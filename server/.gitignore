@@ -1,0 +1,25 @@
+# Build and binary artifacts
+/bin
+/build
+/dist
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Coverage output
+coverage/
+*.cover
+
+# Dependency vendor directory
+/vendor
+
+# Local database / storage
+/storage/*.db
+
+# Tooling files
+.air.toml
+.task

@@ -1,0 +1,16 @@
+.DS_Store
+Thumbs.db
+
+# IDE / editor config
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env files
+.env
+.env.*
+
+# Logs
+logs/
+*.log
