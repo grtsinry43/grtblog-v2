@@ -23,3 +23,5 @@ coverage/
 # Tooling files
 .air.toml
 .task
+
+.env

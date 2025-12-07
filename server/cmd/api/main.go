@@ -7,8 +7,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
-
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/database"
 	appserver "github.com/grtsinry43/grtblog-v2/server/internal/server"
@@ -28,12 +26,13 @@ func main() {
 	defer stop()
 
 	go func() {
-		if err := srv.Start(); err != nil && err != fiber.ErrServerClosed {
-			log.Fatalf("fiber server failed: %v", err)
+		if err := srv.Start(); err != nil {
+			log.Printf("server exiting: %v", err)
 		}
 	}()
 
 	<-ctx.Done()
+	log.Println("shutdown signal received")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

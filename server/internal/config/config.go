@@ -35,8 +35,8 @@ func Load() Config {
 			Env:  strings.ToLower(getEnv("APP_ENV", "development")),
 		},
 		Database: DatabaseConfig{
-			Driver:      strings.ToLower(getEnv("DB_DRIVER", "sqlite")),
-			DSN:         getEnv("DB_DSN", "./storage/grtblog.db"),
+			Driver:      strings.ToLower(getEnv("DB_DRIVER", "postgres")),
+			DSN:         getEnv("DB_DSN", "postgres://postgres:postgres@localhost:5432/grtblog?sslmode=disable"),
 			AutoMigrate: getEnvAsBool("DB_AUTO_MIGRATE", true),
 		},
 	}
