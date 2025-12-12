@@ -2,6 +2,7 @@ package friendlink
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/social"
@@ -32,7 +33,7 @@ type SubmitResult struct {
 func (s *Service) Submit(ctx context.Context, cmd SubmitCommand) (*SubmitResult, error) {
 	url := strings.TrimSpace(cmd.URL)
 	existing, err := s.repo.FindByURL(ctx, url)
-	if err != nil && err != social.ErrFriendLinkApplicationNotFound {
+	if err != nil && !errors.Is(err, social.ErrFriendLinkApplicationNotFound) {
 		return nil, err
 	}
 

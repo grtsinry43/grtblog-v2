@@ -9,6 +9,7 @@
 *.dylib
 *.test
 *.out
+.gocache/
 
 # Coverage output
 coverage/

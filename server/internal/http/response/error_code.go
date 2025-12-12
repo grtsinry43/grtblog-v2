@@ -52,6 +52,13 @@ var (
 		Msg:        "你没有访问该资源的权限",
 	}
 
+	InvalidCredential = BizError{
+		HTTPStatus: fiber.StatusUnauthorized,
+		Code:       40101,
+		BizErr:     "INVALID_CREDENTIAL",
+		Msg:        "用户名或密码不正确",
+	}
+
 	ServerError = BizError{
 		HTTPStatus: fiber.StatusInternalServerError,
 		Code:       500,

@@ -18,21 +18,52 @@ func NewWebsiteInfoHandler(svc *websiteinfo.Service) *WebsiteInfoHandler {
 	return &WebsiteInfoHandler{svc: svc}
 }
 
-func (h *WebsiteInfoHandler) List(c *fiber.Ctx) error {
+func (h *WebsiteInfoHandler) listAll(c *fiber.Ctx) error {
 	items, err := h.svc.List(c.Context())
 	if err != nil {
 		return err
 	}
-	return response.Success(c, items)
+	return response.Success(c, toWebsiteInfoListResponse(items))
 }
 
-type websiteInfoRequest struct {
+// PublicList godoc
+// @Summary 公开获取网站信息
+// @Tags WebsiteInfo
+// @Produce json
+// @Success 200 {object} WebsiteInfoListEnvelope
+// @Router /public/website-info [get]
+func (h *WebsiteInfoHandler) PublicList(c *fiber.Ctx) error {
+	return h.listAll(c)
+}
+
+// List godoc
+// @Summary 获取全部网站信息（需要 config:read 权限）
+// @Tags WebsiteInfo
+// @Produce json
+// @Success 200 {object} WebsiteInfoListEnvelope
+// @Security BearerAuth
+// @Router /website-info [get]
+func (h *WebsiteInfoHandler) List(c *fiber.Ctx) error {
+	return h.listAll(c)
+}
+
+// WebsiteInfoRequest 用于 swagger 展示请求体
+type WebsiteInfoRequest struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
+// Create godoc
+// @Summary 新增网站信息
+// @Tags WebsiteInfo
+// @Accept json
+// @Produce json
+// @Param request body WebsiteInfoRequest true "网站配置"
+// @Success 200 {object} WebsiteInfoDetailEnvelope
+// @Security BearerAuth
+// @Router /website-info [post]
 func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
-	var req websiteInfoRequest
+	var req WebsiteInfoRequest
 	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
@@ -46,15 +77,25 @@ func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.SuccessWithMessage(c, info, "created")
+	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "created")
 }
 
+// Update godoc
+// @Summary 更新网站信息
+// @Tags WebsiteInfo
+// @Accept json
+// @Produce json
+// @Param key path string true "配置键"
+// @Param request body WebsiteInfoRequest true "网站配置"
+// @Success 200 {object} WebsiteInfoDetailEnvelope
+// @Security BearerAuth
+// @Router /website-info/{key} [put]
 func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 	key := c.Params("key")
 	if key == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "key 不能为空")
 	}
-	var req websiteInfoRequest
+	var req WebsiteInfoRequest
 	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
@@ -69,9 +110,17 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	return response.SuccessWithMessage(c, info, "updated")
+	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "updated")
 }
 
+// Delete godoc
+// @Summary 删除网站信息
+// @Tags WebsiteInfo
+// @Produce json
+// @Param key path string true "配置键"
+// @Success 200 {object} GenericMessageEnvelope
+// @Security BearerAuth
+// @Router /website-info/{key} [delete]
 func (h *WebsiteInfoHandler) Delete(c *fiber.Ctx) error {
 	key := c.Params("key")
 	if key == "" {

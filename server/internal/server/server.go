@@ -3,21 +3,28 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/router"
+	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
+	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
+	"github.com/grtsinry43/grtblog-v2/server/internal/security/rbac"
+	"github.com/grtsinry43/grtblog-v2/server/internal/security/turnstile"
 )
 
 // Server wraps Fiber with configuration and dependencies.
 type Server struct {
-	cfg config.Config
-	db  *gorm.DB
-	app *fiber.App
+	cfg      config.Config
+	db       *gorm.DB
+	app      *fiber.App
+	enforcer *rbac.Enforcer
 }
 
 // New builds a Fiber server with registered routes and middlewares.
@@ -48,10 +55,23 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 			}
 
 			// 3. 其他未识别错误，统一视为服务器内部错误
-			// TODO: 这里可以打日志：log.Errorf("unhandled error: %v", err)
+			if reqID, ok := c.Locals("requestId").(string); ok && reqID != "" {
+				log.Printf("[req:%s] unhandled error %s %s: %v", reqID, c.Method(), c.Path(), err)
+			} else {
+				log.Printf("unhandled error %s %s: %v", c.Method(), c.Path(), err)
+			}
 			return response.ErrorFromBiz[any](c, response.ServerError)
 		},
 	})
+
+	jwtManager := jwt.NewManager(cfg.Auth)
+	enforcer, err := rbac.NewEnforcer(cfg.RBAC, db)
+	if err != nil {
+		log.Fatalf("failed to initialize RBAC enforcer: %v", err)
+	}
+	turnstileClient := turnstile.NewClient(cfg.Turnstile)
+	sysCfgRepo := persistence.NewSysConfigRepository(db)
+	sysCfgSvc := sysconfig.NewService(sysCfgRepo, cfg.Turnstile)
 
 	// 中间件：为每个请求附加 requestId（Meta 用）
 	app.Use(func(c *fiber.Ctx) error {
@@ -67,14 +87,19 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 
 	// 注册路由
 	router.Register(app, router.Dependencies{
-		DB:     db,
-		Config: cfg,
+		DB:         db,
+		Config:     cfg,
+		JWTManager: jwtManager,
+		Enforcer:   enforcer,
+		Turnstile:  turnstileClient,
+		SysConfig:  sysCfgSvc,
 	})
 
 	return &Server{
-		cfg: cfg,
-		db:  db,
-		app: app,
+		cfg:      cfg,
+		db:       db,
+		app:      app,
+		enforcer: enforcer,
 	}
 }
 
@@ -86,6 +111,9 @@ func (s *Server) Start() error {
 
 // Shutdown gracefully stops Fiber.
 func (s *Server) Shutdown(ctx context.Context) error {
+	if s.enforcer != nil {
+		s.enforcer.Close()
+	}
 	return s.app.ShutdownWithContext(ctx)
 }
 

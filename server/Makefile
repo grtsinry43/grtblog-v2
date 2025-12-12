@@ -2,8 +2,11 @@ GOOSE ?= goose
 GOOSE_DRIVER ?= postgres
 MIGRATIONS_DIR ?= migrations
 DB_DSN ?= postgres://postgres:postgres@localhost:5432/grtblog?sslmode=disable
+SWAG ?= swag
+SWAG_ENTRY ?= cmd/api/main.go
+SWAG_OUT ?= docs
 
-.PHONY: migrate-up migrate-down migrate-status migrate-version migrate-create
+.PHONY: migrate-up migrate-down migrate-status migrate-version migrate-create docs
 
 migrate-up:
 	$(GOOSE) -dir $(MIGRATIONS_DIR) $(GOOSE_DRIVER) "$(DB_DSN)" up
@@ -22,3 +25,6 @@ ifndef NAME
 	$(error NAME is required, e.g. make migrate-create NAME=add_posts_table)
 endif
 	$(GOOSE) -dir $(MIGRATIONS_DIR) create $(NAME) sql
+
+docs:
+	$(SWAG) init -g $(SWAG_ENTRY) -o $(SWAG_OUT) --outputTypes json --parseInternal

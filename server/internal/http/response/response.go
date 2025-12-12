@@ -6,6 +6,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// TimeLayout 用于对外时间字段格式化。
+const TimeLayout = time.RFC3339
+
 // Meta 附加元信息
 type Meta struct {
 	RequestID string `json:"requestId"`

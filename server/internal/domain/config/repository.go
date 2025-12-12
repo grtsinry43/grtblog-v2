@@ -10,3 +10,8 @@ type WebsiteInfoRepository interface {
 	Update(ctx context.Context, info *WebsiteInfo) error
 	Delete(ctx context.Context, key string) error
 }
+
+// SysConfigRepository 抽象系统配置存储。
+type SysConfigRepository interface {
+	GetByKey(ctx context.Context, key string) (*SysConfig, error)
+}

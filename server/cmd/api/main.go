@@ -12,6 +12,10 @@ import (
 	appserver "github.com/grtsinry43/grtblog-v2/server/internal/server"
 )
 
+// @title grtblog API v2
+// @version 2.0.0
+// @description grtblog 后端接口
+// @BasePath /api/v2
 func main() {
 	cfg := config.Load()
 
