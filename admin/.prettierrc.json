@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "semi": false,
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "singleAttributePerLine": true,
+  "quoteProps": "as-needed",
+  "printWidth": 100,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/assets/base.css",
+  "tailwindAttributes": [
+    "enter-active-class",
+    "enter-from-class",
+    "enter-to-class",
+    "leave-active-class",
+    "leave-from-class",
+    "leave-to-class",
+    "appear-active-class",
+    "appear-from-class",
+    "appear-to-class"
+  ]
+}

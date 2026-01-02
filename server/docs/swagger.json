@@ -8,6 +8,166 @@
     },
     "basePath": "/api/v2",
     "paths": {
+        "/admin/logs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-Log"
+                ],
+                "summary": "查看最近日志",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.LogLinesEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/oauth-providers": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-OAuth"
+                ],
+                "summary": "列出全部 OAuth Providers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthProviderListEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-OAuth"
+                ],
+                "summary": "创建 OAuth Provider",
+                "parameters": [
+                    {
+                        "description": "provider 配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthProviderPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthProviderEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/oauth-providers/{key}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-OAuth"
+                ],
+                "summary": "更新 OAuth Provider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "provider key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "provider 配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthProviderPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthProviderEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-OAuth"
+                ],
+                "summary": "删除 OAuth Provider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "provider key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.AdminGenericMessageEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -28,6 +188,99 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/handler.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.LoginResponseEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/providers": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "获取可用的 OAuth 登录提供方",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ProviderListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/providers/{provider}/authorize": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "获取指定 provider 的授权跳转地址",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "provider key",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "登录成功后的前端跳转地址",
+                        "name": "redirect_uri",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.AuthorizeEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/providers/{provider}/callback": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "OAuth 回调，完成自动登录并签发 JWT",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "provider key",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "回调参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.OAuthCallbackRequest"
                         }
                     }
                 ],
@@ -269,6 +522,78 @@
         }
     },
     "definitions": {
+        "auth.OAuthProviderDTO": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "pkceRequired": {
+                    "type": "boolean"
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handler.AdminGenericMessageEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.AuthorizeEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/handler.AuthorizeResponse"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.AuthorizeResponse": {
+            "type": "object",
+            "properties": {
+                "authUrl": {
+                    "type": "string"
+                },
+                "codeChallenge": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.FriendLinkApplicationRequest": {
             "type": "object",
             "properties": {
@@ -362,6 +687,29 @@
                 }
             }
         },
+        "handler.LogLinesEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.LoginRequest": {
             "type": "object",
             "properties": {
@@ -399,6 +747,131 @@
                 },
                 "data": {
                     "$ref": "#/definitions/handler.LoginResponse"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.OAuthCallbackRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.OAuthProviderEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/identity.OAuthProvider"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.OAuthProviderListEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/identity.OAuthProvider"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.OAuthProviderPayload": {
+            "type": "object",
+            "properties": {
+                "authorizationEndpoint": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientSecret": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraParams": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "issuer": {
+                    "type": "string"
+                },
+                "jwksUri": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "pkceRequired": {
+                    "type": "boolean"
+                },
+                "redirectUriTemplate": {
+                    "type": "string"
+                },
+                "scopes": {
+                    "type": "string"
+                },
+                "tokenEndpoint": {
+                    "type": "string"
+                },
+                "userinfoEndpoint": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.ProviderListResponse": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/auth.OAuthProviderDTO"
+                    }
                 },
                 "meta": {
                     "$ref": "#/definitions/response.Meta"
@@ -547,6 +1020,64 @@
                     "type": "string"
                 },
                 "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "identity.OAuthProvider": {
+            "type": "object",
+            "properties": {
+                "authorizationEndpoint": {
+                    "type": "string"
+                },
+                "clientID": {
+                    "type": "string"
+                },
+                "clientSecret": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraParams": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "issuer": {
+                    "type": "string"
+                },
+                "jwksuri": {
+                    "type": "string"
+                },
+                "pkcerequired": {
+                    "type": "boolean"
+                },
+                "providerKey": {
+                    "type": "string"
+                },
+                "redirectURITemplate": {
+                    "type": "string"
+                },
+                "scopes": {
+                    "type": "string"
+                },
+                "tokenEndpoint": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userinfoEndpoint": {
                     "type": "string"
                 }
             }

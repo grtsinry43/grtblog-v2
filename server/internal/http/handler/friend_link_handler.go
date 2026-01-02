@@ -63,5 +63,6 @@ func (h *FriendLinkHandler) SubmitApplication(c *fiber.Ctx) error {
 	if !result.Created {
 		msg = "你之前的友链申请已更新，感谢耐心等待"
 	}
+	Audit(c, "friend_link.submit", map[string]any{"url": req.URL, "name": req.Name, "created": result.Created})
 	return response.SuccessWithMessage(c, toFriendLinkApplicationVO(result.Application), msg)
 }

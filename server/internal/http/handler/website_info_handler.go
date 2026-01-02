@@ -77,6 +77,7 @@ func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	Audit(c, "website_info.create", map[string]any{"key": info.Key})
 	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "created")
 }
 
@@ -110,6 +111,7 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 		}
 		return err
 	}
+	Audit(c, "website_info.update", map[string]any{"key": info.Key})
 	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "updated")
 }
 
@@ -132,5 +134,6 @@ func (h *WebsiteInfoHandler) Delete(c *fiber.Ctx) error {
 		}
 		return err
 	}
+	Audit(c, "website_info.delete", map[string]any{"key": key})
 	return response.SuccessWithMessage[any](c, nil, "删除成功")
 }

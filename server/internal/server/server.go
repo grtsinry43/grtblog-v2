@@ -3,10 +3,14 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
@@ -25,10 +29,12 @@ type Server struct {
 	db       *gorm.DB
 	app      *fiber.App
 	enforcer *rbac.Enforcer
+	logFile  *os.File
 }
 
 // New builds a Fiber server with registered routes and middlewares.
 func New(cfg config.Config, db *gorm.DB) *Server {
+	logFile := initLogging()
 	app := fiber.New(fiber.Config{
 		AppName:           cfg.App.Name,
 		EnablePrintRoutes: cfg.App.Env == "development",
@@ -69,6 +75,11 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 	if err != nil {
 		log.Fatalf("failed to initialize RBAC enforcer: %v", err)
 	}
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
 	turnstileClient := turnstile.NewClient(cfg.Turnstile)
 	sysCfgRepo := persistence.NewSysConfigRepository(db)
 	sysCfgSvc := sysconfig.NewService(sysCfgRepo, cfg.Turnstile)
@@ -93,6 +104,7 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 		Enforcer:   enforcer,
 		Turnstile:  turnstileClient,
 		SysConfig:  sysCfgSvc,
+		Redis:      redisClient,
 	})
 
 	return &Server{
@@ -100,6 +112,7 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 		db:       db,
 		app:      app,
 		enforcer: enforcer,
+		logFile:  logFile,
 	}
 }
 
@@ -114,10 +127,29 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	if s.enforcer != nil {
 		s.enforcer.Close()
 	}
+	if s.logFile != nil {
+		_ = s.logFile.Close()
+	}
 	return s.app.ShutdownWithContext(ctx)
 }
 
 // App exposes the underlying Fiber instance for testing.
 func (s *Server) App() *fiber.App {
 	return s.app
+}
+
+// initLogging sets a file logger under storage/logs/app.log while keeping stdout.
+func initLogging() *os.File {
+	logDir := filepath.Join("storage", "logs")
+	_ = os.MkdirAll(logDir, 0o755)
+	logPath := filepath.Join(logDir, "app.log")
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		log.Printf("failed to open log file: %v", err)
+		return nil
+	}
+	mw := io.MultiWriter(os.Stdout, f)
+	log.SetOutput(mw)
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.LUTC)
+	return f
 }

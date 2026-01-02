@@ -33,3 +33,6 @@ v2 的目标不是简单重写，而是基于 v1 所有经验重新设计一个�
 
 v2 本质上是：
 用工程化方式给自己一个可持续维护的内容平台。
+
+This project includes third-party open-source software.
+See `THIRD_PARTY_NOTICES.md` for details.

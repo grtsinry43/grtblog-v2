@@ -1,28 +1,30 @@
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-build/
-.output/
-
-# Testing / coverage
-coverage/
-*.lcov
-
-# Vite cache
-.vite/
-
-# Environment files
-.env
-.env.*
-
 # Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.log
+lerna-debug.log*
 
-# TypeScript
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 *.tsbuildinfo

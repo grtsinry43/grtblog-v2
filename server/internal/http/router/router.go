@@ -12,6 +12,7 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/rbac"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/turnstile"
+	"github.com/redis/go-redis/v9"
 )
 
 // Dependencies collects the shared instances that handlers require.
@@ -22,6 +23,7 @@ type Dependencies struct {
 	Enforcer   *rbac.Enforcer
 	Turnstile  *turnstile.Client
 	SysConfig  *sysconfig.Service
+	Redis      *redis.Client
 }
 
 // Register wires up all HTTP endpoints with middlewares.

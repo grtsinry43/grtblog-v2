@@ -14,6 +14,7 @@ type Config struct {
 	Auth      AuthConfig
 	RBAC      RBACConfig
 	Turnstile TurnstileConfig
+	Redis     RedisConfig
 }
 
 // AppConfig contains Fiber specific settings.
@@ -36,6 +37,7 @@ type AuthConfig struct {
 	Issuer       string
 	AccessTTL    time.Duration
 	DefaultRoles []string
+	OAuthStateTTL time.Duration
 }
 
 // RBACConfig 管理 Casbin 相关设置。
@@ -51,6 +53,14 @@ type TurnstileConfig struct {
 	Secret    string
 	VerifyURL string
 	Timeout   time.Duration
+}
+
+// RedisConfig 描述 Redis 连接。
+type RedisConfig struct {
+	Addr     string
+	Password string
+	DB       int
+	Prefix   string
 }
 
 // Load builds a Config struct with sane defaults overridden by environment variables.
@@ -71,6 +81,7 @@ func Load() Config {
 			Issuer:       getEnv("AUTH_ISSUER", "grtblog-api"),
 			AccessTTL:    getEnvAsDuration("AUTH_ACCESS_TTL", time.Minute*30),
 			DefaultRoles: getEnvAsSlice("AUTH_DEFAULT_ROLES", []string{"user"}),
+			OAuthStateTTL: getEnvAsDuration("AUTH_STATE_TTL", time.Minute*10),
 		},
 		RBAC: RBACConfig{
 			ModelPath:         getEnv("RBAC_MODEL_PATH", "./configs/rbac_model.conf"),
@@ -82,6 +93,12 @@ func Load() Config {
 			Secret:    getEnv("TURNSTILE_SECRET", ""),
 			VerifyURL: getEnv("TURNSTILE_VERIFY_URL", "https://challenges.cloudflare.com/turnstile/v0/siteverify"),
 			Timeout:   getEnvAsDuration("TURNSTILE_TIMEOUT", 5*time.Second),
+		},
+		Redis: RedisConfig{
+			Addr:     getEnv("REDIS_ADDR", "127.0.0.1:6379"),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB:       getEnvAsInt("REDIS_DB", 0),
+			Prefix:   getEnv("REDIS_PREFIX", "grtblog:"),
 		},
 	}
 }

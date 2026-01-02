@@ -65,4 +65,11 @@ var (
 		BizErr:     "SERVER_ERROR",
 		Msg:        "服务器内部错误",
 	}
+
+	TooManyRequests = BizError{
+		HTTPStatus: fiber.StatusTooManyRequests,
+		Code:       429,
+		BizErr:     "TOO_MANY_REQUESTS",
+		Msg:        "请求过于频繁，请稍后再试",
+	}
 )

@@ -81,3 +81,13 @@ type UserOAuth struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
+
+// UserOAuthBinding 描述用户已绑定的外部身份信息（用于展示）。
+type UserOAuthBinding struct {
+	ProviderKey   string
+	ProviderName  string
+	OAuthID       string
+	BoundAt       time.Time
+	ExpiresAt     *time.Time
+	ProviderScope string
+}

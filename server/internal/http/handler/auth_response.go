@@ -41,8 +41,17 @@ func toUserResponse(u identity.User) UserResponse {
 
 // LoginResponse 供登录接口返回数据使用。
 type LoginResponse struct {
-	Token string       `json:"token"`
-	User  UserResponse `json:"user"`
+	Token       string       `json:"token"`
+	User        UserResponse `json:"user"`
+	Roles       []string     `json:"roles"`
+	Permissions []string     `json:"permissions"`
+}
+
+// AccessInfoResponse 返回当前登录用户的权限信息。
+type AccessInfoResponse struct {
+	User        UserResponse `json:"user"`
+	Roles       []string     `json:"roles"`
+	Permissions []string     `json:"permissions"`
 }
 
 // RegisterResponseEnvelope 仅用于 swagger 展示。
