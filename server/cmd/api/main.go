@@ -7,6 +7,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/database"
 	appserver "github.com/grtsinry43/grtblog-v2/server/internal/server"
@@ -17,6 +19,11 @@ import (
 // @description grtblog 后端接口
 // @BasePath /api/v2
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, falling back to system env vars")
+	}
+
+	// 现在 config.Load() 才能读到 .env 里的值
 	cfg := config.Load()
 
 	db, err := database.New(cfg.Database)

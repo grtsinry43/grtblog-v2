@@ -49,6 +49,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerAuthRoutes(v2, deps, sysCfgSvc)
 	registerPublicRoutes(v2, websiteInfoHandler)
 	registerProtectedRoutes(v2, deps, websiteInfoHandler)
+	registerArticleRoutes(v2, deps)
 
 	docsHandler := handler.NewDocsHandler("docs/swagger.json")
 	app.Get("/docs/openapi.json", docsHandler.OpenAPI)

@@ -58,12 +58,12 @@ type Article struct {
 	ID          int64          `gorm:"column:id;primaryKey"`
 	Title       string         `gorm:"column:title;size:255;not null"`
 	Summary     string         `gorm:"column:summary;type:text;not null"`
-	AISummary   string         `gorm:"column:ai_summary;type:text"`
-	LeadIn      string         `gorm:"column:lead_in;type:text"`
+	AISummary   *string        `gorm:"column:ai_summary;type:text"`
+	LeadIn      *string        `gorm:"column:lead_in;type:text"`
 	TOC         []byte         `gorm:"column:toc;type:jsonb;not null"`
 	Content     string         `gorm:"column:content;type:text;not null"`
 	AuthorID    int64          `gorm:"column:author_id;not null"`
-	Cover       string         `gorm:"column:cover;size:255"`
+	Cover       *string        `gorm:"column:cover;size:255"`
 	CategoryID  *int64         `gorm:"column:category_id"`
 	CommentID   *int64         `gorm:"column:comment_id"`
 	ShortURL    string         `gorm:"column:short_url;size:255;not null"`
