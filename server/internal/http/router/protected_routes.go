@@ -37,7 +37,7 @@ func registerProtectedRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHand
 
 	// Admin OAuth provider 管理
 	adminOAuth := handler.NewAdminOAuthHandler(oauthRepo)
-	admin := authenticated.Group("/admin", middleware.RequirePermission(deps.Enforcer, "oauth:write"))
+	admin := authenticated.Group("/admin")
 	admin.Get("/oauth-providers", middleware.RequirePermission(deps.Enforcer, "oauth:read"), adminOAuth.List)
 	admin.Post("/oauth-providers", adminOAuth.Create)
 	admin.Put("/oauth-providers/:key", adminOAuth.Update)

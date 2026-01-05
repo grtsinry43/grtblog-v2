@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/article"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/middleware"
@@ -24,7 +25,8 @@ func NewArticleHandler(svc *article.Service) *ArticleHandler {
 // @Accept json
 // @Produce json
 // @Param request body article.CreateArticleCommand true "创建文章参数"
-// @Success 200 {object} response.Success[article.ArticleResponse]
+// @Success 200 {object} article.ViewArticleResponse
+// @Security BearerAuth
 // @Router /articles [post]
 // @Security JWTAuth
 func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
@@ -35,6 +37,7 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 
 	var cmd article.CreateArticleCommand
 	if err := c.BodyParser(&cmd); err != nil {
+		println(err.Error())
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
 
@@ -64,7 +67,8 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "文章ID"
 // @Param request body article.UpdateArticleCommand true "更新文章参数"
-// @Success 200 {object} response.Success[article.ArticleResponse]
+// @Success 200 {object} article.ViewArticleResponse
+// @Security BearerAuth
 // @Router /articles/{id} [put]
 // @Security JWTAuth
 func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
@@ -110,7 +114,8 @@ func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
 // @Tags Article
 // @Produce json
 // @Param id path int true "文章ID"
-// @Success 200 {object} response.Success[article.ArticleResponse]
+// @Security BearerAuth
+// @Success 200 {object} article.ViewArticleResponse
 // @Router /articles/{id} [get]
 func (h *ArticleHandler) GetArticle(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
@@ -136,7 +141,7 @@ func (h *ArticleHandler) GetArticle(c *fiber.Ctx) error {
 // @Tags Article
 // @Produce json
 // @Param shortUrl path string true "短链接"
-// @Success 200 {object} response.Success[article.ArticleResponse]
+// @Success 200 {object} article.ViewArticleResponse
 // @Router /articles/short/{shortUrl} [get]
 func (h *ArticleHandler) GetArticleByShortURL(c *fiber.Ctx) error {
 	shortURL := c.Params("shortUrl")
@@ -166,7 +171,7 @@ func (h *ArticleHandler) GetArticleByShortURL(c *fiber.Ctx) error {
 // @Param categoryId query int false "分类ID"
 // @Param tagId query int false "标签ID"
 // @Param search query string false "搜索关键词"
-// @Success 200 {object} response.Success[article.ArticleListResponse]
+// @Success 200 {object} article.ListArticleResponse
 // @Router /articles [get]
 func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 	query := article.ListArticlesQuery{
@@ -192,7 +197,7 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 	}
 
 	// 只有管理员可以查看未发布的文章
-	claims, hasAuth := middleware.GetClaims(c)
+	_, hasAuth := middleware.GetClaims(c)
 	if hasAuth {
 		// TODO: 检查是否有管理员权限
 		if publishedStr := c.Query("published"); publishedStr != "" {
@@ -206,13 +211,13 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 		query.Published = &published
 	}
 
-	articles, total, err := h.svc.ListArticles(c.Context(), query)
+	articles, total, err := h.svc.ListArticles(c.Context(), content.ArticleListOptionsInternal(query))
 	if err != nil {
 		return err
 	}
 
 	// 转换为响应DTO
-	articleResponses := make([]article.ArticleResponse, len(articles))
+	articleResponses := make([]article.ViewArticleResponse, len(articles))
 	for i, art := range articles {
 		resp, err := h.svc.ToResponse(c.Context(), art)
 		if err != nil {
@@ -221,7 +226,7 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 		articleResponses[i] = *resp
 	}
 
-	listResponse := article.ArticleListResponse{
+	listResponse := article.ListArticleResponse{
 		Items: articleResponses,
 		Total: total,
 		Page:  query.Page,
@@ -236,7 +241,8 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 // @Tags Article
 // @Produce json
 // @Param id path int true "文章ID"
-// @Success 200 {object} response.Success[any]
+// @Success 200 {object} any
+// @Security BearerAuth
 // @Router /articles/{id} [delete]
 // @Security JWTAuth
 func (h *ArticleHandler) DeleteArticle(c *fiber.Ctx) error {

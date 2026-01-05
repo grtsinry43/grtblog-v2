@@ -17,6 +17,11 @@ import (
 // @title grtblog API v2
 // @version 2.0.0
 // @description grtblog 后端接口
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+// @security BearerAuth
 // @BasePath /api/v2
 func main() {
 	if err := godotenv.Load(); err != nil {

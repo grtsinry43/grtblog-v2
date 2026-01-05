@@ -16,6 +16,86 @@ type ContentRepository struct {
 	db *gorm.DB
 }
 
+func (r *ContentRepository) CreateCategory(ctx context.Context, category *content.ArticleCategory) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) GetCategoryByID(ctx context.Context, id int64) (*content.ArticleCategory, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) ListCategories(ctx context.Context) ([]*content.ArticleCategory, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) UpdateCategory(ctx context.Context, category *content.ArticleCategory) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) DeleteCategory(ctx context.Context, id int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) CreateTag(ctx context.Context, tag *content.Tag) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) GetTagByID(ctx context.Context, id int64) (*content.Tag, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) GetTagByName(ctx context.Context, name string) (*content.Tag, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) ListTags(ctx context.Context) ([]*content.Tag, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) UpdateTag(ctx context.Context, tag *content.Tag) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) DeleteTag(ctx context.Context, id int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) AddTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) SyncTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) GetTagsByArticleID(ctx context.Context, articleID int64) ([]*content.Tag, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) UpdateArticleViews(ctx context.Context, articleID int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *ContentRepository) GetArticleMetrics(ctx context.Context, articleID int64) (*content.ArticleMetrics, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewContentRepository(db *gorm.DB) *ContentRepository {
 	return &ContentRepository{db: db}
 }
