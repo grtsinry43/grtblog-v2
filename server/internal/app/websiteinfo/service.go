@@ -16,12 +16,12 @@ func NewService(repo config.WebsiteInfoRepository) *Service {
 	return &Service{repo: repo}
 }
 
-type CreateCommand struct {
+type CreateCmd struct {
 	Key   string
 	Value string
 }
 
-type UpdateCommand struct {
+type UpdateCmd struct {
 	Key   string
 	Value string
 }
@@ -30,7 +30,7 @@ func (s *Service) List(ctx context.Context) ([]config.WebsiteInfo, error) {
 	return s.repo.List(ctx)
 }
 
-func (s *Service) Create(ctx context.Context, cmd CreateCommand) (*config.WebsiteInfo, error) {
+func (s *Service) Create(ctx context.Context, cmd CreateCmd) (*config.WebsiteInfo, error) {
 	info := &config.WebsiteInfo{
 		Key:   strings.TrimSpace(cmd.Key),
 		Value: cmd.Value,
@@ -41,7 +41,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateCommand) (*config.Websit
 	return info, nil
 }
 
-func (s *Service) Update(ctx context.Context, cmd UpdateCommand) (*config.WebsiteInfo, error) {
+func (s *Service) Update(ctx context.Context, cmd UpdateCmd) (*config.WebsiteInfo, error) {
 	info := &config.WebsiteInfo{
 		Key:   strings.TrimSpace(cmd.Key),
 		Value: cmd.Value,

@@ -16,7 +16,7 @@ func NewService(repo social.FriendLinkApplicationRepository) *Service {
 	return &Service{repo: repo}
 }
 
-type SubmitCommand struct {
+type SubmitCmd struct {
 	Name        string
 	URL         string
 	Logo        string
@@ -30,7 +30,7 @@ type SubmitResult struct {
 	Created     bool
 }
 
-func (s *Service) Submit(ctx context.Context, cmd SubmitCommand) (*SubmitResult, error) {
+func (s *Service) Submit(ctx context.Context, cmd SubmitCmd) (*SubmitResult, error) {
 	url := strings.TrimSpace(cmd.URL)
 	existing, err := s.repo.FindByURL(ctx, url)
 	if err != nil && !errors.Is(err, social.ErrFriendLinkApplicationNotFound) {

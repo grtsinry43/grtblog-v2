@@ -1,12 +1,17 @@
 package handler
 
 import (
+	"context"
+	"errors"
 	"strconv"
+
+	"github.com/jinzhu/copier"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/article"
+	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/middleware"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 )
@@ -24,8 +29,8 @@ func NewArticleHandler(svc *article.Service) *ArticleHandler {
 // @Tags Article
 // @Accept json
 // @Produce json
-// @Param request body article.CreateArticleCommand true "创建文章参数"
-// @Success 200 {object} article.ViewArticleResponse
+// @Param request body contract.CreateArticleReq true "创建文章参数"
+// @Success 200 {object} contract.ArticleResp
 // @Security BearerAuth
 // @Router /articles [post]
 // @Security JWTAuth
@@ -35,18 +40,26 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 		return response.ErrorFromBiz[any](c, response.NotLogin)
 	}
 
-	var cmd article.CreateArticleCommand
-	if err := c.BodyParser(&cmd); err != nil {
+	var req contract.CreateArticleReq
+	if err := c.BodyParser(&req); err != nil {
 		println(err.Error())
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
 
+	var cmd article.CreateArticleCmd
+	if err := copier.Copy(&cmd, req); err != nil {
+		return response.NewBizErrorWithMsg(response.ParamsError, "请求体映射失败")
+	}
+
 	createdArticle, err := h.svc.CreateArticle(c.Context(), claims.UserID, cmd)
 	if err != nil {
+		if errors.Is(err, content.ErrArticleShortURLExists) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "短链接已存在")
+		}
 		return err
 	}
 
-	articleResponse, err := h.svc.ToResponse(c.Context(), createdArticle)
+	articleResponse, err := h.toArticleResp(c.Context(), createdArticle)
 	if err != nil {
 		return err
 	}
@@ -66,8 +79,8 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path int true "文章ID"
-// @Param request body article.UpdateArticleCommand true "更新文章参数"
-// @Success 200 {object} article.ViewArticleResponse
+// @Param request body contract.UpdateArticleReq true "更新文章参数"
+// @Success 200 {object} contract.ArticleResp
 // @Security BearerAuth
 // @Router /articles/{id} [put]
 // @Security JWTAuth
@@ -82,20 +95,26 @@ func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
 		return response.NewBizErrorWithMsg(response.ParamsError, "无效的文章ID")
 	}
 
-	var cmd article.UpdateArticleCommand
-	if err := c.BodyParser(&cmd); err != nil {
+	var req contract.UpdateArticleReq
+	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
 
-	// 设置ID
+	var cmd article.UpdateArticleCmd
+	if err := copier.Copy(&cmd, req); err != nil {
+		return response.NewBizErrorWithMsg(response.ParamsError, "请求体映射失败")
+	}
 	cmd.ID = id
 
 	updatedArticle, err := h.svc.UpdateArticle(c.Context(), cmd)
 	if err != nil {
+		if errors.Is(err, content.ErrArticleShortURLExists) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "短链接已存在")
+		}
 		return err
 	}
 
-	articleResponse, err := h.svc.ToResponse(c.Context(), updatedArticle)
+	articleResponse, err := h.toArticleResp(c.Context(), updatedArticle)
 	if err != nil {
 		return err
 	}
@@ -115,7 +134,7 @@ func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "文章ID"
 // @Security BearerAuth
-// @Success 200 {object} article.ViewArticleResponse
+// @Success 200 {object} contract.ArticleResp
 // @Router /articles/{id} [get]
 func (h *ArticleHandler) GetArticle(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
@@ -128,7 +147,7 @@ func (h *ArticleHandler) GetArticle(c *fiber.Ctx) error {
 		return err
 	}
 
-	articleResponse, err := h.svc.ToResponse(c.Context(), article)
+	articleResponse, err := h.toArticleResp(c.Context(), article)
 	if err != nil {
 		return err
 	}
@@ -141,7 +160,7 @@ func (h *ArticleHandler) GetArticle(c *fiber.Ctx) error {
 // @Tags Article
 // @Produce json
 // @Param shortUrl path string true "短链接"
-// @Success 200 {object} article.ViewArticleResponse
+// @Success 200 {object} contract.ArticleResp
 // @Router /articles/short/{shortUrl} [get]
 func (h *ArticleHandler) GetArticleByShortURL(c *fiber.Ctx) error {
 	shortURL := c.Params("shortUrl")
@@ -154,7 +173,7 @@ func (h *ArticleHandler) GetArticleByShortURL(c *fiber.Ctx) error {
 		return err
 	}
 
-	articleResponse, err := h.svc.ToResponse(c.Context(), article)
+	articleResponse, err := h.toArticleResp(c.Context(), article)
 	if err != nil {
 		return err
 	}
@@ -171,10 +190,10 @@ func (h *ArticleHandler) GetArticleByShortURL(c *fiber.Ctx) error {
 // @Param categoryId query int false "分类ID"
 // @Param tagId query int false "标签ID"
 // @Param search query string false "搜索关键词"
-// @Success 200 {object} article.ListArticleResponse
+// @Success 200 {object} contract.ArticleListResp
 // @Router /articles [get]
 func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
-	query := article.ListArticlesQuery{
+	query := contract.ListArticlesReq{
 		Page:     1,
 		PageSize: 10,
 	}
@@ -217,16 +236,16 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 	}
 
 	// 转换为响应DTO
-	articleResponses := make([]article.ViewArticleResponse, len(articles))
+	articleResponses := make([]contract.ArticleResp, len(articles))
 	for i, art := range articles {
-		resp, err := h.svc.ToResponse(c.Context(), art)
+		resp, err := h.toArticleResp(c.Context(), art)
 		if err != nil {
 			return err
 		}
 		articleResponses[i] = *resp
 	}
 
-	listResponse := article.ListArticleResponse{
+	listResponse := contract.ArticleListResp{
 		Items: articleResponses,
 		Total: total,
 		Page:  query.Page,
@@ -266,4 +285,40 @@ func (h *ArticleHandler) DeleteArticle(c *fiber.Ctx) error {
 	})
 
 	return response.SuccessWithMessage[any](c, nil, "文章删除成功")
+}
+
+func (h *ArticleHandler) toArticleResp(ctx context.Context, article *content.Article) (*contract.ArticleResp, error) {
+	tags, err := h.svc.GetArticleTags(ctx, article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := h.svc.GetArticleMetrics(ctx, article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp contract.ArticleResp
+	if err := copier.Copy(&resp, article); err != nil {
+		return nil, err
+	}
+
+	if len(tags) > 0 {
+		resp.Tags = make([]contract.TagResp, len(tags))
+		for i, tag := range tags {
+			if err := copier.Copy(&resp.Tags[i], tag); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if metrics != nil {
+		var metricsResp contract.MetricsResp
+		if err := copier.Copy(&metricsResp, metrics); err != nil {
+			return nil, err
+		}
+		resp.Metrics = &metricsResp
+	}
+
+	return &resp, nil
 }

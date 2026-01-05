@@ -1,11 +1,11 @@
-package handler
+package contract
 
 import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/social"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 )
 
-type FriendLinkApplicationVO struct {
+type FriendLinkApplicationResp struct {
 	ID          int64   `json:"id"`
 	Name        *string `json:"name,omitempty"`
 	URL         string  `json:"url"`
@@ -18,8 +18,8 @@ type FriendLinkApplicationVO struct {
 	UpdatedAt   string  `json:"updatedAt"`
 }
 
-func toFriendLinkApplicationVO(app social.FriendLinkApplication) FriendLinkApplicationVO {
-	return FriendLinkApplicationVO{
+func ToFriendLinkApplicationResp(app social.FriendLinkApplication) FriendLinkApplicationResp {
+	return FriendLinkApplicationResp{
 		ID:          app.ID,
 		Name:        app.Name,
 		URL:         app.URL,
@@ -33,11 +33,11 @@ func toFriendLinkApplicationVO(app social.FriendLinkApplication) FriendLinkAppli
 	}
 }
 
-// FriendLinkApplicationResponse 用于 swagger 展示友链申请操作结果。
-type FriendLinkApplicationResponse struct {
-	Code   int                     `json:"code"`
-	BizErr string                  `json:"bizErr"`
-	Msg    string                  `json:"msg"`
-	Data   FriendLinkApplicationVO `json:"data"`
-	Meta   response.Meta           `json:"meta"`
+// FriendLinkApplicationRespEnvelope 用于 swagger 展示友链申请操作结果。
+type FriendLinkApplicationRespEnvelope struct {
+	Code   int                       `json:"code"`
+	BizErr string                    `json:"bizErr"`
+	Msg    string                    `json:"msg"`
+	Data   FriendLinkApplicationResp `json:"data"`
+	Meta   response.Meta             `json:"meta"`
 }

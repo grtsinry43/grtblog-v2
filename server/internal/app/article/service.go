@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
@@ -18,13 +20,35 @@ func NewService(repo content.Repository) *Service {
 }
 
 // CreateArticle 创建文章
-func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateArticleCommand) (*content.Article, error) {
+func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateArticleCmd) (*content.Article, error) {
 	// 生成短链接如果未提供
 	shortURL := ""
 	if cmd.ShortURL != nil {
-		shortURL = *cmd.ShortURL
+		shortURL = strings.TrimSpace(*cmd.ShortURL)
+	}
+	if shortURL == "" {
+		for i := 0; i < 5; i++ {
+			candidate := s.generateShortURL()
+			_, err := s.repo.GetArticleByShortURL(ctx, candidate)
+			if err != nil {
+				if errors.Is(err, content.ErrArticleNotFound) {
+					shortURL = candidate
+					break
+				}
+				return nil, err
+			}
+		}
+		if shortURL == "" {
+			return nil, content.ErrArticleShortURLExists
+		}
 	} else {
-		shortURL = s.generateShortURL()
+		existing, err := s.repo.GetArticleByShortURL(ctx, shortURL)
+		if err != nil && !errors.Is(err, content.ErrArticleNotFound) {
+			return nil, err
+		}
+		if err == nil && existing != nil {
+			return nil, content.ErrArticleShortURLExists
+		}
 	}
 
 	// 设置创建时间
@@ -72,7 +96,7 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 }
 
 // UpdateArticle 更新文章
-func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCommand) (*content.Article, error) {
+func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*content.Article, error) {
 	// 先获取现有文章
 	existing, err := s.repo.GetArticleByID(ctx, cmd.ID)
 	if err != nil {
@@ -93,6 +117,15 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCommand) (
 	existing.Content = cmd.Content
 	existing.Cover = cmd.Cover
 	existing.CategoryID = cmd.CategoryID
+	if cmd.ShortURL != "" && cmd.ShortURL != existing.ShortURL {
+		other, err := s.repo.GetArticleByShortURL(ctx, cmd.ShortURL)
+		if err != nil && !errors.Is(err, content.ErrArticleNotFound) {
+			return nil, err
+		}
+		if err == nil && other != nil && other.ID != existing.ID {
+			return nil, content.ErrArticleShortURLExists
+		}
+	}
 	existing.ShortURL = cmd.ShortURL
 	existing.IsPublished = cmd.IsPublished
 	existing.IsTop = cmd.IsTop
@@ -159,54 +192,9 @@ func (s *Service) GetArticleMetrics(ctx context.Context, articleID int64) (*cont
 	return s.repo.GetArticleMetrics(ctx, articleID)
 }
 
-// ToResponse 将领域对象转换为响应 DTO
-func (s *Service) ToResponse(ctx context.Context, article *content.Article) (*ViewArticleResponse, error) {
-	// 获取标签
-	tags, err := s.repo.GetTagsByArticleID(ctx, article.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	tagResponses := make([]TagResponse, len(tags))
-	for i, tag := range tags {
-		tagResponses[i] = TagResponse{
-			ID:   tag.ID,
-			Name: tag.Name,
-		}
-	}
-
-	// 获取指标
-	metrics, err := s.repo.GetArticleMetrics(ctx, article.ID)
-	var metricsResponse *MetricsResponse
-	if err == nil && metrics != nil {
-		metricsResponse = &MetricsResponse{
-			Views:    metrics.Views,
-			Likes:    metrics.Likes,
-			Comments: metrics.Comments,
-		}
-	}
-
-	return &ViewArticleResponse{
-		ID:          article.ID,
-		Title:       article.Title,
-		Summary:     article.Summary,
-		AISummary:   article.AISummary,
-		LeadIn:      article.LeadIn,
-		TOC:         article.TOC,
-		Content:     article.Content,
-		AuthorID:    article.AuthorID,
-		Cover:       article.Cover,
-		CategoryID:  article.CategoryID,
-		ShortURL:    article.ShortURL,
-		IsPublished: article.IsPublished,
-		IsTop:       article.IsTop,
-		IsHot:       article.IsHot,
-		IsOriginal:  article.IsOriginal,
-		Tags:        tagResponses,
-		Metrics:     metricsResponse,
-		CreatedAt:   article.CreatedAt,
-		UpdatedAt:   article.UpdatedAt,
-	}, nil
+// GetArticleTags 获取文章标签。
+func (s *Service) GetArticleTags(ctx context.Context, articleID int64) ([]*content.Tag, error) {
+	return s.repo.GetTagsByArticleID(ctx, articleID)
 }
 
 // generateShortURL 生成短链接

@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/auth"
+	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 )
 
@@ -18,46 +20,27 @@ func NewOAuthHandler(svc *auth.Service, stateTTL time.Duration) *OAuthHandler {
 	return &OAuthHandler{svc: svc, stateTTL: stateTTL}
 }
 
-// ProviderListResponse 用于 swagger 展示。
-type ProviderListResponse struct {
-	Code   int                    `json:"code"`
-	BizErr string                 `json:"bizErr"`
-	Msg    string                 `json:"msg"`
-	Data   []auth.OAuthProviderDTO `json:"data"`
-	Meta   response.Meta          `json:"meta"`
-}
-
-type AuthorizeResponse struct {
-	AuthURL       string `json:"authUrl"`
-	State         string `json:"state"`
-	CodeChallenge string `json:"codeChallenge,omitempty"`
-}
-
-type AuthorizeEnvelope struct {
-	Code   int               `json:"code"`
-	BizErr string            `json:"bizErr"`
-	Msg    string            `json:"msg"`
-	Data   AuthorizeResponse `json:"data"`
-	Meta   response.Meta     `json:"meta"`
-}
-
-type OAuthCallbackRequest struct {
-	Code  string `json:"code"`
-	State string `json:"state"`
-}
-
 // ListProviders godoc
 // @Summary 获取可用的 OAuth 登录提供方
 // @Tags Auth
 // @Produce json
-// @Success 200 {object} ProviderListResponse
+// @Success 200 {object} contract.ProviderListRespEnvelope
 // @Router /auth/providers [get]
 func (h *OAuthHandler) ListProviders(c *fiber.Ctx) error {
 	items, err := h.svc.ListProviders(c.Context())
 	if err != nil {
 		return err
 	}
-	return response.Success(c, items)
+	resp := make([]contract.OAuthProviderResp, 0, len(items))
+	for _, item := range items {
+		resp = append(resp, contract.OAuthProviderResp{
+			Key:          item.ProviderKey,
+			DisplayName:  item.DisplayName,
+			Scopes:       splitScopes(item.Scopes),
+			PKCERequired: item.PKCERequired,
+		})
+	}
+	return response.Success(c, resp)
 }
 
 // Authorize godoc
@@ -66,7 +49,7 @@ func (h *OAuthHandler) ListProviders(c *fiber.Ctx) error {
 // @Produce json
 // @Param provider path string true "provider key"
 // @Param redirect_uri query string false "登录成功后的前端跳转地址"
-// @Success 200 {object} AuthorizeEnvelope
+// @Success 200 {object} contract.AuthorizeRespEnvelope
 // @Router /auth/providers/{provider}/authorize [get]
 func (h *OAuthHandler) Authorize(c *fiber.Ctx) error {
 	provider := c.Params("provider")
@@ -75,7 +58,7 @@ func (h *OAuthHandler) Authorize(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.Success(c, AuthorizeResponse{
+	return response.Success(c, contract.AuthorizeResp{
 		AuthURL:       res.AuthURL,
 		State:         res.State,
 		CodeChallenge: res.CodeChallenge,
@@ -88,19 +71,19 @@ func (h *OAuthHandler) Authorize(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param provider path string true "provider key"
-// @Param request body OAuthCallbackRequest true "回调参数"
-// @Success 200 {object} LoginResponseEnvelope
+// @Param request body contract.OAuthCallbackReq true "回调参数"
+// @Success 200 {object} contract.LoginRespEnvelope
 // @Router /auth/providers/{provider}/callback [post]
 func (h *OAuthHandler) Callback(c *fiber.Ctx) error {
 	provider := c.Params("provider")
-	var req OAuthCallbackRequest
+	var req contract.OAuthCallbackReq
 	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
 	if req.Code == "" || req.State == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "code/state 不能为空")
 	}
-	result, err := h.svc.LoginWithProvider(c.Context(), auth.OAuthLoginCommand{
+	result, err := h.svc.LoginWithProvider(c.Context(), auth.OAuthLoginCmd{
 		Provider: provider,
 		Code:     req.Code,
 		State:    req.State,
@@ -108,8 +91,12 @@ func (h *OAuthHandler) Callback(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.Success(c, LoginResponse{
+	return response.Success(c, contract.LoginResp{
 		Token: result.Token,
-		User:  toUserResponse(result.User),
+		User:  contract.ToUserResp(result.User),
 	})
+}
+
+func splitScopes(sc string) []string {
+	return strings.Fields(sc)
 }

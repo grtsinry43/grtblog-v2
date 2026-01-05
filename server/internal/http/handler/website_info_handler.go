@@ -7,6 +7,7 @@ import (
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/websiteinfo"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/config"
+	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 )
 
@@ -23,14 +24,14 @@ func (h *WebsiteInfoHandler) listAll(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.Success(c, toWebsiteInfoListResponse(items))
+	return response.Success(c, contract.ToWebsiteInfoListResp(items))
 }
 
 // PublicList godoc
 // @Summary 公开获取网站信息
 // @Tags WebsiteInfo
 // @Produce json
-// @Success 200 {object} WebsiteInfoListEnvelope
+// @Success 200 {object} contract.WebsiteInfoListRespEnvelope
 // @Router /public/website-info [get]
 func (h *WebsiteInfoHandler) PublicList(c *fiber.Ctx) error {
 	return h.listAll(c)
@@ -40,17 +41,11 @@ func (h *WebsiteInfoHandler) PublicList(c *fiber.Ctx) error {
 // @Summary 获取全部网站信息（需要 config:read 权限）
 // @Tags WebsiteInfo
 // @Produce json
-// @Success 200 {object} WebsiteInfoListEnvelope
+// @Success 200 {object} contract.WebsiteInfoListRespEnvelope
 // @Security BearerAuth
 // @Router /website-info [get]
 func (h *WebsiteInfoHandler) List(c *fiber.Ctx) error {
 	return h.listAll(c)
-}
-
-// WebsiteInfoRequest 用于 swagger 展示请求体
-type WebsiteInfoRequest struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
 }
 
 // Create godoc
@@ -58,19 +53,19 @@ type WebsiteInfoRequest struct {
 // @Tags WebsiteInfo
 // @Accept json
 // @Produce json
-// @Param request body WebsiteInfoRequest true "网站配置"
-// @Success 200 {object} WebsiteInfoDetailEnvelope
+// @Param request body contract.WebsiteInfoReq true "网站配置"
+// @Success 200 {object} contract.WebsiteInfoDetailRespEnvelope
 // @Security BearerAuth
 // @Router /website-info [post]
 func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
-	var req WebsiteInfoRequest
+	var req contract.WebsiteInfoReq
 	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
 	if req.Key == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "key 不能为空")
 	}
-	info, err := h.svc.Create(c.Context(), websiteinfo.CreateCommand{
+	info, err := h.svc.Create(c.Context(), websiteinfo.CreateCmd{
 		Key:   req.Key,
 		Value: req.Value,
 	})
@@ -78,7 +73,7 @@ func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
 		return err
 	}
 	Audit(c, "website_info.create", map[string]any{"key": info.Key})
-	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "created")
+	return response.SuccessWithMessage(c, contract.ToWebsiteInfoResp(*info), "created")
 }
 
 // Update godoc
@@ -87,8 +82,8 @@ func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param key path string true "配置键"
-// @Param request body WebsiteInfoRequest true "网站配置"
-// @Success 200 {object} WebsiteInfoDetailEnvelope
+// @Param request body contract.WebsiteInfoReq true "网站配置"
+// @Success 200 {object} contract.WebsiteInfoDetailRespEnvelope
 // @Security BearerAuth
 // @Router /website-info/{key} [put]
 func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
@@ -96,11 +91,11 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 	if key == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "key 不能为空")
 	}
-	var req WebsiteInfoRequest
+	var req contract.WebsiteInfoReq
 	if err := c.BodyParser(&req); err != nil {
 		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
 	}
-	cmd := websiteinfo.UpdateCommand{
+	cmd := websiteinfo.UpdateCmd{
 		Key:   key,
 		Value: req.Value,
 	}
@@ -112,7 +107,7 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 	Audit(c, "website_info.update", map[string]any{"key": info.Key})
-	return response.SuccessWithMessage(c, toWebsiteInfoResponse(*info), "updated")
+	return response.SuccessWithMessage(c, contract.ToWebsiteInfoResp(*info), "updated")
 }
 
 // Delete godoc
@@ -120,7 +115,7 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 // @Tags WebsiteInfo
 // @Produce json
 // @Param key path string true "配置键"
-// @Success 200 {object} GenericMessageEnvelope
+// @Success 200 {object} contract.GenericMessageEnvelope
 // @Security BearerAuth
 // @Router /website-info/{key} [delete]
 func (h *WebsiteInfoHandler) Delete(c *fiber.Ctx) error {

@@ -14,6 +14,7 @@
 - `make migrate-up|migrate-down|migrate-status|migrate-version`: manage database migrations via Goose.
 - `make migrate-create NAME=add_posts_table`: create a new SQL migration.
 - `make docs`: regenerate OpenAPI JSON from Swagger annotations.
+  - Note: `swag` is sensitive to annotation order; keep `@BasePath /api/v2` in the main comment block (prefer near the end) to ensure it is emitted into `docs/swagger.json`.
 
 ## Coding Style & Naming Conventions
 - Use standard Go formatting (`gofmt`) and idiomatic Go naming (PascalCase exports, camelCase locals).

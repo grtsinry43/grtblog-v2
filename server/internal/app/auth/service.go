@@ -62,14 +62,14 @@ func (s *Service) RegisterProvider(provider ExternalProvider) {
 	s.providers[strings.ToLower(provider.Name())] = provider
 }
 
-type RegisterCommand struct {
+type RegisterCmd struct {
 	Username string
 	Nickname string
 	Email    string
 	Password string
 }
 
-type LoginCommand struct {
+type LoginCmd struct {
 	Credential string
 	Password   string
 }
@@ -81,14 +81,14 @@ type LoginResult struct {
 	Roles  []string
 }
 
-type UpdateProfileCommand struct {
+type UpdateProfileCmd struct {
 	UserID   int64
 	Nickname string
 	Avatar   string
 	Email    string
 }
 
-type ChangePasswordCommand struct {
+type ChangePasswordCmd struct {
 	UserID      int64
 	OldPassword string
 	NewPassword string
@@ -100,7 +100,7 @@ type AccessInfo struct {
 	Permissions []string
 }
 
-func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*identity.User, error) {
+func (s *Service) Register(ctx context.Context, cmd RegisterCmd) (*identity.User, error) {
 	cmd.Username = strings.TrimSpace(cmd.Username)
 	if cmd.Username == "" || cmd.Password == "" {
 		return nil, identity.ErrInvalidCredentials
@@ -126,7 +126,7 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*identity.
 	return user, nil
 }
 
-func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, error) {
+func (s *Service) Login(ctx context.Context, cmd LoginCmd) (*LoginResult, error) {
 	if cmd.Credential == "" || cmd.Password == "" {
 		return nil, identity.ErrInvalidCredentials
 	}
@@ -159,7 +159,7 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, er
 	}, nil
 }
 
-type OAuthLoginCommand struct {
+type OAuthLoginCmd struct {
 	Provider string
 	Code     string
 	State    string
@@ -172,14 +172,7 @@ type OAuthAuthorizeResult struct {
 	CodeChallenge string
 }
 
-type OAuthProviderDTO struct {
-	Key          string   `json:"key"`
-	DisplayName  string   `json:"displayName"`
-	Scopes       []string `json:"scopes"`
-	PKCERequired bool     `json:"pkceRequired"`
-}
-
-func (s *Service) LoginWithProvider(ctx context.Context, cmd OAuthLoginCommand) (*LoginResult, error) {
+func (s *Service) LoginWithProvider(ctx context.Context, cmd OAuthLoginCmd) (*LoginResult, error) {
 	if s.oauthRepo == nil {
 		return nil, ErrProviderNotConfigured
 	}
@@ -285,7 +278,7 @@ func (s *Service) AccessInfo(ctx context.Context, claims *jwt.Claims) (*AccessIn
 	}, nil
 }
 
-func (s *Service) UpdateProfile(ctx context.Context, cmd UpdateProfileCommand) (*identity.User, error) {
+func (s *Service) UpdateProfile(ctx context.Context, cmd UpdateProfileCmd) (*identity.User, error) {
 	if cmd.UserID == 0 {
 		return nil, identity.ErrInvalidCredentials
 	}
@@ -300,7 +293,7 @@ func (s *Service) UpdateProfile(ctx context.Context, cmd UpdateProfileCommand) (
 	return updated, nil
 }
 
-func (s *Service) ChangePassword(ctx context.Context, cmd ChangePasswordCommand) error {
+func (s *Service) ChangePassword(ctx context.Context, cmd ChangePasswordCmd) error {
 	if cmd.UserID == 0 || cmd.NewPassword == "" {
 		return identity.ErrInvalidCredentials
 	}
@@ -335,7 +328,7 @@ func firstNonEmpty(vals ...string) string {
 }
 
 // ListProviders 列出启用的 OAuth 提供方。
-func (s *Service) ListProviders(ctx context.Context) ([]OAuthProviderDTO, error) {
+func (s *Service) ListProviders(ctx context.Context) ([]identity.OAuthProvider, error) {
 	if s.oauthRepo == nil {
 		return nil, ErrProviderNotConfigured
 	}
@@ -343,16 +336,7 @@ func (s *Service) ListProviders(ctx context.Context) ([]OAuthProviderDTO, error)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]OAuthProviderDTO, 0, len(items))
-	for _, it := range items {
-		result = append(result, OAuthProviderDTO{
-			Key:          it.ProviderKey,
-			DisplayName:  it.DisplayName,
-			Scopes:       splitScopes(it.Scopes),
-			PKCERequired: it.PKCERequired,
-		})
-	}
-	return result, nil
+	return items, nil
 }
 
 // Authorize 生成授权 URL 和 state（可含 PKCE）。

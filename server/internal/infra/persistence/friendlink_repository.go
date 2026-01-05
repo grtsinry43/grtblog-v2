@@ -11,28 +11,32 @@ import (
 )
 
 type FriendLinkApplicationRepository struct {
-	db *gorm.DB
+	db   *gorm.DB
+	repo *GormRepository[model.FriendLinkApplication]
 }
 
 func NewFriendLinkApplicationRepository(db *gorm.DB) *FriendLinkApplicationRepository {
-	return &FriendLinkApplicationRepository{db: db}
+	return &FriendLinkApplicationRepository{
+		db:   db,
+		repo: NewGormRepository[model.FriendLinkApplication](db),
+	}
 }
 
 func (r *FriendLinkApplicationRepository) FindByURL(ctx context.Context, url string) (*social.FriendLinkApplication, error) {
-	var rec model.FriendLinkApplication
-	if err := r.db.WithContext(ctx).Where("url = ?", url).First(&rec).Error; err != nil {
+	rec, err := r.repo.First(ctx, "url = ?", url)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, social.ErrFriendLinkApplicationNotFound
 		}
 		return nil, err
 	}
-	entity := mapFriendLinkApplicationToDomain(rec)
+	entity := mapFriendLinkApplicationToDomain(*rec)
 	return &entity, nil
 }
 
 func (r *FriendLinkApplicationRepository) Create(ctx context.Context, app *social.FriendLinkApplication) error {
 	rec := mapFriendLinkApplicationToModel(app)
-	if err := r.db.WithContext(ctx).Create(&rec).Error; err != nil {
+	if err := r.repo.Create(ctx, &rec); err != nil {
 		return err
 	}
 	app.ID = rec.ID

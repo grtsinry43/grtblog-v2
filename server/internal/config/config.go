@@ -33,10 +33,10 @@ type DatabaseConfig struct {
 
 // AuthConfig 控制 JWT 签发与校验。
 type AuthConfig struct {
-	Secret       string
-	Issuer       string
-	AccessTTL    time.Duration
-	DefaultRoles []string
+	Secret        string
+	Issuer        string
+	AccessTTL     time.Duration
+	DefaultRoles  []string
 	OAuthStateTTL time.Duration
 }
 
@@ -77,10 +77,10 @@ func Load() Config {
 			AutoMigrate: getEnvAsBool("DB_AUTO_MIGRATE", true),
 		},
 		Auth: AuthConfig{
-			Secret:       getEnv("AUTH_SECRET", "change-me"),
-			Issuer:       getEnv("AUTH_ISSUER", "grtblog-api"),
-			AccessTTL:    getEnvAsDuration("AUTH_ACCESS_TTL", time.Minute*30),
-			DefaultRoles: getEnvAsSlice("AUTH_DEFAULT_ROLES", []string{"user"}),
+			Secret:        getEnv("AUTH_SECRET", "change-me"),
+			Issuer:        getEnv("AUTH_ISSUER", "grtblog-api"),
+			AccessTTL:     getEnvAsDuration("AUTH_ACCESS_TTL", 7*24*time.Hour),
+			DefaultRoles:  getEnvAsSlice("AUTH_DEFAULT_ROLES", []string{"user"}),
 			OAuthStateTTL: getEnvAsDuration("AUTH_STATE_TTL", time.Minute*10),
 		},
 		RBAC: RBACConfig{

@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence/model"
@@ -17,83 +19,236 @@ type ContentRepository struct {
 }
 
 func (r *ContentRepository) CreateCategory(ctx context.Context, category *content.ArticleCategory) error {
-	//TODO implement me
-	panic("implement me")
+	rec := model.ArticleCategory{
+		Name:     category.Name,
+		ShortURL: optionalString(category.ShortURL),
+	}
+	if err := r.db.WithContext(ctx).Create(&rec).Error; err != nil {
+		return err
+	}
+	category.ID = rec.ID
+	category.CreatedAt = rec.CreatedAt
+	category.UpdatedAt = rec.UpdatedAt
+	return nil
 }
 
 func (r *ContentRepository) GetCategoryByID(ctx context.Context, id int64) (*content.ArticleCategory, error) {
-	//TODO implement me
-	panic("implement me")
+	var rec model.ArticleCategory
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&rec).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, content.ErrCategoryNotFound
+		}
+		return nil, err
+	}
+	return mapCategoryToDomain(rec), nil
 }
 
 func (r *ContentRepository) ListCategories(ctx context.Context) ([]*content.ArticleCategory, error) {
-	//TODO implement me
-	panic("implement me")
+	var records []model.ArticleCategory
+	if err := r.db.WithContext(ctx).Order("name ASC").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*content.ArticleCategory, len(records))
+	for i, rec := range records {
+		result[i] = mapCategoryToDomain(rec)
+	}
+	return result, nil
 }
 
 func (r *ContentRepository) UpdateCategory(ctx context.Context, category *content.ArticleCategory) error {
-	//TODO implement me
-	panic("implement me")
+	updates := map[string]any{
+		"name":      category.Name,
+		"short_url": optionalString(category.ShortURL),
+	}
+	result := r.db.WithContext(ctx).
+		Model(&model.ArticleCategory{}).
+		Where("id = ?", category.ID).
+		Updates(updates)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return content.ErrCategoryNotFound
+	}
+	return nil
 }
 
 func (r *ContentRepository) DeleteCategory(ctx context.Context, id int64) error {
-	//TODO implement me
-	panic("implement me")
+	result := r.db.WithContext(ctx).Where("id = ?", id).Delete(&model.ArticleCategory{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return content.ErrCategoryNotFound
+	}
+	return nil
 }
 
 func (r *ContentRepository) CreateTag(ctx context.Context, tag *content.Tag) error {
-	//TODO implement me
-	panic("implement me")
+	rec := model.Tag{Name: tag.Name}
+	if err := r.db.WithContext(ctx).Create(&rec).Error; err != nil {
+		return err
+	}
+	tag.ID = rec.ID
+	tag.CreatedAt = rec.CreatedAt
+	tag.UpdatedAt = rec.UpdatedAt
+	return nil
 }
 
 func (r *ContentRepository) GetTagByID(ctx context.Context, id int64) (*content.Tag, error) {
-	//TODO implement me
-	panic("implement me")
+	var rec model.Tag
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&rec).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, content.ErrTagNotFound
+		}
+		return nil, err
+	}
+	return mapTagToDomain(rec), nil
 }
 
 func (r *ContentRepository) GetTagByName(ctx context.Context, name string) (*content.Tag, error) {
-	//TODO implement me
-	panic("implement me")
+	var rec model.Tag
+	if err := r.db.WithContext(ctx).Where("name = ?", name).First(&rec).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, content.ErrTagNotFound
+		}
+		return nil, err
+	}
+	return mapTagToDomain(rec), nil
 }
 
 func (r *ContentRepository) ListTags(ctx context.Context) ([]*content.Tag, error) {
-	//TODO implement me
-	panic("implement me")
+	var records []model.Tag
+	if err := r.db.WithContext(ctx).Order("name ASC").Find(&records).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*content.Tag, len(records))
+	for i, rec := range records {
+		result[i] = mapTagToDomain(rec)
+	}
+	return result, nil
 }
 
 func (r *ContentRepository) UpdateTag(ctx context.Context, tag *content.Tag) error {
-	//TODO implement me
-	panic("implement me")
+	result := r.db.WithContext(ctx).
+		Model(&model.Tag{}).
+		Where("id = ?", tag.ID).
+		Update("name", tag.Name)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return content.ErrTagNotFound
+	}
+	return nil
 }
 
 func (r *ContentRepository) DeleteTag(ctx context.Context, id int64) error {
-	//TODO implement me
-	panic("implement me")
+	result := r.db.WithContext(ctx).Where("id = ?", id).Delete(&model.Tag{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return content.ErrTagNotFound
+	}
+	return nil
 }
 
 func (r *ContentRepository) AddTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error {
-	//TODO implement me
-	panic("implement me")
+	if len(tagIDs) == 0 {
+		return nil
+	}
+	records := make([]model.ArticleTag, 0, len(tagIDs))
+	for _, tagID := range tagIDs {
+		records = append(records, model.ArticleTag{
+			ArticleID: articleID,
+			TagID:     tagID,
+		})
+	}
+	return r.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "article_id"}, {Name: "tag_id"}},
+			DoNothing: true,
+		}).
+		Create(&records).Error
 }
 
 func (r *ContentRepository) SyncTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error {
-	//TODO implement me
-	panic("implement me")
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("article_id = ?", articleID).Delete(&model.ArticleTag{}).Error; err != nil {
+			return err
+		}
+		if len(tagIDs) == 0 {
+			return nil
+		}
+		records := make([]model.ArticleTag, 0, len(tagIDs))
+		for _, tagID := range tagIDs {
+			records = append(records, model.ArticleTag{
+				ArticleID: articleID,
+				TagID:     tagID,
+			})
+		}
+		return tx.Create(&records).Error
+	})
 }
 
 func (r *ContentRepository) GetTagsByArticleID(ctx context.Context, articleID int64) ([]*content.Tag, error) {
-	//TODO implement me
-	panic("implement me")
+	var records []model.Tag
+	err := r.db.WithContext(ctx).
+		Model(&model.Tag{}).
+		Joins("JOIN article_tag ON article_tag.tag_id = tag.id").
+		Where("article_tag.article_id = ?", articleID).
+		Order("tag.name ASC").
+		Find(&records).Error
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*content.Tag, len(records))
+	for i, rec := range records {
+		result[i] = mapTagToDomain(rec)
+	}
+	return result, nil
 }
 
 func (r *ContentRepository) UpdateArticleViews(ctx context.Context, articleID int64) error {
-	//TODO implement me
-	panic("implement me")
+	result := r.db.WithContext(ctx).
+		Model(&model.ArticleMetrics{}).
+		Where("article_id = ?", articleID).
+		UpdateColumn("views", gorm.Expr("views + ?", 1))
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected > 0 {
+		return nil
+	}
+	rec := model.ArticleMetrics{
+		ArticleID: articleID,
+		Views:     1,
+	}
+	return r.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "article_id"}},
+			DoUpdates: clause.Assignments(map[string]any{"views": gorm.Expr("views + 1"), "updated_at": time.Now()}),
+		}).
+		Create(&rec).Error
 }
 
 func (r *ContentRepository) GetArticleMetrics(ctx context.Context, articleID int64) (*content.ArticleMetrics, error) {
-	//TODO implement me
-	panic("implement me")
+	var rec model.ArticleMetrics
+	result := r.db.WithContext(ctx).Where("article_id = ?", articleID).Limit(1).Find(&rec)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	return &content.ArticleMetrics{
+		ArticleID: rec.ArticleID,
+		Views:     rec.Views,
+		Likes:     rec.Likes,
+		Comments:  rec.Comments,
+		UpdatedAt: rec.UpdatedAt,
+	}, nil
 }
 
 func NewContentRepository(db *gorm.DB) *ContentRepository {
@@ -125,13 +280,28 @@ func (r *ContentRepository) CreateArticle(ctx context.Context, article *content.
 		CreatedAt:   article.CreatedAt,
 	}
 
-	if err := r.db.WithContext(ctx).Create(articleModel).Error; err != nil {
-		return err
-	}
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(articleModel).Error; err != nil {
+			if isArticleShortURLConstraint(err) {
+				return content.ErrArticleShortURLExists
+			}
+			return err
+		}
 
-	article.ID = articleModel.ID
-	article.UpdatedAt = articleModel.UpdatedAt
-	return nil
+		metrics := model.ArticleMetrics{
+			ArticleID: articleModel.ID,
+			Views:     0,
+			Likes:     0,
+			Comments:  0,
+		}
+		if err := tx.Create(&metrics).Error; err != nil {
+			return err
+		}
+
+		article.ID = articleModel.ID
+		article.UpdatedAt = articleModel.UpdatedAt
+		return nil
+	})
 }
 
 // GetArticleByID 根据ID获取文章
@@ -185,6 +355,9 @@ func (r *ContentRepository) UpdateArticle(ctx context.Context, article *content.
 	}
 
 	if err := r.db.WithContext(ctx).Save(articleModel).Error; err != nil {
+		if isArticleShortURLConstraint(err) {
+			return content.ErrArticleShortURLExists
+		}
 		return err
 	}
 
@@ -194,7 +367,12 @@ func (r *ContentRepository) UpdateArticle(ctx context.Context, article *content.
 
 // DeleteArticle 删除文章（软删除）
 func (r *ContentRepository) DeleteArticle(ctx context.Context, id int64) error {
-	return r.db.WithContext(ctx).Where("id = ?", id).Delete(&model.Article{}).Error
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id = ?", id).Delete(&model.Article{}).Error; err != nil {
+			return err
+		}
+		return tx.Where("article_id = ?", id).Delete(&model.ArticleMetrics{}).Error
+	})
 }
 
 // ListArticles 获取文章列表（内部使用，包含未发布）
@@ -336,4 +514,53 @@ func bytesToToc(data []byte) (map[string]any, error) {
 	}
 	err := json.Unmarshal(data, &toc)
 	return toc, err
+}
+
+func mapCategoryToDomain(rec model.ArticleCategory) *content.ArticleCategory {
+	return &content.ArticleCategory{
+		ID:        rec.ID,
+		Name:      rec.Name,
+		ShortURL:  stringToPtr(rec.ShortURL),
+		CreatedAt: rec.CreatedAt,
+		UpdatedAt: rec.UpdatedAt,
+		DeletedAt: deletedAtToPtr(rec.DeletedAt),
+	}
+}
+
+func mapTagToDomain(rec model.Tag) *content.Tag {
+	return &content.Tag{
+		ID:        rec.ID,
+		Name:      rec.Name,
+		CreatedAt: rec.CreatedAt,
+		UpdatedAt: rec.UpdatedAt,
+		DeletedAt: deletedAtToPtr(rec.DeletedAt),
+	}
+}
+
+func deletedAtToPtr(deleted gorm.DeletedAt) *time.Time {
+	if !deleted.Valid {
+		return nil
+	}
+	return &deleted.Time
+}
+
+func optionalString(val *string) string {
+	if val == nil {
+		return ""
+	}
+	return *val
+}
+
+func stringToPtr(val string) *string {
+	if val == "" {
+		return nil
+	}
+	return &val
+}
+
+func isArticleShortURLConstraint(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(err.Error(), "uq_article_short_url")
 }

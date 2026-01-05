@@ -6,6 +6,7 @@
         "contact": {},
         "version": "2.0.0"
     },
+    "basePath": "/api/v2",
     "paths": {
         "/admin/logs": {
             "get": {
@@ -214,7 +215,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/article.ListArticleResponse"
+                            "$ref": "#/definitions/contract.ArticleListResp"
                         }
                     }
                 }
@@ -245,7 +246,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/article.CreateArticleCommand"
+                            "$ref": "#/definitions/contract.CreateArticleReq"
                         }
                     }
                 ],
@@ -253,7 +254,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/article.ViewArticleResponse"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -281,7 +282,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/article.ViewArticleResponse"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -314,7 +315,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/article.ViewArticleResponse"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -352,7 +353,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/article.UpdateArticleCommand"
+                            "$ref": "#/definitions/contract.UpdateArticleReq"
                         }
                     }
                 ],
@@ -360,7 +361,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/article.ViewArticleResponse"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -417,7 +418,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginRequest"
+                            "$ref": "#/definitions/contract.LoginReq"
                         }
                     }
                 ],
@@ -425,7 +426,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginResponseEnvelope"
+                            "$ref": "#/definitions/contract.LoginRespEnvelope"
                         }
                     }
                 }
@@ -444,7 +445,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.ProviderListResponse"
+                            "$ref": "#/definitions/contract.ProviderListRespEnvelope"
                         }
                     }
                 }
@@ -478,7 +479,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorizeEnvelope"
+                            "$ref": "#/definitions/contract.AuthorizeRespEnvelope"
                         }
                     }
                 }
@@ -510,7 +511,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.OAuthCallbackRequest"
+                            "$ref": "#/definitions/contract.OAuthCallbackReq"
                         }
                     }
                 ],
@@ -518,7 +519,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.LoginResponseEnvelope"
+                            "$ref": "#/definitions/contract.LoginRespEnvelope"
                         }
                     }
                 }
@@ -543,7 +544,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.RegisterRequest"
+                            "$ref": "#/definitions/contract.RegisterReq"
                         }
                     }
                 ],
@@ -551,7 +552,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.RegisterResponseEnvelope"
+                            "$ref": "#/definitions/contract.RegisterRespEnvelope"
                         }
                     }
                 }
@@ -581,7 +582,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.FriendLinkApplicationRequest"
+                            "$ref": "#/definitions/contract.FriendLinkApplicationReq"
                         }
                     }
                 ],
@@ -589,7 +590,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.FriendLinkApplicationResponse"
+                            "$ref": "#/definitions/contract.FriendLinkApplicationRespEnvelope"
                         }
                     }
                 }
@@ -608,7 +609,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoListEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoListRespEnvelope"
                         }
                     }
                 }
@@ -632,7 +633,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoListEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoListRespEnvelope"
                         }
                     }
                 }
@@ -660,7 +661,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoRequest"
+                            "$ref": "#/definitions/contract.WebsiteInfoReq"
                         }
                     }
                 ],
@@ -668,7 +669,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoDetailEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoDetailRespEnvelope"
                         }
                     }
                 }
@@ -705,7 +706,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoRequest"
+                            "$ref": "#/definitions/contract.WebsiteInfoReq"
                         }
                     }
                 ],
@@ -713,7 +714,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.WebsiteInfoDetailEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoDetailRespEnvelope"
                         }
                     }
                 }
@@ -744,7 +745,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.GenericMessageEnvelope"
+                            "$ref": "#/definitions/contract.GenericMessageEnvelope"
                         }
                     }
                 }
@@ -752,71 +753,13 @@
         }
     },
     "definitions": {
-        "article.CreateArticleCommand": {
-            "type": "object",
-            "required": [
-                "content",
-                "summary",
-                "title"
-            ],
-            "properties": {
-                "categoryId": {
-                    "type": "integer"
-                },
-                "content": {
-                    "type": "string"
-                },
-                "cover": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "description": "可选：因为可能会有自定义发布时间的需求",
-                    "type": "string"
-                },
-                "isHot": {
-                    "type": "boolean"
-                },
-                "isOriginal": {
-                    "type": "boolean"
-                },
-                "isPublished": {
-                    "type": "boolean"
-                },
-                "isTop": {
-                    "type": "boolean"
-                },
-                "leadIn": {
-                    "type": "string"
-                },
-                "shortUrl": {
-                    "type": "string"
-                },
-                "summary": {
-                    "type": "string"
-                },
-                "tagIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "toc": {
-                    "type": "object",
-                    "additionalProperties": {}
-                }
-            }
-        },
-        "article.ListArticleResponse": {
+        "contract.ArticleListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/article.ViewArticleResponse"
+                        "$ref": "#/definitions/contract.ArticleResp"
                     }
                 },
                 "page": {
@@ -830,91 +773,7 @@
                 }
             }
         },
-        "article.MetricsResponse": {
-            "type": "object",
-            "properties": {
-                "comments": {
-                    "type": "integer"
-                },
-                "likes": {
-                    "type": "integer"
-                },
-                "views": {
-                    "type": "integer"
-                }
-            }
-        },
-        "article.TagResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "article.UpdateArticleCommand": {
-            "type": "object",
-            "required": [
-                "content",
-                "id",
-                "shortUrl",
-                "summary",
-                "title"
-            ],
-            "properties": {
-                "categoryId": {
-                    "type": "integer"
-                },
-                "content": {
-                    "type": "string"
-                },
-                "cover": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "isHot": {
-                    "type": "boolean"
-                },
-                "isOriginal": {
-                    "type": "boolean"
-                },
-                "isPublished": {
-                    "type": "boolean"
-                },
-                "isTop": {
-                    "type": "boolean"
-                },
-                "leadIn": {
-                    "type": "string"
-                },
-                "shortUrl": {
-                    "type": "string"
-                },
-                "summary": {
-                    "type": "string"
-                },
-                "tagIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "toc": {
-                    "type": "object",
-                    "additionalProperties": {}
-                }
-            }
-        },
-        "article.ViewArticleResponse": {
+        "contract.ArticleResp": {
             "type": "object",
             "properties": {
                 "aiSummary": {
@@ -954,7 +813,7 @@
                     "type": "string"
                 },
                 "metrics": {
-                    "$ref": "#/definitions/article.MetricsResponse"
+                    "$ref": "#/definitions/contract.MetricsResp"
                 },
                 "shortUrl": {
                     "type": "string"
@@ -965,7 +824,7 @@
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/article.TagResponse"
+                        "$ref": "#/definitions/contract.TagResp"
                     }
                 },
                 "title": {
@@ -980,65 +839,7 @@
                 }
             }
         },
-        "auth.OAuthProviderDTO": {
-            "type": "object",
-            "properties": {
-                "displayName": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "pkceRequired": {
-                    "type": "boolean"
-                },
-                "scopes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "handler.AdminGenericMessageEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {},
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.AuthorizeEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/handler.AuthorizeResponse"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.AuthorizeResponse": {
+        "contract.AuthorizeResp": {
             "type": "object",
             "properties": {
                 "authUrl": {
@@ -1052,7 +853,82 @@
                 }
             }
         },
-        "handler.FriendLinkApplicationRequest": {
+        "contract.AuthorizeRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.AuthorizeResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.CreateArticleReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "isPublished",
+                "summary",
+                "title"
+            ],
+            "properties": {
+                "categoryId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "可以自定义发布时间",
+                    "type": "string"
+                },
+                "isHot": {
+                    "type": "boolean"
+                },
+                "isOriginal": {
+                    "type": "boolean"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "leadIn": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "tagIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "contract.FriendLinkApplicationReq": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1072,27 +948,7 @@
                 }
             }
         },
-        "handler.FriendLinkApplicationResponse": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/handler.FriendLinkApplicationVO"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.FriendLinkApplicationVO": {
+        "contract.FriendLinkApplicationResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1127,7 +983,380 @@
                 }
             }
         },
-        "handler.GenericMessageEnvelope": {
+        "contract.FriendLinkApplicationRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.FriendLinkApplicationResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.GenericMessageEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.LoginReq": {
+            "type": "object",
+            "properties": {
+                "credential": {
+                    "description": "username or email",
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "turnstileToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.LoginResp": {
+            "type": "object",
+            "properties": {
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/contract.UserResp"
+                }
+            }
+        },
+        "contract.LoginRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.LoginResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.MetricsResp": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "integer"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "views": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contract.OAuthCallbackReq": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.OAuthProviderResp": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "pkceRequired": {
+                    "type": "boolean"
+                },
+                "scopes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "contract.ProviderListRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.OAuthProviderResp"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.RegisterReq": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "turnstileToken": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.RegisterRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.UserResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.TagResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.UpdateArticleReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "shortUrl",
+                "summary",
+                "title"
+            ],
+            "properties": {
+                "categoryId": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "isHot": {
+                    "type": "boolean"
+                },
+                "isOriginal": {
+                    "type": "boolean"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "leadIn": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "tagIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "toc": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "contract.UserResp": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.WebsiteInfoDetailRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.WebsiteInfoResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.WebsiteInfoListRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.WebsiteInfoResp"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.WebsiteInfoReq": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.WebsiteInfoResp": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.AdminGenericMessageEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -1164,75 +1393,6 @@
                     "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.LoginRequest": {
-            "type": "object",
-            "properties": {
-                "credential": {
-                    "description": "username or email",
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "turnstileToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/handler.UserResponse"
-                }
-            }
-        },
-        "handler.LoginResponseEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/handler.LoginResponse"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.OAuthCallbackRequest": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "state": {
                     "type": "string"
                 }
             }
@@ -1324,172 +1484,6 @@
                     "type": "string"
                 },
                 "userinfoEndpoint": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.ProviderListResponse": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/auth.OAuthProviderDTO"
-                    }
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.RegisterRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "nickname": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "turnstileToken": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.RegisterResponseEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/handler.UserResponse"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.UserResponse": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "isActive": {
-                    "type": "boolean"
-                },
-                "nickname": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.WebsiteInfoDetailEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/handler.WebsiteInfoResponse"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.WebsiteInfoListEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.WebsiteInfoResponse"
-                    }
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.WebsiteInfoRequest": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.WebsiteInfoResponse": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             }

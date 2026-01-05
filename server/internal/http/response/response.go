@@ -20,7 +20,7 @@ type Envelope[T any] struct {
 	Code   int    `json:"code"`
 	BizErr string `json:"bizErr"`
 	Msg    string `json:"msg"`
-	Data   T      `json:"data,omitempty"`
+	Data   T      `json:"data"`
 	Meta   Meta   `json:"meta"`
 }
 
