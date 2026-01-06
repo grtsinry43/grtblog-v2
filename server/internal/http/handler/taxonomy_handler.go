@@ -68,7 +68,7 @@ func (h *TaxonomyHandler) ListCategories(c *fiber.Ctx) error {
 func (h *TaxonomyHandler) CreateCategory(c *fiber.Ctx) error {
 	var req contract.CategoryCreateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "分类名称不能为空")
@@ -111,7 +111,7 @@ func (h *TaxonomyHandler) UpdateCategory(c *fiber.Ctx) error {
 	}
 	var req contract.CategoryUpdateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "分类名称不能为空")
@@ -201,7 +201,7 @@ func (h *TaxonomyHandler) ListColumns(c *fiber.Ctx) error {
 func (h *TaxonomyHandler) CreateColumn(c *fiber.Ctx) error {
 	var req contract.ColumnCreateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "分区名称不能为空")
@@ -244,7 +244,7 @@ func (h *TaxonomyHandler) UpdateColumn(c *fiber.Ctx) error {
 	}
 	var req contract.ColumnUpdateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "分区名称不能为空")
@@ -324,7 +324,7 @@ func (h *TaxonomyHandler) ListTags(c *fiber.Ctx) error {
 func (h *TaxonomyHandler) CreateTag(c *fiber.Ctx) error {
 	var req contract.TagCreateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "标签名称不能为空")
@@ -355,7 +355,7 @@ func (h *TaxonomyHandler) UpdateTag(c *fiber.Ctx) error {
 	}
 	var req contract.TagUpdateReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "标签名称不能为空")

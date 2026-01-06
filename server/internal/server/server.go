@@ -44,11 +44,17 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			// 1. 我们自己抛出的业务错误：*response.AppError
 			if ae, ok := err.(*response.AppError); ok {
+				detail := fmt.Sprintf("biz=%s code=%d msg=%s", ae.Biz.BizErr, ae.Biz.Code, ae.Error())
+				if ae.Cause != nil {
+					detail = fmt.Sprintf("%s cause=%v", detail, ae.Cause)
+				}
+				logRequestError(c, "biz", detail)
 				return response.ErrorWithMsg[any](c, ae.Biz, ae.Message)
 			}
 
 			// 2. Fiber 内置错误（比如 fiber.ErrNotFound / ErrMethodNotAllowed）
 			if fe, ok := err.(*fiber.Error); ok {
+				logRequestError(c, "http", fmt.Sprintf("status=%d msg=%s", fe.Code, fe.Message))
 				// 这里可以按需映射到你的 BizError
 				switch fe.Code {
 				case fiber.StatusNotFound:
@@ -62,11 +68,7 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 			}
 
 			// 3. 其他未识别错误，统一视为服务器内部错误
-			if reqID, ok := c.Locals("requestId").(string); ok && reqID != "" {
-				log.Printf("[req:%s] unhandled error %s %s: %v", reqID, c.Method(), c.Path(), err)
-			} else {
-				log.Printf("unhandled error %s %s: %v", c.Method(), c.Path(), err)
-			}
+			logRequestError(c, "unhandled", fmt.Sprintf("err=%v", err))
 			return response.ErrorFromBiz[any](c, response.ServerError)
 		},
 	})
@@ -143,6 +145,14 @@ func (s *Server) Shutdown(ctx context.Context) error {
 // App exposes the underlying Fiber instance for testing.
 func (s *Server) App() *fiber.App {
 	return s.app
+}
+
+func logRequestError(c *fiber.Ctx, kind string, detail string) {
+	reqID, _ := c.Locals("requestId").(string)
+	if reqID == "" {
+		reqID = "-"
+	}
+	log.Printf("[error] req=%s %s %s kind=%s %s", reqID, c.Method(), c.Path(), kind, detail)
 }
 
 // initLogging sets a file logger under storage/logs/app.log while keeping stdout.

@@ -1,11 +1,16 @@
 package article
 
 import (
-	"bufio"
-	"strconv"
+	"fmt"
+	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
+	"github.com/mozillazg/go-pinyin"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
 )
 
 type heading struct {
@@ -13,45 +18,43 @@ type heading struct {
 	text  string
 }
 
+var markdownParser = goldmark.New()
+var tocAnchorSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
+
 func generateTOC(markdown string) []content.TOCNode {
 	headings := extractHeadings(markdown)
 	if len(headings) == 0 {
 		return nil
 	}
 
-	minLevel := headings[0].level
-	for _, h := range headings[1:] {
-		if h.level < minLevel {
-			minLevel = h.level
-		}
-	}
-
 	var roots []*content.TOCNode
-	levelMap := make(map[int][]*content.TOCNode)
-	anchorIndex := 1
+	type stackItem struct {
+		level int
+		node  *content.TOCNode
+	}
+	var stack []stackItem
+	anchorCounts := make(map[string]int)
 	for _, h := range headings {
+		anchor := anchorFromHeading(h.text, anchorCounts)
 		node := &content.TOCNode{
 			Name:   h.text,
-			Anchor: "article-md-title-" + strconv.Itoa(anchorIndex),
+			Anchor: anchor,
 		}
-		anchorIndex++
 
-		if h.level == minLevel {
+		for len(stack) > 0 && stack[len(stack)-1].level >= h.level {
+			stack = stack[:len(stack)-1]
+		}
+		if len(stack) == 0 {
 			roots = append(roots, node)
 		} else {
-			parentList := levelMap[h.level-1]
-			if len(parentList) > 0 {
-				parent := parentList[len(parentList)-1]
-				parent.Children = append(parent.Children, content.TOCNode{
-					Name:   node.Name,
-					Anchor: node.Anchor,
-				})
-				node = &parent.Children[len(parent.Children)-1]
-			} else {
-				roots = append(roots, node)
-			}
+			parent := stack[len(stack)-1].node
+			parent.Children = append(parent.Children, content.TOCNode{
+				Name:   node.Name,
+				Anchor: node.Anchor,
+			})
+			node = &parent.Children[len(parent.Children)-1]
 		}
-		levelMap[h.level] = append(levelMap[h.level], node)
+		stack = append(stack, stackItem{level: h.level, node: node})
 	}
 
 	result := make([]content.TOCNode, len(roots))
@@ -62,38 +65,106 @@ func generateTOC(markdown string) []content.TOCNode {
 }
 
 func extractHeadings(markdown string) []heading {
-	scanner := bufio.NewScanner(strings.NewReader(markdown))
-	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-
-	inCodeBlock := false
 	var headings []heading
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if strings.HasPrefix(line, "```") {
-			inCodeBlock = !inCodeBlock
-			continue
+	source := []byte(markdown)
+	doc := markdownParser.Parser().Parse(text.NewReader(source))
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
 		}
-		if inCodeBlock {
-			continue
+		headingNode, ok := node.(*ast.Heading)
+		if !ok {
+			return ast.WalkContinue, nil
 		}
-
-		level := 0
-		for level < len(line) && line[level] == '#' {
-			level++
-		}
-		if level == 0 || level > 6 {
-			continue
-		}
-		text := strings.TrimSpace(line[level:])
-		if text == "" {
-			continue
+		headingText := strings.TrimSpace(extractHeadingText(headingNode, source))
+		if headingText == "" {
+			return ast.WalkContinue, nil
 		}
 		headings = append(headings, heading{
-			level: level,
-			text:  text,
+			level: headingNode.Level,
+			text:  headingText,
 		})
-	}
+		return ast.WalkContinue, nil
+	})
 	return headings
+}
+
+func extractHeadingText(node *ast.Heading, source []byte) string {
+	var builder strings.Builder
+	_ = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		switch typed := n.(type) {
+		case *ast.Text:
+			value := string(typed.Segment.Value(source))
+			value = strings.ReplaceAll(value, "\n", " ")
+			builder.WriteString(value)
+			if typed.SoftLineBreak() || typed.HardLineBreak() {
+				builder.WriteByte(' ')
+			}
+		case *ast.String:
+			value := string(typed.Value)
+			value = strings.ReplaceAll(value, "\n", " ")
+			builder.WriteString(value)
+		}
+		return ast.WalkContinue, nil
+	})
+	return builder.String()
+}
+
+func anchorFromHeading(text string, counts map[string]int) string {
+	slug := slugifyHeading(text)
+	if slug == "" {
+		slug = "section"
+	}
+	seq := counts[slug]
+	counts[slug] = seq + 1
+	if seq == 0 {
+		return slug
+	}
+	return fmt.Sprintf("%s-%d", slug, seq+1)
+}
+
+func slugifyHeading(input string) string {
+	args := pinyin.NewArgs()
+	args.Style = pinyin.Normal
+
+	var builder strings.Builder
+	needsDash := false
+	for _, r := range input {
+		if r >= 0x4e00 && r <= 0x9fa5 {
+			py := pinyin.Pinyin(string(r), args)
+			if len(py) == 0 || len(py[0]) == 0 || py[0][0] == "" {
+				continue
+			}
+			if needsDash && builder.Len() > 0 {
+				builder.WriteByte('-')
+			}
+			builder.WriteString(py[0][0])
+			needsDash = true
+			continue
+		}
+		if unicode.IsSpace(r) || r == '-' {
+			needsDash = true
+			continue
+		}
+		if r > unicode.MaxASCII {
+			continue
+		}
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			if needsDash && builder.Len() > 0 {
+				builder.WriteByte('-')
+			}
+			builder.WriteRune(unicode.ToLower(r))
+			needsDash = false
+		}
+	}
+
+	slug := tocAnchorSanitizer.ReplaceAllString(builder.String(), "-")
+	slug = strings.Trim(slug, "-")
+	slug = strings.ToLower(slug)
+	return slug
 }
 
 func buildSummary(summary, content string) string {

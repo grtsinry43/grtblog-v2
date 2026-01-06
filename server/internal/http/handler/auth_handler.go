@@ -42,7 +42,7 @@ func NewAuthHandler(svc *auth.Service, sysCfg *sysconfig.Service, verifier Turns
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req contract.RegisterReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if err := h.verifyTurnstile(c, req.TurnstileToken); err != nil {
 		return err
@@ -78,7 +78,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req contract.LoginReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if err := h.verifyTurnstile(c, req.TurnstileToken); err != nil {
 		return err
@@ -136,7 +136,7 @@ func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 	var req contract.UpdateProfileReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	var cmd auth.UpdateProfileCmd
 	if err := copier.Copy(&cmd, req); err != nil {
@@ -162,7 +162,7 @@ func (h *AuthHandler) ChangePassword(c *fiber.Ctx) error {
 	}
 	var req contract.ChangePasswordReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if req.NewPassword == "" || req.OldPassword == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "密码不能为空")

@@ -57,10 +57,12 @@ type ArticleListItemResp struct {
 	Views            int64     `json:"views"`
 	CategoryName     string    `json:"categoryName,omitempty"`
 	CategoryShortURL string    `json:"categoryShortUrl,omitempty"`
-	Tags             string    `json:"tags,omitempty"`
+	Tags             []string  `json:"tags"`
 	Likes            int       `json:"likes"`
 	Comments         int       `json:"comments"`
 	IsTop            bool      `json:"isTop"`
+	IsHot            bool      `json:"isHot"`
+	IsOriginal       bool      `json:"isOriginal"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
 }

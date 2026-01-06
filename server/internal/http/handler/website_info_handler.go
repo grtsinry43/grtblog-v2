@@ -60,7 +60,7 @@ func (h *WebsiteInfoHandler) List(c *fiber.Ctx) error {
 func (h *WebsiteInfoHandler) Create(c *fiber.Ctx) error {
 	var req contract.WebsiteInfoReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if req.Key == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "key 不能为空")
@@ -93,7 +93,7 @@ func (h *WebsiteInfoHandler) Update(c *fiber.Ctx) error {
 	}
 	var req contract.WebsiteInfoReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	cmd := websiteinfo.UpdateCmd{
 		Key:   key,

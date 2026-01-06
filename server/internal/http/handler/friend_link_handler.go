@@ -30,7 +30,7 @@ func NewFriendLinkHandler(svc *friendlink.Service) *FriendLinkHandler {
 func (h *FriendLinkHandler) SubmitApplication(c *fiber.Ctx) error {
 	var req contract.FriendLinkApplicationReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	claims, ok := middleware.GetClaims(c)
 	if !ok {

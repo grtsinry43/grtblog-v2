@@ -78,7 +78,7 @@ func (h *OAuthHandler) Callback(c *fiber.Ctx) error {
 	provider := c.Params("provider")
 	var req contract.OAuthCallbackReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	if req.Code == "" || req.State == "" {
 		return response.NewBizErrorWithMsg(response.ParamsError, "code/state 不能为空")

@@ -147,7 +147,7 @@ func (h *AdminOAuthHandler) List(c *fiber.Ctx) error {
 func (h *AdminOAuthHandler) Create(c *fiber.Ctx) error {
 	var req OAuthProviderPayload
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	p := payloadToDomain(req)
 	if p.ProviderKey == "" || p.AuthorizationEndpoint == "" || p.TokenEndpoint == "" || p.RedirectURITemplate == "" {
@@ -177,7 +177,7 @@ func (h *AdminOAuthHandler) Update(c *fiber.Ctx) error {
 	}
 	var req OAuthProviderPayload
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 	p := payloadToDomain(req)
 	p.ProviderKey = key

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"strings"
 
 	"github.com/jinzhu/copier"
 
@@ -50,8 +49,7 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 
 	var req contract.CreateArticleReq
 	if err := c.BodyParser(&req); err != nil {
-		println(err.Error())
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 
 	var cmd article.CreateArticleCmd
@@ -111,7 +109,7 @@ func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
 
 	var req contract.UpdateArticleReq
 	if err := c.BodyParser(&req); err != nil {
-		return response.NewBizErrorWithMsg(response.ParamsError, "请求体解析失败")
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 
 	var cmd article.UpdateArticleCmd
@@ -356,13 +354,16 @@ func (h *ArticleHandler) toArticleListItemResp(ctx context.Context, article *con
 	}
 
 	resp := contract.ArticleListItemResp{
-		ID:        article.ID,
-		Title:     article.Title,
-		ShortURL:  article.ShortURL,
-		Summary:   article.Summary,
-		IsTop:     article.IsTop,
-		CreatedAt: article.CreatedAt,
-		UpdatedAt: article.UpdatedAt,
+		ID:         article.ID,
+		Title:      article.Title,
+		ShortURL:   article.ShortURL,
+		Summary:    article.Summary,
+		IsTop:      article.IsTop,
+		IsHot:      article.IsHot,
+		IsOriginal: article.IsOriginal,
+		CreatedAt:  article.CreatedAt,
+		UpdatedAt:  article.UpdatedAt,
+		Tags:       []string{},
 	}
 
 	if article.Cover != nil {
@@ -380,7 +381,7 @@ func (h *ArticleHandler) toArticleListItemResp(ctx context.Context, article *con
 		for i, tag := range tags {
 			tagNames[i] = tag.Name
 		}
-		resp.Tags = strings.Join(tagNames, ",")
+		resp.Tags = tagNames
 	}
 
 	if article.CategoryID != nil {
