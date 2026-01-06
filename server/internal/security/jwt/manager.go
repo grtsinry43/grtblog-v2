@@ -22,13 +22,12 @@ var (
 
 // Claims 表示 JWT 的载荷内容。
 type Claims struct {
-	Subject     string   `json:"sub,omitempty"`
-	UserID      int64    `json:"uid"`
-	Roles       []string `json:"roles,omitempty"`
-	Permissions []string `json:"perms,omitempty"`
-	Issuer      string   `json:"iss"`
-	IssuedAt    int64    `json:"iat"`
-	ExpiresAt   int64    `json:"exp"`
+	Subject   string `json:"sub,omitempty"`
+	UserID    int64  `json:"uid"`
+	IsAdmin   bool   `json:"isAdmin"`
+	Issuer    string `json:"iss"`
+	IssuedAt  int64  `json:"iat"`
+	ExpiresAt int64  `json:"exp"`
 }
 
 // Manager 负责签发、解析与校验 JWT。
@@ -47,15 +46,14 @@ func NewManager(cfg config.AuthConfig) *Manager {
 }
 
 // Generate 针对指定用户签发 token。
-func (m *Manager) Generate(userID int64, roles, perms []string) (string, *Claims, error) {
+func (m *Manager) Generate(userID int64, isAdmin bool) (string, *Claims, error) {
 	now := time.Now()
 	claims := &Claims{
-		UserID:      userID,
-		Roles:       roles,
-		Permissions: perms,
-		Issuer:      m.issuer,
-		IssuedAt:    now.Unix(),
-		ExpiresAt:   now.Add(m.ttl).Unix(),
+		UserID:    userID,
+		IsAdmin:   isAdmin,
+		Issuer:    m.issuer,
+		IssuedAt:  now.Unix(),
+		ExpiresAt: now.Add(m.ttl).Unix(),
 	}
 	token, err := m.sign(claims)
 	if err != nil {

@@ -2,7 +2,8 @@ package content
 
 import "errors"
 
-var ErrArticleNotFound = errors.New("article not found")
-var ErrCategoryNotFound = errors.New("category not found")
-var ErrTagNotFound = errors.New("tag not found")
-var ErrArticleShortURLExists = errors.New("article short url exists")
+var ErrArticleNotFound = errors.New("文章不存在")
+var ErrCategoryNotFound = errors.New("分类不存在")
+var ErrColumnNotFound = errors.New("手记分区不存在")
+var ErrTagNotFound = errors.New("标签不存在")
+var ErrArticleShortURLExists = errors.New("文章短链接已存在")

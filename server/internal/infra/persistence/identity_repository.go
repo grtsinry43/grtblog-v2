@@ -41,6 +41,7 @@ func (r *IdentityRepository) Create(ctx context.Context, user *identity.User) er
 		Password: user.Password,
 		Avatar:   user.Avatar,
 		IsActive: user.IsActive,
+		IsAdmin:  user.IsAdmin,
 	}
 	if err := r.db.WithContext(ctx).Create(&rec).Error; err != nil {
 		if isUniqueConstraint(err) {
@@ -90,55 +91,6 @@ func (r *IdentityRepository) FindByCredential(ctx context.Context, credential st
 	}
 	user := mapUserToDomain(rec)
 	return &user, nil
-}
-
-func (r *IdentityRepository) GetRoles(ctx context.Context, userID int64) ([]string, error) {
-	var roles []string
-	err := r.db.WithContext(ctx).
-		Model(&model.UserRole{}).
-		Select("role.role_name").
-		Joins("JOIN role ON role.id = user_role.role_id").
-		Where("user_role.user_id = ?", userID).
-		Scan(&roles).Error
-	return roles, err
-}
-
-func (r *IdentityRepository) GetPermissions(ctx context.Context, userID int64) ([]string, error) {
-	var perms []string
-	err := r.db.WithContext(ctx).
-		Table("role_permission").
-		Select("DISTINCT permission.permission_name").
-		Joins("JOIN permission ON permission.id = role_permission.permission_id").
-		Joins("JOIN user_role ON user_role.role_id = role_permission.role_id").
-		Where("user_role.user_id = ?", userID).
-		Scan(&perms).Error
-	return perms, err
-}
-
-func (r *IdentityRepository) AssignRoles(ctx context.Context, userID int64, roles []string) error {
-	if len(roles) == 0 {
-		return nil
-	}
-	var roleRecords []model.Role
-	if err := r.db.WithContext(ctx).
-		Where("role_name IN ?", roles).
-		Find(&roleRecords).Error; err != nil {
-		return err
-	}
-	if len(roleRecords) != len(roles) {
-		return identity.ErrRoleNotFound
-	}
-	var mappings []model.UserRole
-	for _, role := range roleRecords {
-		mappings = append(mappings, model.UserRole{
-			UserID: userID,
-			RoleID: role.ID,
-		})
-	}
-	return r.db.WithContext(ctx).Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "user_id"}, {Name: "role_id"}},
-		DoNothing: true,
-	}).Create(&mappings).Error
 }
 
 func (r *IdentityRepository) FindByOAuth(ctx context.Context, providerKey, oauthID string) (*identity.User, error) {
@@ -254,10 +206,19 @@ func mapUserToDomain(rec model.User) identity.User {
 		Password:  rec.Password,
 		Avatar:    rec.Avatar,
 		IsActive:  rec.IsActive,
+		IsAdmin:   rec.IsAdmin,
 		CreatedAt: rec.CreatedAt,
 		UpdatedAt: rec.UpdatedAt,
 		DeletedAt: deleted,
 	}
+}
+
+func (r *IdentityRepository) CountUsers(ctx context.Context) (int64, error) {
+	var total int64
+	if err := r.db.WithContext(ctx).Model(&model.User{}).Count(&total).Error; err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func isUniqueConstraint(err error) bool {

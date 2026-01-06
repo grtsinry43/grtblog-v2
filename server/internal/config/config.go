@@ -12,7 +12,6 @@ type Config struct {
 	App       AppConfig
 	Database  DatabaseConfig
 	Auth      AuthConfig
-	RBAC      RBACConfig
 	Turnstile TurnstileConfig
 	Redis     RedisConfig
 }
@@ -36,15 +35,7 @@ type AuthConfig struct {
 	Secret        string
 	Issuer        string
 	AccessTTL     time.Duration
-	DefaultRoles  []string
 	OAuthStateTTL time.Duration
-}
-
-// RBACConfig 管理 Casbin 相关设置。
-type RBACConfig struct {
-	ModelPath         string
-	AutoReload        bool
-	AutoReloadSeconds int
 }
 
 // TurnstileConfig 控制 Cloudflare Turnstile 人机校验。
@@ -80,13 +71,7 @@ func Load() Config {
 			Secret:        getEnv("AUTH_SECRET", "change-me"),
 			Issuer:        getEnv("AUTH_ISSUER", "grtblog-api"),
 			AccessTTL:     getEnvAsDuration("AUTH_ACCESS_TTL", 7*24*time.Hour),
-			DefaultRoles:  getEnvAsSlice("AUTH_DEFAULT_ROLES", []string{"user"}),
 			OAuthStateTTL: getEnvAsDuration("AUTH_STATE_TTL", time.Minute*10),
-		},
-		RBAC: RBACConfig{
-			ModelPath:         getEnv("RBAC_MODEL_PATH", "./configs/rbac_model.conf"),
-			AutoReload:        getEnvAsBool("RBAC_AUTO_RELOAD", false),
-			AutoReloadSeconds: getEnvAsInt("RBAC_AUTO_RELOAD_SECONDS", 30),
 		},
 		Turnstile: TurnstileConfig{
 			Enabled:   getEnvAsBool("TURNSTILE_ENABLED", false),

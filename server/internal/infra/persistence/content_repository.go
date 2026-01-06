@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -152,6 +153,20 @@ func (r *ContentRepository) DeleteTag(ctx context.Context, id int64) error {
 		return content.ErrTagNotFound
 	}
 	return nil
+}
+
+func (r *ContentRepository) TagIDsExist(ctx context.Context, ids []int64) (bool, error) {
+	if len(ids) == 0 {
+		return true, nil
+	}
+	var count int64
+	if err := r.db.WithContext(ctx).
+		Model(&model.Tag{}).
+		Where("id IN ?", ids).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count == int64(len(ids)), nil
 }
 
 func (r *ContentRepository) AddTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error {
@@ -307,11 +322,12 @@ func (r *ContentRepository) CreateArticle(ctx context.Context, article *content.
 // GetArticleByID 根据ID获取文章
 func (r *ContentRepository) GetArticleByID(ctx context.Context, id int64) (*content.Article, error) {
 	var articleModel model.Article
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&articleModel).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, content.ErrArticleNotFound
-		}
-		return nil, err
+	result := r.db.WithContext(ctx).Where("id = ?", id).Limit(1).Find(&articleModel)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, content.ErrArticleNotFound
 	}
 
 	return r.modelToArticle(&articleModel), nil
@@ -320,11 +336,12 @@ func (r *ContentRepository) GetArticleByID(ctx context.Context, id int64) (*cont
 // GetArticleByShortURL 根据短链接获取文章
 func (r *ContentRepository) GetArticleByShortURL(ctx context.Context, shortURL string) (*content.Article, error) {
 	var articleModel model.Article
-	if err := r.db.WithContext(ctx).Where("short_url = ?", shortURL).First(&articleModel).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, content.ErrArticleNotFound
-		}
-		return nil, err
+	result := r.db.WithContext(ctx).Where("short_url = ?", shortURL).Limit(1).Find(&articleModel)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, content.ErrArticleNotFound
 	}
 
 	return r.modelToArticle(&articleModel), nil
@@ -337,31 +354,34 @@ func (r *ContentRepository) UpdateArticle(ctx context.Context, article *content.
 		return err
 	}
 
-	articleModel := &model.Article{
-		ID:          article.ID,
-		Title:       article.Title,
-		Summary:     article.Summary,
-		AISummary:   article.AISummary,
-		LeadIn:      article.LeadIn,
-		TOC:         tocBytes,
-		Content:     article.Content,
-		CategoryID:  article.CategoryID,
-		Cover:       article.Cover,
-		ShortURL:    article.ShortURL,
-		IsPublished: article.IsPublished,
-		IsTop:       article.IsTop,
-		IsHot:       article.IsHot,
-		IsOriginal:  article.IsOriginal,
+	now := time.Now()
+	updates := map[string]any{
+		"title":        article.Title,
+		"summary":      article.Summary,
+		"ai_summary":   article.AISummary,
+		"lead_in":      article.LeadIn,
+		"toc":          tocBytes,
+		"content":      article.Content,
+		"category_id":  article.CategoryID,
+		"cover":        article.Cover,
+		"short_url":    article.ShortURL,
+		"is_published": article.IsPublished,
+		"is_top":       article.IsTop,
+		"is_hot":       article.IsHot,
+		"is_original":  article.IsOriginal,
+		"updated_at":   now,
 	}
-
-	if err := r.db.WithContext(ctx).Save(articleModel).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Model(&model.Article{}).
+		Where("id = ?", article.ID).
+		Updates(updates).Error; err != nil {
 		if isArticleShortURLConstraint(err) {
 			return content.ErrArticleShortURLExists
 		}
 		return err
 	}
 
-	article.UpdatedAt = articleModel.UpdatedAt
+	article.UpdatedAt = now
 	return nil
 }
 
@@ -464,8 +484,8 @@ func (r *ContentRepository) ListPublicArticles(ctx context.Context, options cont
 func (r *ContentRepository) modelToArticle(am *model.Article) *content.Article {
 	toc, err := bytesToToc(am.TOC)
 	if err != nil {
-		// 如果解析失败，使用空的map
-		toc = make(map[string]any)
+		// 如果解析失败，使用空列表
+		toc = []content.TOCNode{}
 	}
 
 	return &content.Article{
@@ -500,20 +520,26 @@ func timeToTimePtr(t time.Time) *time.Time {
 }
 
 // JSONB 转换辅助函数
-func tocToBytes(toc map[string]any) ([]byte, error) {
+func tocToBytes(toc []content.TOCNode) ([]byte, error) {
 	if toc == nil {
-		return []byte("{}"), nil
+		return []byte("[]"), nil
 	}
 	return json.Marshal(toc)
 }
 
-func bytesToToc(data []byte) (map[string]any, error) {
-	var toc map[string]any
-	if len(data) == 0 {
-		return make(map[string]any), nil
+func bytesToToc(data []byte) ([]content.TOCNode, error) {
+	var toc []content.TOCNode
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return []content.TOCNode{}, nil
 	}
-	err := json.Unmarshal(data, &toc)
-	return toc, err
+	if err := json.Unmarshal(trimmed, &toc); err == nil {
+		return toc, nil
+	} else if len(trimmed) > 0 && trimmed[0] == '{' {
+		return []content.TOCNode{}, nil
+	} else {
+		return nil, err
+	}
 }
 
 func mapCategoryToDomain(rec model.ArticleCategory) *content.ArticleCategory {

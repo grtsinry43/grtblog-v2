@@ -7,8 +7,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -17,19 +19,18 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/router"
+	infraevent "github.com/grtsinry43/grtblog-v2/server/internal/infra/event"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
-	"github.com/grtsinry43/grtblog-v2/server/internal/security/rbac"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/turnstile"
 )
 
 // Server wraps Fiber with configuration and dependencies.
 type Server struct {
-	cfg      config.Config
-	db       *gorm.DB
-	app      *fiber.App
-	enforcer *rbac.Enforcer
-	logFile  *os.File
+	cfg     config.Config
+	db      *gorm.DB
+	app     *fiber.App
+	logFile *os.File
 }
 
 // New builds a Fiber server with registered routes and middlewares.
@@ -70,17 +71,27 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 		},
 	})
 
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
+			reqID, _ := c.Locals("requestId").(string)
+			stack := debug.Stack()
+			if reqID != "" {
+				log.Printf("[panic] req=%s %s %s: %v\n%s", reqID, c.Method(), c.Path(), e, stack)
+			} else {
+				log.Printf("[panic] %s %s: %v\n%s", c.Method(), c.Path(), e, stack)
+			}
+		},
+	}))
+
 	jwtManager := jwt.NewManager(cfg.Auth)
-	enforcer, err := rbac.NewEnforcer(cfg.RBAC, db)
-	if err != nil {
-		log.Fatalf("failed to initialize RBAC enforcer: %v", err)
-	}
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.Addr,
 		Password: cfg.Redis.Password,
 		DB:       cfg.Redis.DB,
 	})
 	turnstileClient := turnstile.NewClient(cfg.Turnstile)
+	eventBus := infraevent.NewInMemoryBus()
 	sysCfgRepo := persistence.NewSysConfigRepository(db)
 	sysCfgSvc := sysconfig.NewService(sysCfgRepo, cfg.Turnstile)
 
@@ -101,18 +112,17 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 		DB:         db,
 		Config:     cfg,
 		JWTManager: jwtManager,
-		Enforcer:   enforcer,
 		Turnstile:  turnstileClient,
 		SysConfig:  sysCfgSvc,
+		EventBus:   eventBus,
 		Redis:      redisClient,
 	})
 
 	return &Server{
-		cfg:      cfg,
-		db:       db,
-		app:      app,
-		enforcer: enforcer,
-		logFile:  logFile,
+		cfg:     cfg,
+		db:      db,
+		app:     app,
+		logFile: logFile,
 	}
 }
 
@@ -124,9 +134,6 @@ func (s *Server) Start() error {
 
 // Shutdown gracefully stops Fiber.
 func (s *Server) Shutdown(ctx context.Context) error {
-	if s.enforcer != nil {
-		s.enforcer.Close()
-	}
 	if s.logFile != nil {
 		_ = s.logFile.Close()
 	}

@@ -58,7 +58,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	Audit(c, "auth.register", map[string]any{"username": user.Username, "email": user.Email})
+	Audit(c, "auth.register", map[string]any{
+		"userId":   user.ID,
+		"username": user.Username,
+		"email":    user.Email,
+		"isAdmin":  user.IsAdmin,
+	})
 	return response.SuccessWithMessage(c, contract.ToUserResp(*user), "注册成功")
 }
 
@@ -89,12 +94,14 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	Audit(c, "auth.login", map[string]any{"userId": result.User.ID, "username": result.User.Username})
+	Audit(c, "auth.login", map[string]any{
+		"userId":   result.User.ID,
+		"username": result.User.Username,
+		"isAdmin":  result.User.IsAdmin,
+	})
 	return response.Success(c, contract.LoginResp{
-		Token:       result.Token,
-		User:        contract.ToUserResp(result.User),
-		Roles:       result.Roles,
-		Permissions: result.Claims.Permissions,
+		Token: result.Token,
+		User:  contract.ToUserResp(result.User),
 	})
 }
 
@@ -199,8 +206,17 @@ func (h *AuthHandler) AccessInfo(c *fiber.Ctx) error {
 		return err
 	}
 	return response.Success(c, contract.AccessInfoResp{
-		User:        contract.ToUserResp(info.User),
-		Roles:       info.Roles,
-		Permissions: info.Permissions,
+		User: contract.ToUserResp(info.User),
+	})
+}
+
+// InitState 返回是否需要初始化（无用户时为 false）。
+func (h *AuthHandler) InitState(c *fiber.Ctx) error {
+	initialized, err := h.svc.IsInitialized(c.Context())
+	if err != nil {
+		return response.NewBizErrorWithMsg(response.ServerError, "获取初始化状态失败")
+	}
+	return response.Success(c, contract.InitStateResp{
+		Initialized: initialized,
 	})
 }

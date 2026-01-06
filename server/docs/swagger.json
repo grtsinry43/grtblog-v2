@@ -8,6 +8,228 @@
     },
     "basePath": "/api/v2",
     "paths": {
+        "/admin/categories": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "创建文章分类",
+                "parameters": [
+                    {
+                        "description": "分类参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CategoryCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.CategoryResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/categories/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "更新文章分类",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "分类参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CategoryUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.CategoryResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "删除文章分类",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/columns": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Column"
+                ],
+                "summary": "创建手记分区",
+                "parameters": [
+                    {
+                        "description": "分区参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.ColumnCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.ColumnResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/columns/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Column"
+                ],
+                "summary": "更新手记分区",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分区ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "分区参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.ColumnUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.ColumnResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Column"
+                ],
+                "summary": "删除手记分区",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "分区ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/logs": {
             "get": {
                 "security": [
@@ -50,7 +272,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.OAuthProviderListEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderListEnvelope"
                         }
                     }
                 }
@@ -86,7 +308,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.OAuthProviderEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderEnvelope"
                         }
                     }
                 }
@@ -131,7 +353,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.OAuthProviderEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderEnvelope"
                         }
                     }
                 }
@@ -163,6 +385,117 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handler.AdminGenericMessageEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/tags": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "创建标签",
+                "parameters": [
+                    {
+                        "description": "标签参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.TagCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.TagItemResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/tags/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "更新标签",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "标签ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "标签参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.TagUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.TagItemResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "删除标签",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "标签ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
                         }
                     }
                 }
@@ -558,6 +891,50 @@
                 }
             }
         },
+        "/categories": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Category"
+                ],
+                "summary": "获取文章分类列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contract.CategoryResp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/columns": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Column"
+                ],
+                "summary": "获取手记分区列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contract.ColumnResp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/friend-links/applications": {
             "post": {
                 "security": [
@@ -610,6 +987,28 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/contract.WebsiteInfoListRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/tags": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "获取标签列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contract.TagItemResp"
+                            }
                         }
                     }
                 }
@@ -753,13 +1152,66 @@
         }
     },
     "definitions": {
+        "contract.ArticleListItemResp": {
+            "type": "object",
+            "properties": {
+                "authorName": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "categoryName": {
+                    "type": "string"
+                },
+                "categoryShortUrl": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "integer"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "shortUrl": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "views": {
+                    "type": "integer"
+                }
+            }
+        },
         "contract.ArticleListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/contract.ArticleResp"
+                        "$ref": "#/definitions/contract.ArticleListItemResp"
                     }
                 },
                 "page": {
@@ -831,8 +1283,10 @@
                     "type": "string"
                 },
                 "toc": {
-                    "type": "object",
-                    "additionalProperties": {}
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.TOCNode"
+                    }
                 },
                 "updatedAt": {
                     "type": "string"
@@ -873,12 +1327,95 @@
                 }
             }
         },
+        "contract.CategoryCreateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.CategoryResp": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.CategoryUpdateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.ColumnCreateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.ColumnResp": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.ColumnUpdateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortUrl": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.CreateArticleReq": {
             "type": "object",
             "required": [
                 "content",
                 "isPublished",
-                "summary",
                 "title"
             ],
             "properties": {
@@ -925,6 +1462,24 @@
                 "title": {
                     "type": "string",
                     "maxLength": 255
+                }
+            }
+        },
+        "contract.EmptyRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
                 }
             }
         },
@@ -1039,18 +1594,6 @@
         "contract.LoginResp": {
             "type": "object",
             "properties": {
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "token": {
                     "type": "string"
                 },
@@ -1187,6 +1730,48 @@
                 }
             }
         },
+        "contract.TOCNode": {
+            "type": "object",
+            "properties": {
+                "anchor": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.TOCNode"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.TagCreateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.TagItemResp": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.TagResp": {
             "type": "object",
             "properties": {
@@ -1198,12 +1783,19 @@
                 }
             }
         },
+        "contract.TagUpdateReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.UpdateArticleReq": {
             "type": "object",
             "required": [
                 "content",
                 "shortUrl",
-                "summary",
                 "title"
             ],
             "properties": {
@@ -1246,10 +1838,6 @@
                 "title": {
                     "type": "string",
                     "maxLength": 255
-                },
-                "toc": {
-                    "type": "object",
-                    "additionalProperties": {}
                 }
             }
         },
@@ -1272,6 +1860,9 @@
                     "type": "integer"
                 },
                 "isActive": {
+                    "type": "boolean"
+                },
+                "isAdmin": {
                     "type": "boolean"
                 },
                 "nickname": {
@@ -1374,6 +1965,100 @@
                 }
             }
         },
+        "handler.AdminOAuthProviderEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/handler.AdminOAuthProviderResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.AdminOAuthProviderListEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.AdminOAuthProviderResp"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.AdminOAuthProviderResp": {
+            "type": "object",
+            "properties": {
+                "authorizationEndpoint": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "extraParams": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "issuer": {
+                    "type": "string"
+                },
+                "jwksUri": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "pkceRequired": {
+                    "type": "boolean"
+                },
+                "redirectUriTemplate": {
+                    "type": "string"
+                },
+                "scopes": {
+                    "type": "string"
+                },
+                "tokenEndpoint": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userinfoEndpoint": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.LogLinesEnvelope": {
             "type": "object",
             "properties": {
@@ -1387,49 +2072,6 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.OAuthProviderEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "$ref": "#/definitions/identity.OAuthProvider"
-                },
-                "meta": {
-                    "$ref": "#/definitions/response.Meta"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.OAuthProviderListEnvelope": {
-            "type": "object",
-            "properties": {
-                "bizErr": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "integer"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/identity.OAuthProvider"
                     }
                 },
                 "meta": {
@@ -1481,64 +2123,6 @@
                     "type": "string"
                 },
                 "tokenEndpoint": {
-                    "type": "string"
-                },
-                "userinfoEndpoint": {
-                    "type": "string"
-                }
-            }
-        },
-        "identity.OAuthProvider": {
-            "type": "object",
-            "properties": {
-                "authorizationEndpoint": {
-                    "type": "string"
-                },
-                "clientID": {
-                    "type": "string"
-                },
-                "clientSecret": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "displayName": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "extraParams": {
-                    "type": "object",
-                    "additionalProperties": {}
-                },
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "issuer": {
-                    "type": "string"
-                },
-                "jwksuri": {
-                    "type": "string"
-                },
-                "pkcerequired": {
-                    "type": "boolean"
-                },
-                "providerKey": {
-                    "type": "string"
-                },
-                "redirectURITemplate": {
-                    "type": "string"
-                },
-                "scopes": {
-                    "type": "string"
-                },
-                "tokenEndpoint": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 },
                 "userinfoEndpoint": {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
-	"github.com/grtsinry43/grtblog-v2/server/internal/security/rbac"
 )
 
 const authContextKey = "authUser"
@@ -34,37 +33,15 @@ func RequireAuth(manager *jwt.Manager) fiber.Handler {
 	}
 }
 
-// RequireRoles 要求当前用户拥有任意一个角色。
-func RequireRoles(roles ...string) fiber.Handler {
+// RequireAdmin 要求当前用户是管理员。
+func RequireAdmin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		claims, ok := getClaims(c)
 		if !ok {
 			return response.ErrorFromBiz[any](c, response.NotLogin)
 		}
-		if len(roles) == 0 {
-			return c.Next()
-		}
-		for _, role := range roles {
-			if hasString(claims.Roles, role) {
-				return c.Next()
-			}
-		}
-		return response.ErrorWithMsg[any](c, response.Unauthorized, "缺少必要角色")
-	}
-}
-
-// RequirePermission 借助 Casbin 校验权限字符串。
-func RequirePermission(enforcer *rbac.Enforcer, permission string) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		if permission == "" || enforcer == nil {
-			return c.Next()
-		}
-		claims, ok := getClaims(c)
-		if !ok {
-			return response.ErrorFromBiz[any](c, response.NotLogin)
-		}
-		if !enforcer.HasPermission(claims.Roles, permission) {
-			return response.ErrorWithMsg[any](c, response.Unauthorized, "缺少必要权限: "+permission)
+		if !claims.IsAdmin {
+			return response.ErrorWithMsg[any](c, response.Unauthorized, "需要管理员权限")
 		}
 		return c.Next()
 	}
@@ -82,15 +59,6 @@ func getClaims(c *fiber.Ctx) (*jwt.Claims, bool) {
 	}
 	claims, ok := val.(*jwt.Claims)
 	return claims, ok
-}
-
-func hasString(haystack []string, needle string) bool {
-	for _, v := range haystack {
-		if v == needle {
-			return true
-		}
-	}
-	return false
 }
 
 func extractToken(header string) string {

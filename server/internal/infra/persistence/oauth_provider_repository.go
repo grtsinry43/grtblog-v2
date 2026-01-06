@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/identity"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence/model"
@@ -63,10 +64,28 @@ func (r *OAuthProviderRepository) Create(ctx context.Context, provider *identity
 
 func (r *OAuthProviderRepository) Update(ctx context.Context, provider *identity.OAuthProvider) error {
 	rec := toOAuthModel(*provider)
+	updates := map[string]any{
+		"display_name":           rec.DisplayName,
+		"client_id":              rec.ClientID,
+		"authorization_endpoint": rec.AuthorizationEndpoint,
+		"token_endpoint":         rec.TokenEndpoint,
+		"userinfo_endpoint":      rec.UserinfoEndpoint,
+		"redirect_uri_template":  rec.RedirectURITemplate,
+		"scopes":                 rec.Scopes,
+		"issuer":                 rec.Issuer,
+		"jwks_uri":               rec.JWKSURI,
+		"pkce_required":          rec.PKCERequired,
+		"enabled":                rec.Enabled,
+		"extra_params":           rec.ExtraParams,
+		"updated_at":             time.Now(),
+	}
+	if rec.ClientSecret != "" {
+		updates["client_secret"] = rec.ClientSecret
+	}
 	result := r.db.WithContext(ctx).
 		Model(&model.OAuthProvider{}).
 		Where("provider_key = ?", provider.ProviderKey).
-		Updates(rec)
+		Updates(updates)
 	if result.Error != nil {
 		return result.Error
 	}

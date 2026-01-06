@@ -16,7 +16,6 @@ type CreateArticleCmd struct {
 	IsTop       bool
 	IsHot       bool
 	IsOriginal  bool
-	TOC         map[string]any
 	CreatedAt   *time.Time // 可选：因为可能会有自定义发布时间的需求
 }
 
@@ -35,5 +34,4 @@ type UpdateArticleCmd struct {
 	IsTop       bool
 	IsHot       bool
 	IsOriginal  bool
-	TOC         map[string]any
 }

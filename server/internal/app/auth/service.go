@@ -36,22 +36,20 @@ type ExternalIdentity struct {
 }
 
 type Service struct {
-	users        identity.Repository
-	oauthRepo    identity.OAuthProviderRepository
-	stateStore   StateStore
-	manager      *jwt.Manager
-	defaultRoles []string
-	providers    map[string]ExternalProvider
+	users      identity.Repository
+	oauthRepo  identity.OAuthProviderRepository
+	stateStore StateStore
+	manager    *jwt.Manager
+	providers  map[string]ExternalProvider
 }
 
 func NewService(repo identity.Repository, oauthRepo identity.OAuthProviderRepository, manager *jwt.Manager, stateStore StateStore, authCfg config.AuthConfig) *Service {
 	return &Service{
-		users:        repo,
-		oauthRepo:    oauthRepo,
-		stateStore:   stateStore,
-		manager:      manager,
-		defaultRoles: authCfg.DefaultRoles,
-		providers:    make(map[string]ExternalProvider),
+		users:      repo,
+		oauthRepo:  oauthRepo,
+		stateStore: stateStore,
+		manager:    manager,
+		providers:  make(map[string]ExternalProvider),
 	}
 }
 
@@ -78,7 +76,6 @@ type LoginResult struct {
 	Token  string
 	User   identity.User
 	Claims *jwt.Claims
-	Roles  []string
 }
 
 type UpdateProfileCmd struct {
@@ -95,9 +92,7 @@ type ChangePasswordCmd struct {
 }
 
 type AccessInfo struct {
-	User        identity.User
-	Roles       []string
-	Permissions []string
+	User identity.User
 }
 
 func (s *Service) Register(ctx context.Context, cmd RegisterCmd) (*identity.User, error) {
@@ -116,10 +111,12 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCmd) (*identity.User
 		Password: string(hashed),
 		IsActive: true,
 	}
-	if err := s.users.Create(ctx, user); err != nil {
+	if total, err := s.users.CountUsers(ctx); err != nil {
 		return nil, err
+	} else if total == 0 {
+		user.IsAdmin = true
 	}
-	if err := s.users.AssignRoles(ctx, user.ID, s.defaultRoles); err != nil {
+	if err := s.users.Create(ctx, user); err != nil {
 		return nil, err
 	}
 	user.Password = ""
@@ -137,15 +134,7 @@ func (s *Service) Login(ctx context.Context, cmd LoginCmd) (*LoginResult, error)
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cmd.Password)) != nil {
 		return nil, identity.ErrInvalidCredentials
 	}
-	roles, err := s.users.GetRoles(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-	perms, err := s.users.GetPermissions(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-	token, claims, err := s.manager.Generate(user.ID, roles, perms)
+	token, claims, err := s.manager.Generate(user.ID, user.IsAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +144,6 @@ func (s *Service) Login(ctx context.Context, cmd LoginCmd) (*LoginResult, error)
 		Token:  token,
 		User:   *user,
 		Claims: claims,
-		Roles:  roles,
 	}, nil
 }
 
@@ -231,15 +219,7 @@ func (s *Service) LoginWithProvider(ctx context.Context, cmd OAuthLoginCmd) (*Lo
 		}
 	}
 
-	roles, err := s.users.GetRoles(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-	perms, err := s.users.GetPermissions(ctx, user.ID)
-	if err != nil {
-		return nil, err
-	}
-	jwtToken, claims, err := s.manager.Generate(user.ID, roles, perms)
+	jwtToken, claims, err := s.manager.Generate(user.ID, user.IsAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +229,6 @@ func (s *Service) LoginWithProvider(ctx context.Context, cmd OAuthLoginCmd) (*Lo
 		Token:  jwtToken,
 		User:   *user,
 		Claims: claims,
-		Roles:  roles,
 	}, nil
 }
 
@@ -262,19 +241,9 @@ func (s *Service) AccessInfo(ctx context.Context, claims *jwt.Claims) (*AccessIn
 	if err != nil {
 		return nil, err
 	}
-	roles, err := s.users.GetRoles(ctx, claims.UserID)
-	if err != nil {
-		return nil, err
-	}
-	perms, err := s.users.GetPermissions(ctx, claims.UserID)
-	if err != nil {
-		return nil, err
-	}
 	user.Password = ""
 	return &AccessInfo{
-		User:        *user,
-		Roles:       roles,
-		Permissions: perms,
+		User: *user,
 	}, nil
 }
 
@@ -316,6 +285,15 @@ func (s *Service) ListOAuthBindings(ctx context.Context, userID int64) ([]identi
 		return nil, identity.ErrInvalidCredentials
 	}
 	return s.users.ListOAuthBindings(ctx, userID)
+}
+
+// IsInitialized 用于判断是否已完成初始化（存在至少一个用户）。
+func (s *Service) IsInitialized(ctx context.Context) (bool, error) {
+	total, err := s.users.CountUsers(ctx)
+	if err != nil {
+		return false, err
+	}
+	return total > 0, nil
 }
 
 func firstNonEmpty(vals ...string) string {
@@ -469,7 +447,7 @@ func firstString(raw map[string]any, keys ...string) string {
 	return ""
 }
 
-// registerOAuthUser 根据外部信息注册本地用户并赋默认角色。
+// registerOAuthUser 根据外部信息注册本地用户。
 func (s *Service) registerOAuthUser(ctx context.Context, ext *ExternalIdentity) (*identity.User, error) {
 	username := firstNonEmpty(ext.Username, ext.Email, ext.Provider+"_"+ext.ProviderID)
 	user := &identity.User{
@@ -479,10 +457,12 @@ func (s *Service) registerOAuthUser(ctx context.Context, ext *ExternalIdentity) 
 		Avatar:   ext.Avatar,
 		IsActive: true,
 	}
-	if err := s.users.Create(ctx, user); err != nil {
+	if total, err := s.users.CountUsers(ctx); err != nil {
 		return nil, err
+	} else if total == 0 {
+		user.IsAdmin = true
 	}
-	if err := s.users.AssignRoles(ctx, user.ID, s.defaultRoles); err != nil {
+	if err := s.users.Create(ctx, user); err != nil {
 		return nil, err
 	}
 	return user, nil

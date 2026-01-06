@@ -2,53 +2,47 @@ package article
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"strings"
 	"time"
 
+	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 )
 
 type Service struct {
-	repo content.Repository
+	repo   content.Repository
+	events appEvent.Bus
 }
 
-func NewService(repo content.Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo content.Repository, events appEvent.Bus) *Service {
+	if events == nil {
+		events = appEvent.NopBus{}
+	}
+	return &Service{repo: repo, events: events}
 }
 
 // CreateArticle 创建文章
 func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateArticleCmd) (*content.Article, error) {
-	// 生成短链接如果未提供
 	shortURL := ""
 	if cmd.ShortURL != nil {
 		shortURL = strings.TrimSpace(*cmd.ShortURL)
 	}
 	if shortURL == "" {
-		for i := 0; i < 5; i++ {
-			candidate := s.generateShortURL()
-			_, err := s.repo.GetArticleByShortURL(ctx, candidate)
-			if err != nil {
-				if errors.Is(err, content.ErrArticleNotFound) {
-					shortURL = candidate
-					break
-				}
-				return nil, err
-			}
-		}
-		if shortURL == "" {
-			return nil, content.ErrArticleShortURLExists
-		}
-	} else {
-		existing, err := s.repo.GetArticleByShortURL(ctx, shortURL)
-		if err != nil && !errors.Is(err, content.ErrArticleNotFound) {
+		shortURL = generateShortURLFromTitle(cmd.Title)
+	}
+	shortURL, err := s.ensureShortURLAvailable(ctx, shortURL)
+	if err != nil {
+		return nil, err
+	}
+
+	if cmd.CategoryID != nil {
+		if _, err := s.repo.GetCategoryByID(ctx, *cmd.CategoryID); err != nil {
 			return nil, err
 		}
-		if err == nil && existing != nil {
-			return nil, content.ErrArticleShortURLExists
-		}
+	}
+	if err := s.ensureTagsExist(ctx, cmd.TagIDs); err != nil {
+		return nil, err
 	}
 
 	// 设置创建时间
@@ -57,15 +51,12 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 		createdAt = *cmd.CreatedAt
 	}
 
-	// 处理 TOC
-	toc := cmd.TOC
-	if toc == nil {
-		toc = make(map[string]any)
-	}
+	toc := generateTOC(cmd.Content)
+	summary := buildSummary(cmd.Summary, cmd.Content)
 
 	article := &content.Article{
 		Title:       cmd.Title,
-		Summary:     cmd.Summary,
+		Summary:     summary,
 		AISummary:   nil, // 后续可以添加 AI 摘要功能
 		LeadIn:      cmd.LeadIn,
 		TOC:         toc,
@@ -92,6 +83,25 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 		}
 	}
 
+	now := time.Now()
+	_ = s.events.Publish(ctx, ArticleCreated{
+		ID:        article.ID,
+		AuthorID:  article.AuthorID,
+		Title:     article.Title,
+		ShortURL:  article.ShortURL,
+		Published: article.IsPublished,
+		At:        now,
+	})
+	if article.IsPublished {
+		_ = s.events.Publish(ctx, ArticlePublished{
+			ID:       article.ID,
+			AuthorID: article.AuthorID,
+			Title:    article.Title,
+			ShortURL: article.ShortURL,
+			At:       now,
+		})
+	}
+
 	return article, nil
 }
 
@@ -102,31 +112,39 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 	if err != nil {
 		return nil, err
 	}
+	prevPublished := existing.IsPublished
 
-	// 处理 TOC
-	toc := cmd.TOC
-	if toc == nil {
-		toc = make(map[string]any)
+	if cmd.CategoryID != nil {
+		if _, err := s.repo.GetCategoryByID(ctx, *cmd.CategoryID); err != nil {
+			return nil, err
+		}
 	}
+	if err := s.ensureTagsExist(ctx, cmd.TagIDs); err != nil {
+		return nil, err
+	}
+
+	toc := generateTOC(cmd.Content)
+	summary := buildSummary(cmd.Summary, cmd.Content)
 
 	// 更新字段
 	existing.Title = cmd.Title
-	existing.Summary = cmd.Summary
+	existing.Summary = summary
 	existing.LeadIn = cmd.LeadIn
 	existing.TOC = toc
 	existing.Content = cmd.Content
 	existing.Cover = cmd.Cover
 	existing.CategoryID = cmd.CategoryID
-	if cmd.ShortURL != "" && cmd.ShortURL != existing.ShortURL {
-		other, err := s.repo.GetArticleByShortURL(ctx, cmd.ShortURL)
-		if err != nil && !errors.Is(err, content.ErrArticleNotFound) {
+	shortURL := strings.TrimSpace(cmd.ShortURL)
+	if shortURL == "" {
+		shortURL = existing.ShortURL
+	}
+	if shortURL != existing.ShortURL {
+		shortURL, err = s.ensureShortURLAvailable(ctx, shortURL)
+		if err != nil {
 			return nil, err
 		}
-		if err == nil && other != nil && other.ID != existing.ID {
-			return nil, content.ErrArticleShortURLExists
-		}
 	}
-	existing.ShortURL = cmd.ShortURL
+	existing.ShortURL = shortURL
 	existing.IsPublished = cmd.IsPublished
 	existing.IsTop = cmd.IsTop
 	existing.IsHot = cmd.IsHot
@@ -139,6 +157,34 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 	// 同步标签
 	if err := s.repo.SyncTagsToArticle(ctx, existing.ID, cmd.TagIDs); err != nil {
 		return nil, err
+	}
+
+	now := time.Now()
+	_ = s.events.Publish(ctx, ArticleUpdated{
+		ID:        existing.ID,
+		AuthorID:  existing.AuthorID,
+		Title:     existing.Title,
+		ShortURL:  existing.ShortURL,
+		Published: existing.IsPublished,
+		At:        now,
+	})
+	if !prevPublished && existing.IsPublished {
+		_ = s.events.Publish(ctx, ArticlePublished{
+			ID:       existing.ID,
+			AuthorID: existing.AuthorID,
+			Title:    existing.Title,
+			ShortURL: existing.ShortURL,
+			At:       now,
+		})
+	}
+	if prevPublished && !existing.IsPublished {
+		_ = s.events.Publish(ctx, ArticleUnpublished{
+			ID:       existing.ID,
+			AuthorID: existing.AuthorID,
+			Title:    existing.Title,
+			ShortURL: existing.ShortURL,
+			At:       now,
+		})
 	}
 
 	return existing, nil
@@ -169,7 +215,21 @@ func (s *Service) ListArticles(ctx context.Context, options content.ArticleListO
 
 // DeleteArticle 删除文章
 func (s *Service) DeleteArticle(ctx context.Context, id int64) error {
-	return s.repo.DeleteArticle(ctx, id)
+	article, err := s.repo.GetArticleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err := s.repo.DeleteArticle(ctx, id); err != nil {
+		return err
+	}
+	_ = s.events.Publish(ctx, ArticleDeleted{
+		ID:       article.ID,
+		AuthorID: article.AuthorID,
+		Title:    article.Title,
+		ShortURL: article.ShortURL,
+		At:       time.Now(),
+	})
+	return nil
 }
 
 // GetArticleWithTags 获取文章及其标签
@@ -198,8 +258,53 @@ func (s *Service) GetArticleTags(ctx context.Context, articleID int64) ([]*conte
 }
 
 // generateShortURL 生成短链接
-func (s *Service) generateShortURL() string {
-	bytes := make([]byte, 4)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
+func (s *Service) ensureShortURLAvailable(ctx context.Context, shortURL string) (string, error) {
+	shortURL = strings.TrimSpace(shortURL)
+	if shortURL == "" {
+		for i := 0; i < 5; i++ {
+			candidate := generateRandomShortURL()
+			_, err := s.repo.GetArticleByShortURL(ctx, candidate)
+			if err != nil {
+				if errors.Is(err, content.ErrArticleNotFound) {
+					return candidate, nil
+				}
+				return "", err
+			}
+		}
+		return "", content.ErrArticleShortURLExists
+	}
+
+	existing, err := s.repo.GetArticleByShortURL(ctx, shortURL)
+	if err != nil && !errors.Is(err, content.ErrArticleNotFound) {
+		return "", err
+	}
+	if err == nil && existing != nil {
+		return "", content.ErrArticleShortURLExists
+	}
+	return shortURL, nil
+}
+
+func (s *Service) ensureTagsExist(ctx context.Context, tagIDs []int64) error {
+	if len(tagIDs) == 0 {
+		return nil
+	}
+	unique := make(map[int64]struct{}, len(tagIDs))
+	for _, id := range tagIDs {
+		if id <= 0 {
+			return content.ErrTagNotFound
+		}
+		unique[id] = struct{}{}
+	}
+	ids := make([]int64, 0, len(unique))
+	for id := range unique {
+		ids = append(ids, id)
+	}
+	ok, err := s.repo.TagIDsExist(ctx, ids)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return content.ErrTagNotFound
+	}
+	return nil
 }

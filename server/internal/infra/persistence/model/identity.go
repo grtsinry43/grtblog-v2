@@ -14,44 +14,13 @@ type User struct {
 	Password  string         `gorm:"column:password;size:60"`
 	Avatar    string         `gorm:"column:avatar;size:255"`
 	IsActive  bool           `gorm:"column:is_active;default:true"`
+	IsAdmin   bool           `gorm:"column:is_admin;default:false"`
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (User) TableName() string { return "app_user" }
-
-type Role struct {
-	ID        int64     `gorm:"column:id;primaryKey"`
-	RoleName  string    `gorm:"column:role_name;size:100;not null"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
-	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
-}
-
-func (Role) TableName() string { return "role" }
-
-type Permission struct {
-	ID             int64     `gorm:"column:id;primaryKey"`
-	PermissionName string    `gorm:"column:permission_name;size:100;not null"`
-	CreatedAt      time.Time `gorm:"column:created_at;autoCreateTime"`
-	UpdatedAt      time.Time `gorm:"column:updated_at;autoUpdateTime"`
-}
-
-func (Permission) TableName() string { return "permission" }
-
-type UserRole struct {
-	UserID int64 `gorm:"column:user_id;primaryKey"`
-	RoleID int64 `gorm:"column:role_id;primaryKey"`
-}
-
-func (UserRole) TableName() string { return "user_role" }
-
-type RolePermission struct {
-	RoleID       int64 `gorm:"column:role_id;primaryKey"`
-	PermissionID int64 `gorm:"column:permission_id;primaryKey"`
-}
-
-func (RolePermission) TableName() string { return "role_permission" }
 
 type AdminToken struct {
 	ID          int64     `gorm:"column:id;primaryKey"`

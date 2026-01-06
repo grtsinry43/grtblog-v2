@@ -27,6 +27,7 @@ type Repository interface {
 	ListTags(ctx context.Context) ([]*Tag, error)
 	UpdateTag(ctx context.Context, tag *Tag) error
 	DeleteTag(ctx context.Context, id int64) error
+	TagIDsExist(ctx context.Context, ids []int64) (bool, error)
 
 	// ArticleTag 关联操作
 	AddTagsToArticle(ctx context.Context, articleID int64, tagIDs []int64) error

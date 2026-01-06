@@ -11,6 +11,12 @@ type ArticleCategory struct {
 	DeletedAt *time.Time
 }
 
+type TOCNode struct {
+	Name     string    `json:"name"`
+	Anchor   string    `json:"anchor"`
+	Children []TOCNode `json:"children"`
+}
+
 type MomentColumn struct {
 	ID        int64
 	Name      string
@@ -46,7 +52,7 @@ type Article struct {
 	Summary     string
 	AISummary   *string
 	LeadIn      *string
-	TOC         map[string]any
+	TOC         []TOCNode
 	Content     string
 	AuthorID    int64
 	Cover       *string
@@ -77,7 +83,7 @@ type Moment struct {
 	AISummary   *string
 	Content     string
 	AuthorID    int64
-	TOC         map[string]any
+	TOC         []TOCNode
 	Image       *string
 	ColumnID    *int64
 	CommentID   *int64
@@ -107,7 +113,7 @@ type Page struct {
 	ShortURL    string
 	IsEnabled   bool
 	IsBuiltin   bool
-	TOC         map[string]any
+	TOC         []TOCNode
 	Content     string
 	CommentID   *int64
 	CreatedAt   time.Time

@@ -2,4 +2,4 @@ package social
 
 import "errors"
 
-var ErrFriendLinkApplicationNotFound = errors.New("friend link application not found")
+var ErrFriendLinkApplicationNotFound = errors.New("友链申请不存在")

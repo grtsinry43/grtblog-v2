@@ -61,3 +61,13 @@ func (r *GormRepository[T]) DeleteByID(ctx context.Context, id any) error {
 	var entity T
 	return r.db.WithContext(ctx).Delete(&entity, id).Error
 }
+
+// DeleteWhere 根据条件删除记录，返回影响行数。
+func (r *GormRepository[T]) DeleteWhere(ctx context.Context, query any, args ...any) (int64, error) {
+	var entity T
+	result := r.db.WithContext(ctx).Where(query, args...).Delete(&entity)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
+}

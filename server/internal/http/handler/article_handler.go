@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/jinzhu/copier"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
+	"github.com/grtsinry43/grtblog-v2/server/internal/domain/identity"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/article"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
@@ -17,11 +19,17 @@ import (
 )
 
 type ArticleHandler struct {
-	svc *article.Service
+	svc         *article.Service
+	contentRepo content.Repository
+	userRepo    identity.Repository
 }
 
-func NewArticleHandler(svc *article.Service) *ArticleHandler {
-	return &ArticleHandler{svc: svc}
+func NewArticleHandler(svc *article.Service, contentRepo content.Repository, userRepo identity.Repository) *ArticleHandler {
+	return &ArticleHandler{
+		svc:         svc,
+		contentRepo: contentRepo,
+		userRepo:    userRepo,
+	}
 }
 
 // CreateArticle godoc
@@ -55,6 +63,12 @@ func (h *ArticleHandler) CreateArticle(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, content.ErrArticleShortURLExists) {
 			return response.NewBizErrorWithMsg(response.ParamsError, "短链接已存在")
+		}
+		if errors.Is(err, content.ErrCategoryNotFound) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "分类不存在")
+		}
+		if errors.Is(err, content.ErrTagNotFound) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "标签不存在")
 		}
 		return err
 	}
@@ -110,6 +124,12 @@ func (h *ArticleHandler) UpdateArticle(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, content.ErrArticleShortURLExists) {
 			return response.NewBizErrorWithMsg(response.ParamsError, "短链接已存在")
+		}
+		if errors.Is(err, content.ErrCategoryNotFound) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "分类不存在")
+		}
+		if errors.Is(err, content.ErrTagNotFound) {
+			return response.NewBizErrorWithMsg(response.ParamsError, "标签不存在")
 		}
 		return err
 	}
@@ -236,9 +256,9 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 	}
 
 	// 转换为响应DTO
-	articleResponses := make([]contract.ArticleResp, len(articles))
+	articleResponses := make([]contract.ArticleListItemResp, len(articles))
 	for i, art := range articles {
-		resp, err := h.toArticleResp(c.Context(), art)
+		resp, err := h.toArticleListItemResp(c.Context(), art)
 		if err != nil {
 			return err
 		}
@@ -302,6 +322,7 @@ func (h *ArticleHandler) toArticleResp(ctx context.Context, article *content.Art
 	if err := copier.Copy(&resp, article); err != nil {
 		return nil, err
 	}
+	resp.TOC = mapTOCNodes(article.TOC)
 
 	if len(tags) > 0 {
 		resp.Tags = make([]contract.TagResp, len(tags))
@@ -321,4 +342,86 @@ func (h *ArticleHandler) toArticleResp(ctx context.Context, article *content.Art
 	}
 
 	return &resp, nil
+}
+
+func (h *ArticleHandler) toArticleListItemResp(ctx context.Context, article *content.Article) (*contract.ArticleListItemResp, error) {
+	tags, err := h.svc.GetArticleTags(ctx, article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := h.svc.GetArticleMetrics(ctx, article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := contract.ArticleListItemResp{
+		ID:        article.ID,
+		Title:     article.Title,
+		ShortURL:  article.ShortURL,
+		Summary:   article.Summary,
+		IsTop:     article.IsTop,
+		CreatedAt: article.CreatedAt,
+		UpdatedAt: article.UpdatedAt,
+	}
+
+	if article.Cover != nil {
+		resp.Cover = *article.Cover
+	}
+
+	if metrics != nil {
+		resp.Views = metrics.Views
+		resp.Likes = metrics.Likes
+		resp.Comments = metrics.Comments
+	}
+
+	if len(tags) > 0 {
+		tagNames := make([]string, len(tags))
+		for i, tag := range tags {
+			tagNames[i] = tag.Name
+		}
+		resp.Tags = strings.Join(tagNames, ",")
+	}
+
+	if article.CategoryID != nil {
+		category, err := h.contentRepo.GetCategoryByID(ctx, *article.CategoryID)
+		if err != nil {
+			if !errors.Is(err, content.ErrCategoryNotFound) {
+				return nil, err
+			}
+		} else if category != nil {
+			resp.CategoryName = category.Name
+			if category.ShortURL != nil {
+				resp.CategoryShortURL = *category.ShortURL
+			}
+		}
+	}
+
+	if h.userRepo != nil {
+		user, err := h.userRepo.FindByID(ctx, article.AuthorID)
+		if err != nil {
+			if !errors.Is(err, identity.ErrUserNotFound) {
+				return nil, err
+			}
+		} else if user != nil {
+			resp.AuthorName = user.Nickname
+			resp.Avatar = user.Avatar
+		}
+	}
+
+	return &resp, nil
+}
+func mapTOCNodes(nodes []content.TOCNode) []contract.TOCNode {
+	if len(nodes) == 0 {
+		return nil
+	}
+	result := make([]contract.TOCNode, len(nodes))
+	for i, node := range nodes {
+		result[i] = contract.TOCNode{
+			Name:     node.Name,
+			Anchor:   node.Anchor,
+			Children: mapTOCNodes(node.Children),
+		}
+	}
+	return result
 }

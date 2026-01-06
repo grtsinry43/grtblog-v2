@@ -17,6 +17,7 @@ type UserResp struct {
 	Email     string  `json:"email"`
 	Avatar    string  `json:"avatar"`
 	IsActive  bool    `json:"isActive"`
+	IsAdmin   bool    `json:"isAdmin"`
 	CreatedAt string  `json:"createdAt"`
 	UpdatedAt string  `json:"updatedAt"`
 	DeletedAt *string `json:"deletedAt,omitempty"`
@@ -38,17 +39,18 @@ func ToUserResp(u identity.User) UserResp {
 
 // LoginResp 供登录接口返回数据使用。
 type LoginResp struct {
-	Token       string   `json:"token"`
-	User        UserResp `json:"user"`
-	Roles       []string `json:"roles"`
-	Permissions []string `json:"permissions"`
+	Token string   `json:"token"`
+	User  UserResp `json:"user"`
 }
 
 // AccessInfoResp 返回当前登录用户的权限信息。
 type AccessInfoResp struct {
-	User        UserResp `json:"user"`
-	Roles       []string `json:"roles"`
-	Permissions []string `json:"permissions"`
+	User UserResp `json:"user"`
+}
+
+// InitStateResp 返回是否需要初始化。
+type InitStateResp struct {
+	Initialized bool `json:"initialized"`
 }
 
 // RegisterRespEnvelope 仅用于 swagger 展示。

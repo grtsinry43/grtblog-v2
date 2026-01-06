@@ -11,6 +11,7 @@ type User struct {
 	Password  string
 	Avatar    string
 	IsActive  bool
+	IsAdmin   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time

@@ -11,16 +11,20 @@ import (
 )
 
 type SysConfigRepository struct {
-	db *gorm.DB
+	db   *gorm.DB
+	repo *GormRepository[model.SysConfig]
 }
 
 func NewSysConfigRepository(db *gorm.DB) *SysConfigRepository {
-	return &SysConfigRepository{db: db}
+	return &SysConfigRepository{
+		db:   db,
+		repo: NewGormRepository[model.SysConfig](db),
+	}
 }
 
 func (r *SysConfigRepository) GetByKey(ctx context.Context, key string) (*config.SysConfig, error) {
-	var rec model.SysConfig
-	if err := r.db.WithContext(ctx).Where("config_key = ?", key).First(&rec).Error; err != nil {
+	rec, err := r.repo.First(ctx, "config_key = ?", key)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, config.ErrSysConfigNotFound
 		}

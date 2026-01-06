@@ -9,14 +9,12 @@ type Repository interface {
 	FindByUsername(ctx context.Context, username string) (*User, error)
 	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByCredential(ctx context.Context, credential string) (*User, error)
-	GetRoles(ctx context.Context, userID int64) ([]string, error)
-	GetPermissions(ctx context.Context, userID int64) ([]string, error)
-	AssignRoles(ctx context.Context, userID int64, roles []string) error
 	UpdateProfile(ctx context.Context, userID int64, nickname, avatar, email string) (*User, error)
 	UpdatePassword(ctx context.Context, userID int64, hashed string) error
 	ListOAuthBindings(ctx context.Context, userID int64) ([]UserOAuthBinding, error)
 	FindByOAuth(ctx context.Context, providerKey, oauthID string) (*User, error)
 	BindOAuth(ctx context.Context, link UserOAuth) error
+	CountUsers(ctx context.Context) (int64, error)
 }
 
 // OAuthProviderRepository 提供 OAuth/OIDC 提供方配置。

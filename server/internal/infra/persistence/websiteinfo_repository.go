@@ -11,16 +11,22 @@ import (
 )
 
 type WebsiteInfoRepository struct {
-	db *gorm.DB
+	db   *gorm.DB
+	repo *GormRepository[model.WebsiteInfo]
 }
 
 func NewWebsiteInfoRepository(db *gorm.DB) *WebsiteInfoRepository {
-	return &WebsiteInfoRepository{db: db}
+	return &WebsiteInfoRepository{
+		db:   db,
+		repo: NewGormRepository[model.WebsiteInfo](db),
+	}
 }
 
 func (r *WebsiteInfoRepository) List(ctx context.Context) ([]config.WebsiteInfo, error) {
-	var records []model.WebsiteInfo
-	if err := r.db.WithContext(ctx).Order("info_key ASC").Find(&records).Error; err != nil {
+	records, err := r.repo.List(ctx, func(db *gorm.DB) *gorm.DB {
+		return db.Order("info_key ASC")
+	})
+	if err != nil {
 		return nil, err
 	}
 	result := make([]config.WebsiteInfo, len(records))
@@ -31,20 +37,20 @@ func (r *WebsiteInfoRepository) List(ctx context.Context) ([]config.WebsiteInfo,
 }
 
 func (r *WebsiteInfoRepository) GetByKey(ctx context.Context, key string) (*config.WebsiteInfo, error) {
-	var rec model.WebsiteInfo
-	if err := r.db.WithContext(ctx).Where("info_key = ?", key).First(&rec).Error; err != nil {
+	rec, err := r.repo.First(ctx, "info_key = ?", key)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, config.ErrWebsiteInfoNotFound
 		}
 		return nil, err
 	}
-	info := mapWebsiteInfoToDomain(rec)
+	info := mapWebsiteInfoToDomain(*rec)
 	return &info, nil
 }
 
 func (r *WebsiteInfoRepository) Create(ctx context.Context, info *config.WebsiteInfo) error {
 	rec := mapWebsiteInfoToModel(*info)
-	if err := r.db.WithContext(ctx).Create(&rec).Error; err != nil {
+	if err := r.repo.Create(ctx, &rec); err != nil {
 		return err
 	}
 	info.ID = rec.ID
@@ -71,11 +77,11 @@ func (r *WebsiteInfoRepository) Update(ctx context.Context, info *config.Website
 }
 
 func (r *WebsiteInfoRepository) Delete(ctx context.Context, key string) error {
-	result := r.db.WithContext(ctx).Where("info_key = ?", key).Delete(&model.WebsiteInfo{})
-	if result.Error != nil {
-		return result.Error
+	affected, err := r.repo.DeleteWhere(ctx, "info_key = ?", key)
+	if err != nil {
+		return err
 	}
-	if result.RowsAffected == 0 {
+	if affected == 0 {
 		return config.ErrWebsiteInfoNotFound
 	}
 	return nil

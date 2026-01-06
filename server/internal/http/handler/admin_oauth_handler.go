@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -73,6 +74,40 @@ type OAuthProviderEnvelope struct {
 	Meta   response.Meta          `json:"meta"`
 }
 
+type AdminOAuthProviderResp struct {
+	Key                   string         `json:"key"`
+	DisplayName           string         `json:"displayName"`
+	ClientID              string         `json:"clientId"`
+	AuthorizationEndpoint string         `json:"authorizationEndpoint"`
+	TokenEndpoint         string         `json:"tokenEndpoint"`
+	UserinfoEndpoint      string         `json:"userinfoEndpoint"`
+	RedirectURITemplate   string         `json:"redirectUriTemplate"`
+	Scopes                string         `json:"scopes"`
+	Issuer                string         `json:"issuer"`
+	JWKSURI               string         `json:"jwksUri"`
+	PKCERequired          bool           `json:"pkceRequired"`
+	Enabled               bool           `json:"enabled"`
+	ExtraParams           map[string]any `json:"extraParams"`
+	CreatedAt             string         `json:"createdAt"`
+	UpdatedAt             string         `json:"updatedAt"`
+}
+
+type AdminOAuthProviderListEnvelope struct {
+	Code   int                      `json:"code"`
+	BizErr string                   `json:"bizErr"`
+	Msg    string                   `json:"msg"`
+	Data   []AdminOAuthProviderResp `json:"data"`
+	Meta   response.Meta            `json:"meta"`
+}
+
+type AdminOAuthProviderEnvelope struct {
+	Code   int                    `json:"code"`
+	BizErr string                 `json:"bizErr"`
+	Msg    string                 `json:"msg"`
+	Data   AdminOAuthProviderResp `json:"data"`
+	Meta   response.Meta          `json:"meta"`
+}
+
 type AdminGenericMessageEnvelope struct {
 	Code   int           `json:"code"`
 	BizErr string        `json:"bizErr"`
@@ -85,7 +120,7 @@ type AdminGenericMessageEnvelope struct {
 // @Summary 列出全部 OAuth Providers
 // @Tags Admin-OAuth
 // @Produce json
-// @Success 200 {object} OAuthProviderListEnvelope
+// @Success 200 {object} AdminOAuthProviderListEnvelope
 // @Security BearerAuth
 // @Router /admin/oauth-providers [get]
 func (h *AdminOAuthHandler) List(c *fiber.Ctx) error {
@@ -93,7 +128,11 @@ func (h *AdminOAuthHandler) List(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return response.Success(c, items)
+	resp := make([]AdminOAuthProviderResp, 0, len(items))
+	for _, item := range items {
+		resp = append(resp, sanitizeAdminProvider(item))
+	}
+	return response.Success(c, resp)
 }
 
 // Create godoc
@@ -102,7 +141,7 @@ func (h *AdminOAuthHandler) List(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param request body OAuthProviderPayload true "provider 配置"
-// @Success 200 {object} OAuthProviderEnvelope
+// @Success 200 {object} AdminOAuthProviderEnvelope
 // @Security BearerAuth
 // @Router /admin/oauth-providers [post]
 func (h *AdminOAuthHandler) Create(c *fiber.Ctx) error {
@@ -118,7 +157,7 @@ func (h *AdminOAuthHandler) Create(c *fiber.Ctx) error {
 		return err
 	}
 	Audit(c, "admin.oauth.create", map[string]any{"key": p.ProviderKey})
-	return response.SuccessWithMessage(c, p, "created")
+	return response.SuccessWithMessage(c, sanitizeAdminProvider(p), "created")
 }
 
 // Update godoc
@@ -128,7 +167,7 @@ func (h *AdminOAuthHandler) Create(c *fiber.Ctx) error {
 // @Produce json
 // @Param key path string true "provider key"
 // @Param request body OAuthProviderPayload true "provider 配置"
-// @Success 200 {object} OAuthProviderEnvelope
+// @Success 200 {object} AdminOAuthProviderEnvelope
 // @Security BearerAuth
 // @Router /admin/oauth-providers/{key} [put]
 func (h *AdminOAuthHandler) Update(c *fiber.Ctx) error {
@@ -149,7 +188,7 @@ func (h *AdminOAuthHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 	Audit(c, "admin.oauth.update", map[string]any{"key": key})
-	return response.SuccessWithMessage(c, p, "updated")
+	return response.SuccessWithMessage(c, sanitizeAdminProvider(p), "updated")
 }
 
 // Delete godoc
@@ -173,4 +212,24 @@ func (h *AdminOAuthHandler) Delete(c *fiber.Ctx) error {
 	}
 	Audit(c, "admin.oauth.delete", map[string]any{"key": key})
 	return response.SuccessWithMessage[any](c, nil, "deleted")
+}
+
+func sanitizeAdminProvider(p identity.OAuthProvider) AdminOAuthProviderResp {
+	return AdminOAuthProviderResp{
+		Key:                   p.ProviderKey,
+		DisplayName:           p.DisplayName,
+		ClientID:              p.ClientID,
+		AuthorizationEndpoint: p.AuthorizationEndpoint,
+		TokenEndpoint:         p.TokenEndpoint,
+		UserinfoEndpoint:      p.UserinfoEndpoint,
+		RedirectURITemplate:   p.RedirectURITemplate,
+		Scopes:                p.Scopes,
+		Issuer:                p.Issuer,
+		JWKSURI:               p.JWKSURI,
+		PKCERequired:          p.PKCERequired,
+		Enabled:               p.Enabled,
+		ExtraParams:           p.ExtraParams,
+		CreatedAt:             p.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:             p.UpdatedAt.Format(time.RFC3339),
+	}
 }
