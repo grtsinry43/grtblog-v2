@@ -1,9 +1,12 @@
-export const load = async ({ params, fetch }) => {
-    const { id } = params;
-    const shortUrl = id; // Assuming `id` in the route actually corresponds to `shortUrl`
-    const response = await fetch(`http://localhost:8080/article/${shortUrl}`);
-    const result = await response.json();
-    const article = result.data;
+export const load = async ({ params }) => {
+    // MOCK DATA FOR DEMO
+    // In a real app, this would fetch from the backend
+    const article = {
+        title: "Deep Dive into Svelte 5 Runes",
+        content: "This is a demo article content to verify the navbar title functionality...",
+        date: "2024-03-20"
+    };
+
     return {
         article
     };

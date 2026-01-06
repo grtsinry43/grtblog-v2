@@ -1,3 +1,126 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* Fonts */
+    --font-sans: "Inter", "Noto Sans SC", -apple-system, sans-serif;
+    --font-serif: "Noto Serif SC", "Georgia", serif;
+    --font-mono: "JetBrains Mono", monospace;
+
+    /* Colors: Ink (Warm Grayscale) */
+    --color-ink-50: #fafaf9;
+    --color-ink-100: #f5f5f4;
+    --color-ink-200: #e7e5e4;
+    --color-ink-300: #d6d3d1;
+    --color-ink-400: #a8a29e;
+    --color-ink-500: #78716c;
+    --color-ink-600: #57534e;
+    --color-ink-700: #44403c;
+    --color-ink-800: #292524;
+    --color-ink-900: #1c1917;
+    --color-ink-950: #0c0a09;
+
+    /* Colors: Jade (Primary Brand) */
+    --color-jade-50: #f0fdfa;
+    --color-jade-100: #ccfbf1;
+    --color-jade-200: #99f6e4;
+    --color-jade-300: #5eead4;
+    --color-jade-400: #2dd4bf;
+    --color-jade-500: #14b8a6;
+    --color-jade-600: #0d9488;
+    --color-jade-700: #0f766e;
+    --color-jade-800: #115e59;
+    --color-jade-900: #134e4a;
+    --color-jade-950: #042f2e;
+
+    /* Colors: Functional */
+    --color-cinnabar-50: #fef2f2;
+    --color-cinnabar-100: #fee2e2;
+    --color-cinnabar-500: #ef4444;
+    --color-cinnabar-600: #dc2626;
+    --color-cinnabar-900: #7f1d1d;
+
+    --color-amber-50: #fffbeb;
+    --color-amber-100: #fef3c7;
+    --color-amber-500: #f59e0b;
+    --color-amber-600: #d97706;
+    --color-amber-900: #78350f;
+
+    --color-bamboo-50: #f0fdf4;
+    --color-bamboo-100: #dcfce7;
+    --color-bamboo-500: #22c55e;
+    --color-bamboo-600: #16a34a;
+    --color-bamboo-900: #14532d;
+
+    /* Shadows */
+    --shadow-glass: 0 8px 32px 0 rgba(100, 100, 100, 0.05);
+    --shadow-glass-dark: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --shadow-subtle: 0 2px 20px -4px rgba(28, 25, 23, 0.04);
+    --shadow-float: 0 20px 50px -10px rgba(28, 25, 23, 0.1);
+    --shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 30px -5px rgba(45, 212, 191, 0.2);
+
+    /* Border Radius */
+    --radius-4xl: 2rem;
+    --radius-5xl: 2.5rem;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--color-ink-50);
+    color: var(--color-ink-900);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[class~="dark"] body {
+    background-color: var(--color-ink-950);
+    color: var(--color-ink-200);
+}
+
+/* Selection */
+::selection {
+    background: rgba(45, 212, 191, 0.15);
+    color: var(--color-jade-800);
+}
+
+:root[class~="dark"] ::selection {
+    background: rgba(45, 212, 191, 0.25);
+    color: var(--color-jade-100);
+}
+
+/* Utilities */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Noise Texture */
+.bg-noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+:root[class~="dark"] .bg-noise {
+    opacity: 0.035;
+    filter: invert(1) sepia(10%) hue-rotate(10deg);
+}
+
+/* Global resets for polish */
+button {
+    cursor: pointer;
+}
