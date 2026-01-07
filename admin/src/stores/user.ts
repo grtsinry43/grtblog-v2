@@ -18,6 +18,7 @@ interface User {
   avatar: string
   email: string
   id: number | null
+  isAdmin: boolean
   nickname: string
   roles: string[]
   permissions: string[]
@@ -30,6 +31,7 @@ const createEmptyUser = (): User => ({
   avatar: '',
   email: '',
   id: null,
+  isAdmin: false,
   nickname: '',
   roles: [],
   permissions: [],
@@ -79,6 +81,7 @@ export const useUserStore = defineStore('userStore', () => {
 
   function setAuth(session: { token: string; user: Partial<User> }) {
     token.value = session.token
+    const payload = payloadFromToken(session.token)
     const roles = session.user.roles?.length ? session.user.roles : rolesFromToken(session.token)
     const permissions = session.user.permissions?.length
       ? session.user.permissions
@@ -86,6 +89,7 @@ export const useUserStore = defineStore('userStore', () => {
     user.value = {
       ...createEmptyUser(),
       ...session.user,
+      isAdmin: session.user.isAdmin ?? payload?.isAdmin === true,
       roles,
       permissions,
       createdAt: session.user.createdAt || '',
@@ -94,8 +98,8 @@ export const useUserStore = defineStore('userStore', () => {
   }
 
   async function resolveMenuRoute() {
-    const roles = user.value.roles.length ? user.value.roles : rolesFromToken(token.value)
-    const isAdmin = roles.includes('admin')
+    const payload = payloadFromToken(token.value)
+    const isAdmin = user.value.isAdmin || payload?.isAdmin === true
 
     const res = await new Promise<MenuMixedOptions[]>((resolve) => {
       if (isAdmin) {

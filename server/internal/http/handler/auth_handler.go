@@ -210,6 +210,28 @@ func (h *AuthHandler) AccessInfo(c *fiber.Ctx) error {
 	})
 }
 
+// Profile godoc
+// @Summary 获取当前用户信息
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} contract.UserRespEnvelope
+// @Security BearerAuth
+// @Router /auth/profile [get]
+func (h *AuthHandler) Profile(c *fiber.Ctx) error {
+	claims, ok := middleware.GetClaims(c)
+	if !ok {
+		return response.ErrorFromBiz[any](c, response.NotLogin)
+	}
+	user, err := h.svc.CurrentUser(c.Context(), claims.UserID)
+	if err != nil {
+		if errors.Is(err, identity.ErrUserNotFound) {
+			return response.NewBizErrorWithMsg(response.NotFound, "用户不存在")
+		}
+		return err
+	}
+	return response.Success(c, contract.ToUserResp(*user))
+}
+
 // InitState 返回是否需要初始化（无用户时为 false）。
 func (h *AuthHandler) InitState(c *fiber.Ctx) error {
 	initialized, err := h.svc.IsInitialized(c.Context())

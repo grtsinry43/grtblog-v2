@@ -18,6 +18,7 @@ func registerUserRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *
 	authSvc := auth.NewService(identityRepo, oauthRepo, deps.JWTManager, nil, deps.Config.Auth)
 	authHandler := handler.NewAuthHandler(authSvc, nil, nil)
 	authenticated.Get("/auth/access-info", authHandler.AccessInfo)
+	authenticated.Get("/auth/profile", authHandler.Profile)
 	authenticated.Put("/auth/profile", authHandler.UpdateProfile)
 	authenticated.Put("/auth/password", authHandler.ChangePassword)
 	authenticated.Get("/auth/oauth-bindings", authHandler.ListOAuthBindings)

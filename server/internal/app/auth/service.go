@@ -262,6 +262,19 @@ func (s *Service) UpdateProfile(ctx context.Context, cmd UpdateProfileCmd) (*ide
 	return updated, nil
 }
 
+// CurrentUser 返回当前用户信息。
+func (s *Service) CurrentUser(ctx context.Context, userID int64) (*identity.User, error) {
+	if userID == 0 {
+		return nil, identity.ErrInvalidCredentials
+	}
+	user, err := s.users.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = ""
+	return user, nil
+}
+
 func (s *Service) ChangePassword(ctx context.Context, cmd ChangePasswordCmd) error {
 	if cmd.UserID == 0 || cmd.NewPassword == "" {
 		return identity.ErrInvalidCredentials

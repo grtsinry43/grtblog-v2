@@ -14,6 +14,18 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     component: 'dashboard/index',
   },
   {
+    path: 'articles',
+    name: 'articles',
+    icon: 'icon-[mage--dashboard-chart]',
+    label: '文章',
+    meta: {
+      componentName: 'Articles',
+      pinned: true,
+      showTab: true,
+    },
+    component: 'articles/index',
+  },
+  {
     path: 'user-center',
     name: 'userCenter',
     icon: 'iconify ph--user-circle',

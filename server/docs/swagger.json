@@ -765,6 +765,30 @@
                 }
             }
         },
+        "/auth/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "获取当前用户信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.UserRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/providers": {
             "get": {
                 "produces": [
@@ -1179,6 +1203,12 @@
                 "id": {
                     "type": "integer"
                 },
+                "isHot": {
+                    "type": "boolean"
+                },
+                "isOriginal": {
+                    "type": "boolean"
+                },
                 "isTop": {
                     "type": "boolean"
                 },
@@ -1192,7 +1222,10 @@
                     "type": "string"
                 },
                 "tags": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "title": {
                     "type": "string"
@@ -1872,6 +1905,26 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.UserRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.UserResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
                     "type": "string"
                 }
             }

@@ -23,6 +23,15 @@ type UserResp struct {
 	DeletedAt *string `json:"deletedAt,omitempty"`
 }
 
+// UserRespEnvelope 仅用于 swagger 展示。
+type UserRespEnvelope struct {
+	Code   int           `json:"code"`
+	BizErr string        `json:"bizErr"`
+	Msg    string        `json:"msg"`
+	Data   UserResp      `json:"data"`
+	Meta   response.Meta `json:"meta"`
+}
+
 func ToUserResp(u identity.User) UserResp {
 	var deleted *string
 	if u.DeletedAt != nil {
