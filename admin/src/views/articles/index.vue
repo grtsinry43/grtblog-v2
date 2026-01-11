@@ -2,11 +2,66 @@
 import { ref } from 'vue'
 
 import MarkdownEditor from '@/components/markdown-editor/MarkdownEditor.vue'
-const value = ref('# Hello Markdown Editor')
+import MarkdownPreview from '@/components/markdown-editor/MarkdownPreview.vue'
+
+const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
 </script>
 
 <template>
-  <markdown-editor :model-value="value" :is-dark="false" />
+  <div class="editor-container">
+    <div class="pane editor-pane">
+      <markdown-editor
+        v-model="value"
+        class="h-full"
+      />
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pane preview-pane">
+      <markdown-preview :source="value" />
+    </div>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.editor-container {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pane {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+.preview-pane {
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .editor-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1px 1fr;
+  }
+}
+
+.pane::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pane::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.4);
+  border-radius: 4px;
+}
+.pane::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.6);
+}
+</style>

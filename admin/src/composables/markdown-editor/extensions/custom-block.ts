@@ -22,12 +22,12 @@ function buildDecorations(view: EditorView): DecorationSet {
     const line = doc.line(i)
     const text = line.text.trim() // 去除首尾空格方便判断
 
-    // 检查是否是开始标记 ::: name
+    // 检查是否是开始标记 ::: name 或 ::: component name
     if (text.startsWith(':::')) {
-      // 提取组件名，处理 ":::gallery" 或 "::: gallery"
-      // 去掉前面的 ":::"，再去掉可能的空格，取第一个单词
+      // 提取组件名，处理 ":::gallery" / "::: gallery" / "::: component gallery"
       const content = line.text.trim().slice(3).trim()
-      const componentName = content.split(' ')[0]
+      const parts = content.split(/\s+/)
+      const componentName = parts[0] === 'component' ? parts[1] : parts[0]
 
       if (VALID_COMPONENTS.includes(componentName)) {
         // 这是一个合法的开始标记

@@ -1,26 +1,24 @@
 import { autocompletion } from '@codemirror/autocomplete'
 import { markdown } from '@codemirror/lang-markdown'
 import { EditorState, Compartment } from '@codemirror/state'
-import { oneDark } from '@codemirror/theme-one-dark' // 或者你自己的主题
 import { EditorView, basicSetup } from 'codemirror'
-import { type Ref, shallowRef, onMounted, onUnmounted, watchEffect } from 'vue'
+import { type Ref, shallowRef, onMounted, onUnmounted } from 'vue'
 
+import { codeMirrorTheme } from './codemirror-theme'
 import { customBlockExtension } from './extensions/custom-block'
-import { slashHintExtension } from './extensions/slash-hint'
-import './editor.css'
 // 引入我们刚才写的扩展
 import { slashCommandSource } from './extensions/slash-command'
+import './editor.css'
+import { slashHintExtension } from './extensions/slash-hint'
 
 interface UseCodeMirrorProps {
   initialDoc?: string
   onChange?: (doc: string) => void
-  darkMode?: boolean
   readonly?: boolean
 }
 
 export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: UseCodeMirrorProps) {
   const view = shallowRef<EditorView>()
-  const themeConfig = new Compartment() // 用于动态切换主题
   const readonlyConfig = new Compartment() // 用于动态切换只读
 
   onMounted(() => {
@@ -34,7 +32,7 @@ export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: Us
         markdown(),
 
         // 2. 状态管理 Compartments
-        themeConfig.of(props.darkMode ? oneDark : []),
+        codeMirrorTheme,
         readonlyConfig.of(EditorState.readOnly.of(!!props.readonly)),
 
         // 3. 核心功能：自动补全 (含 Slash 指令)
@@ -61,15 +59,6 @@ export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: Us
       state: startState,
       parent: container.value,
     })
-  })
-
-  // 监听 DarkMode 变化
-  watchEffect(() => {
-    if (view.value) {
-      view.value.dispatch({
-        effects: themeConfig.reconfigure(props.darkMode ? oneDark : []),
-      })
-    }
   })
 
   onUnmounted(() => {

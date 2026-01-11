@@ -10,10 +10,10 @@
 }
 
 .cm-tooltip-autocomplete {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--cm-tooltip-border, #e5e7eb);
   border-radius: 4px;
-  background-color: #ffffff;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+  background-color: var(--cm-tooltip-bg, #ffffff);
+  box-shadow: var(--cm-tooltip-shadow, 0 6px 16px rgba(15, 23, 42, 0.12));
   padding: 4px;
   animation: cm-autocomplete-pop 120ms ease-out;
 }
@@ -22,7 +22,62 @@
   padding: 0;
   margin: 0;
   max-height: 480px !important;
-  font-family: "Google Sans Flex", "Noto Sans CJK SC", sans-serif !important;
+  font-family: "Google Sans Flex", "Noto Sans SC Variable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.cm-editor {
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+  color: var(--cm-fg, #1f2328);
+  background-color: var(--cm-bg, #ffffff);
+}
+
+.cm-scroller,
+.cm-content,
+.cm-line {
+  font-family: "Google Sans Flex", "Noto Sans SC Variable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.cm-content {
+  padding: 28px 26px 40px 26px;
+}
+
+.cm-line {
+  padding: 2px 0;
+}
+
+.cm-inline-code,
+.cm-codeblock {
+  font-family: "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95em;
+}
+
+.cm-gutters {
+  border-right: none;
+  background-color: transparent !important;
+  padding-right: 6px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.cm-gutter {
+  background-color: transparent !important;
+}
+
+.cm-gutterElement {
+  color: var(--cm-gutter-fg, #94a3b8);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.cm-gutters:hover {
+  opacity: 1;
+}
+
+.cm-gutters:hover .cm-gutterElement {
+  opacity: 0.45;
 }
 
 /* 滚动条美化 (Webkit) */
@@ -45,48 +100,24 @@
 
 .cm-tooltip-autocomplete li[aria-selected],
 .cm-tooltip-autocomplete .cm-completionItem-selected {
-  background-color: #dbdbdf !important;
+  background-color: var(--cm-tooltip-selected, #dbdbdf) !important;
   background-image: none !important;
 }
 
 .cm-tooltip-autocomplete li:hover {
-  background-color: #f6f7f8;
+  background-color: var(--cm-tooltip-hover, #f6f7f8);
 }
 
 .cm-completionLabel {
   font-size: 14px;
-  color: #0f172a;
+  color: var(--cm-fg, #0f172a);
 }
 
 .cm-completionDetail {
   margin-left: auto;
   font-size: 13px;
-  color: #64748b;
+  color: var(--cm-fg-muted, #64748b);
   font-style: normal !important;
-}
-
-.cm-theme-dark .cm-tooltip-autocomplete {
-  border: 1px solid #1f2937;
-  background-color: #0b1220;
-  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.45);
-}
-
-.cm-tooltip-autocomplete li[aria-selected],
-.cm-theme-dark .cm-tooltip-autocomplete li[aria-selected] {
-  background-color: #1f2328;
-}
-
-.cm-theme-dark .cm-tooltip-autocomplete li:hover {
-  background-color: #22262c;
-}
-
-.cm-theme-dark .cm-completionLabel {
-  font-size: 14px;
-  color: #e5e7eb;
-}
-
-.cm-theme-dark .cm-completionDetail {
-  color: #94a3b8;
 }
 
 .cm-line.cm-slash-hint-line {
@@ -100,7 +131,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 11px;
-  color: #a8b1bf;
+  color: var(--cm-fg-muted, #a8b1bf);
   letter-spacing: 0.2px;
   opacity: 0.6;
   pointer-events: none;
@@ -110,11 +141,6 @@
   top: 100%;
   transform: translateY(4px);
   opacity: 0.45;
-}
-
-.cm-theme-dark .cm-line.cm-slash-hint-line::after {
-  color: #7b879a;
-  opacity: 0.5;
 }
 
 .cm-line.cm-custom-block {
@@ -129,7 +155,7 @@
   right: 6px;
   top: 1px;
   bottom: 1px;
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: var(--cm-block-highlight, rgba(59, 130, 246, 0.08));
   border-radius: 0;
   z-index: -1;
 }
@@ -153,18 +179,6 @@
 }
 
 .cm-custom-block-label {
-  color: #3b82f6;
+  color: var(--cm-accent, #3b82f6);
   font-weight: 600;
-}
-
-.cm-theme-dark .cm-line.cm-custom-block {
-  background-color: transparent;
-}
-
-.cm-theme-dark .cm-line.cm-custom-block::before {
-  background-color: rgba(59, 130, 246, 0.16);
-}
-
-.cm-theme-dark .cm-custom-block-label {
-  color: #60a5fa;
 }
