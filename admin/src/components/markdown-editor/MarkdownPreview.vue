@@ -2,6 +2,7 @@
 import { ref, watch, nextTick, onBeforeUnmount, render, h, type Component } from 'vue'
 
 import { useMarkdownIt } from '@/composables/markdown-it/use-markdown-it.ts'
+import { getMarkdownComponent } from '@/composables/markdown/shared/components'
 import { toRefsPreferencesStore } from '@/stores/preferences'
 
 // --- Props 定义 ---
@@ -35,6 +36,48 @@ const escapeHtml = (value = '') =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
 
+const parseProps = (raw?: string) => {
+  if (!raw) return {}
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string>
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+const buildPropsHtml = (componentName: string | undefined, props: Record<string, string>) => {
+  const meta = getMarkdownComponent(componentName)
+  const entries = meta?.attrs?.length
+    ? meta.attrs.map((attr) => ({
+        key: attr.key,
+        value: props[attr.key] ?? attr.defaultValue ?? attr.placeholder ?? '',
+        isEmpty: props[attr.key] === undefined || props[attr.key] === '',
+      }))
+    : Object.entries(props).map(([key, value]) => ({
+        key,
+        value,
+        isEmpty: value === '',
+      }))
+
+  if (entries.length === 0) return ''
+
+  const tags = entries
+    .map((entry) => {
+      const safeKey = escapeHtml(entry.key)
+      const safeValue = escapeHtml(entry.value)
+      const emptyClass = entry.isEmpty ? ' is-empty' : ''
+      return `<span class="md-component-fallback__prop${emptyClass}">
+        <span class="md-component-fallback__prop-key">${safeKey}</span>
+        <span class="md-component-fallback__prop-sep">=</span>
+        <span class="md-component-fallback__prop-value">${safeValue}</span>
+      </span>`
+    })
+    .join('')
+
+  return `<div class="md-component-fallback__props">${tags}</div>`
+}
+
 // 存储已挂载的组件容器，用于清理，防止内存泄漏
 let mountedApps: HTMLElement[] = []
 
@@ -57,6 +100,7 @@ const mountDynamicComponents = async () => {
 
   placeholders.forEach((el) => {
     const componentName = el.dataset.component
+    const componentProps = parseProps(el.dataset.props)
     const ComponentDef = props.components[componentName || '']
 
     if (ComponentDef) {
@@ -67,7 +111,7 @@ const mountDynamicComponents = async () => {
       // 这里可以传递 props，比如把 dataset 里的其他参数传进去
       const vnode = h(ComponentDef, {
         // 如果需要，可以在这里把 el.dataset 传给组件 props
-        // ...el.dataset
+        ...componentProps,
       })
 
       render(vnode, el)
@@ -77,9 +121,11 @@ const mountDynamicComponents = async () => {
     } else {
       // 如果找不到组件，显示占位提示
       const safeName = escapeHtml(componentName || 'unknown')
+      const propsHtml = buildPropsHtml(componentName || 'unknown', componentProps)
       el.innerHTML = `<div class="md-component-fallback">
         <span class="md-component-fallback__label">自定义组件</span>
         <span class="md-component-fallback__name">${safeName}</span>
+        ${propsHtml}
         <span class="md-component-fallback__hint">将在最终页面预览时展示</span>
       </div>`
     }
@@ -117,9 +163,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="markdown-preview markdown-body"
+    class="markdown-preview markdown-body prose max-w-none"
     ref="containerRef"
     :data-theme="isDark ? 'dark' : 'light'"
+    :class="{ 'prose-invert': isDark }"
     :key="renderKey"
     v-html="html"
   ></div>
@@ -136,6 +183,8 @@ onBeforeUnmount(() => {
   padding: 20px;
   /* 基础排版优化 */
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
   background-color: transparent;
   color: inherit;
   --md-hljs-fg: #24292f;
@@ -274,6 +323,37 @@ onBeforeUnmount(() => {
   font-size: 14px;
   font-weight: 600;
   color: var(--md-component-name);
+}
+
+:deep(.md-component-fallback__props) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+:deep(.md-component-fallback__prop) {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 999px;
+  border: 1px solid var(--md-component-border);
+  background: var(--md-component-bg);
+  color: var(--md-component-name);
+}
+
+:deep(.md-component-fallback__prop.is-empty) {
+  opacity: 0.6;
+}
+
+:deep(.md-component-fallback__prop-key) {
+  font-weight: 600;
+}
+
+:deep(.md-component-fallback__prop-sep) {
+  opacity: 0.6;
 }
 
 :deep(.md-component-fallback__hint) {

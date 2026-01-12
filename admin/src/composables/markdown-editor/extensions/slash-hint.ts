@@ -6,8 +6,14 @@ const lineHintLast = Decoration.line({ class: 'cm-slash-hint-line cm-slash-hint-
 
 function buildDecorations(view: EditorView): DecorationSet {
   const { state } = view
+  if (!view.hasFocus) {
+    return RangeSet.empty
+  }
   const cursor = state.selection.main.head
   const line = state.doc.lineAt(cursor)
+  if (line.text.trim() !== '') {
+    return RangeSet.empty
+  }
   const isLastLine = line.number === state.doc.lines
 
   const decorations: { from: number; to: number; value: Decoration }[] = []

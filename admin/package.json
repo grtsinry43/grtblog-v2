@@ -48,6 +48,7 @@
   "devDependencies": {
     "@iconify/json": "^2.2.425",
     "@iconify/tailwind4": "^1.2.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "@tsconfig/node22": "^22.0.5",
     "@types/chroma-js": "^3.1.2",

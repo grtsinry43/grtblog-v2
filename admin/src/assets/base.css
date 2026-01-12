@@ -13,6 +13,8 @@
   scale: 1.2;
 }
 
+@plugin '@tailwindcss/typography';
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @config '../../tailwind.config.ts';

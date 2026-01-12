@@ -1,16 +1,24 @@
 import { CompletionContext, type CompletionResult } from '@codemirror/autocomplete'
 import { syntaxTree } from '@codemirror/language'
 
+import { markdownComponents } from '@/composables/markdown/shared/components'
+
 // ... options 定义保持不变 ...
-const options = [
+const baseOptions = [
   { label: 'Heading 1', type: 'keyword', apply: '# ', detail: '一级标题' },
   { label: 'Heading 2', type: 'keyword', apply: '## ', detail: '二级标题' },
   { label: 'Code Block', type: 'keyword', apply: '```\n\n```', detail: '代码块' },
   { label: 'Quote', type: 'keyword', apply: '> ', detail: '引用' },
-  { label: 'Gallery', type: 'variable', apply: '::: gallery\n\n:::', detail: '相册组件' },
-  { label: 'Callout', type: 'variable', apply: '::: callout\n\n:::', detail: '提示框' },
-  { label: 'Timeline', type: 'variable', apply: '::: timeline\n\n:::', detail: '时间轴' },
 ]
+
+const componentOptions = markdownComponents.map((component) => ({
+  label: component.label,
+  type: 'variable',
+  apply: component.insertTemplate,
+  detail: component.description || component.name,
+}))
+
+const options = [...baseOptions, ...componentOptions]
 
 export const slashCommandSource = (context: CompletionContext): CompletionResult | null => {
   const { state, pos } = context

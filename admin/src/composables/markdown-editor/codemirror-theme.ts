@@ -9,6 +9,7 @@ const editorTheme = EditorView.theme({
   },
   '.cm-content': {
     caretColor: 'var(--cm-cursor, #3b82f6)',
+    padding: '20px 0px 40px 4px',
   },
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: 'var(--cm-cursor, #3b82f6)',

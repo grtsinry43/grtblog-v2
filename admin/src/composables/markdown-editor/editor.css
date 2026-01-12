@@ -40,7 +40,12 @@
 }
 
 .cm-content {
-  padding: 28px 26px 40px 26px;
+  padding: 20px 16px 40px 26px;
+  --cm-content-padding-right: 16px;
+}
+
+.cm-editor .cm-content {
+  padding-right: 16px;
 }
 
 .cm-line {
@@ -68,6 +73,8 @@
 .cm-gutterElement {
   color: var(--cm-gutter-fg, #94a3b8);
   font-size: 12px;
+  line-height: 1.7;
+  padding: 2px 0;
   opacity: 0;
   transition: opacity 140ms ease;
 }
@@ -151,11 +158,11 @@
 .cm-line.cm-custom-block::before {
   content: "";
   position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 1px;
-  bottom: 1px;
-  background-color: var(--cm-block-highlight, rgba(59, 130, 246, 0.08));
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: var(--cm-block-highlight, rgba(59, 130, 246, 0.06));
   border-radius: 0;
   z-index: -1;
 }

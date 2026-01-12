@@ -27,15 +27,18 @@ const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
 <style scoped>
 .editor-container {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  height: 100vh;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
   width: 100%;
   overflow: hidden;
 }
 
 .pane {
   height: 100%;
-  overflow-y: auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   position: relative;
 }
 
@@ -46,7 +49,7 @@ const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
 @media (max-width: 768px) {
   .editor-container {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1px 1fr;
+    grid-template-rows: minmax(0, 1fr) 1px minmax(0, 1fr);
   }
 }
 

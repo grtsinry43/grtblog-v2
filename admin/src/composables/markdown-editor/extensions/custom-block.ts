@@ -1,12 +1,13 @@
 import { RangeSet } from '@codemirror/state'
 import { Decoration, type DecorationSet, EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view'
 
+import { markdownComponentNames, parseComponentInfo } from '@/composables/markdown/shared/components'
+
 const blockLine = Decoration.line({ class: 'cm-custom-block' })
 const blockLineStart = Decoration.line({ class: 'cm-custom-block cm-custom-block-start' })
 const blockLineEnd = Decoration.line({ class: 'cm-custom-block cm-custom-block-end' })
 const labelMark = Decoration.mark({ class: 'cm-custom-block-label' })
-
-const VALID_COMPONENTS = ['gallery', 'callout', 'timeline']
+const VALID_COMPONENTS = markdownComponentNames
 
 // 2. 构建逻辑：使用行扫描代替全文正则
 function buildDecorations(view: EditorView): DecorationSet {
@@ -24,12 +25,11 @@ function buildDecorations(view: EditorView): DecorationSet {
 
     // 检查是否是开始标记 ::: name 或 ::: component name
     if (text.startsWith(':::')) {
-      // 提取组件名，处理 ":::gallery" / "::: gallery" / "::: component gallery"
+      // 提取组件名，处理 ":::gallery" / "::: gallery" / "::: component gallery{...}"
       const content = line.text.trim().slice(3).trim()
-      const parts = content.split(/\s+/)
-      const componentName = parts[0] === 'component' ? parts[1] : parts[0]
+      const { name: componentName } = parseComponentInfo(content)
 
-      if (VALID_COMPONENTS.includes(componentName)) {
+      if (VALID_COMPONENTS.has(componentName)) {
         // 这是一个合法的开始标记
         if (!inBlock) {
           inBlock = true
