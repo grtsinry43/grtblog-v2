@@ -1,10 +1,6 @@
-<script>
-    let { data } = $props();
+<script lang="ts">
+import { PostDetail } from '$lib/modules/post';
+let { data } = $props();
 </script>
 
-{#if data.article}
-    <h1>{data.article.title}</h1>
-    <p>{data.article.content}</p>
-{:else}
-    <p>Article not found.</p>
-{/if}
+<PostDetail post={data.post ?? null} />

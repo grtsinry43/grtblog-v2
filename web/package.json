@@ -41,6 +41,7 @@
 		"vite": "^7.2.2"
 	},
 	"dependencies": {
-		"lucide-svelte": "^0.562.0"
+		"lucide-svelte": "^0.562.0",
+		"ofetch": "^1.5.1"
 	}
 }

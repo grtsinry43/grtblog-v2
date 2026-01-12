@@ -20,6 +20,7 @@ coverage/
 
 # Local database / storage
 /storage/*.db
+storage/
 
 # Tooling files
 .air.toml

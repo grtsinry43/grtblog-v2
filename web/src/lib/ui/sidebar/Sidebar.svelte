@@ -134,8 +134,9 @@
 	let displayTitle = $derived.by(() => {
 		// Debug logging to help identify why title might be missing
 		// console.log('Sidebar Page Data:', $page.data);
+		const post = $page.data?.post;
 		const article = $page.data?.article;
-		return article?.title ? article.title : activeLabel;
+		return post?.title || article?.title || activeLabel;
 	});
 </script>
 
@@ -461,7 +462,7 @@
 <TableOfContents isOpen={isTocOpen} onClose={() => (isTocOpen = false)} />
 
 <style>
-	@reference "../routes/layout.css";
+	@reference "../../../routes/layout.css";
 
 	/* --- 通用：隐藏滚动条 --- */
 	.no-scrollbar::-webkit-scrollbar {

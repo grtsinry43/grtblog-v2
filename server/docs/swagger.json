@@ -997,6 +997,23 @@
                 }
             }
         },
+        "/public/html/posts/refresh": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Public"
+                ],
+                "summary": "刷新文章 HTML 缓存",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/public/website-info": {
             "get": {
                 "produces": [

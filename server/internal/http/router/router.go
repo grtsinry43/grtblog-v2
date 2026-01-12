@@ -51,7 +51,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	websiteInfoSvc := websiteinfo.NewService(websiteInfoRepo)
 	websiteInfoHandler := handler.NewWebsiteInfoHandler(websiteInfoSvc)
 
-	registerPublicRoutes(v2, websiteInfoHandler)
+	registerPublicRoutes(v2, deps, websiteInfoHandler)
 	registerAuthRoutes(v2, deps, sysCfgSvc)
 	deps.EventBus = eventBus
 	registerArticlePublicRoutes(v2, deps)
