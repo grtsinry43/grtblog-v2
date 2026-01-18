@@ -36,9 +36,8 @@ const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
 
 .pane {
   height: 100%;
-  min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
 }
 
@@ -53,18 +52,59 @@ const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
   }
 }
 
-.pane::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.pane::-webkit-scrollbar,
+.editor-pane :deep(.cm-scroller::-webkit-scrollbar),
+.preview-pane :deep(.markdown-preview::-webkit-scrollbar) {
+  width: 3px;
+  height: 3px;
 }
-.pane::-webkit-scrollbar-track {
+.pane::-webkit-scrollbar-track,
+.editor-pane :deep(.cm-scroller::-webkit-scrollbar-track),
+.preview-pane :deep(.markdown-preview::-webkit-scrollbar-track) {
   background: transparent;
 }
-.pane::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.4);
-  border-radius: 4px;
+.pane::-webkit-scrollbar-thumb,
+.editor-pane :deep(.cm-scroller::-webkit-scrollbar-thumb),
+.preview-pane :deep(.markdown-preview::-webkit-scrollbar-thumb) {
+  background: color-mix(
+    in srgb,
+    var(--primary-color),
+    var(--popover-color, var(--card-color)) 85%
+  );
+  border-radius: 0;
+  transition: background-color 160ms ease;
 }
-.pane::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 128, 128, 0.6);
+.pane::-webkit-scrollbar-thumb:hover,
+.editor-pane :deep(.cm-scroller::-webkit-scrollbar-thumb:hover),
+.preview-pane :deep(.markdown-preview::-webkit-scrollbar-thumb:hover) {
+  background: color-mix(
+    in srgb,
+    var(--primary-color),
+    var(--popover-color, var(--card-color)) 70%
+  );
+}
+.pane {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--primary-color),
+      var(--popover-color, var(--card-color)) 85%
+    )
+    transparent;
+}
+
+.editor-pane :deep(.cm-editor) {
+  height: auto !important;
+  min-height: 100%;
+}
+
+.editor-pane :deep(.cm-scroller) {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.preview-pane :deep(.markdown-preview) {
+  height: auto !important;
+  overflow: visible !important;
 }
 </style>

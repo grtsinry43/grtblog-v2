@@ -179,7 +179,6 @@ onBeforeUnmount(() => {
 .markdown-preview {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
   padding: 20px;
   /* 基础排版优化 */
   line-height: 1.6;
