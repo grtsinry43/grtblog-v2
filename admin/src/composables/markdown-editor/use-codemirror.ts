@@ -1,28 +1,57 @@
 import { autocompletion } from '@codemirror/autocomplete'
 import { markdown } from '@codemirror/lang-markdown'
-import { EditorState, Compartment } from '@codemirror/state'
+import { EditorState, Compartment, type Extension } from '@codemirror/state'
+import { GFM, Subscript, Superscript } from '@lezer/markdown'
 import { EditorView, basicSetup } from 'codemirror'
 import { type Ref, shallowRef, onMounted, onUnmounted } from 'vue'
 
 import { codeMirrorTheme } from './codemirror-theme'
-import { createComponentEditorExtension, type ComponentEditPayload } from './extensions/component-editor'
 import { componentAttributeSource } from './extensions/component-attrs'
+import {
+  createComponentEditorExtension,
+  type ComponentEditPayload,
+} from './extensions/component-editor'
 import { customBlockExtension } from './extensions/custom-block'
-// 引入我们刚才写的扩展
 import { slashCommandSource } from './extensions/slash-command'
 import './editor.css'
 import { slashHintExtension } from './extensions/slash-hint'
+
+import type { ViewUpdate } from '@codemirror/view'
 
 interface UseCodeMirrorProps {
   initialDoc?: string
   onChange?: (doc: string) => void
   readonly?: boolean
   onComponentEdit?: (payload: ComponentEditPayload) => void
+  // 允许传入额外的 extensions (如果需要)
+  extensions?: Extension[]
 }
+
+// 定义钩子类型
+export type UpdateHook = (update: ViewUpdate) => void
 
 export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: UseCodeMirrorProps) {
   const view = shallowRef<EditorView>()
-  const readonlyConfig = new Compartment() // 用于动态切换只读
+  const readonlyConfig = new Compartment()
+
+  const updateCallbacks = new Set<UpdateHook>()
+
+  // 对外暴露的注册函数
+  const onViewUpdate = (callback: UpdateHook) => {
+    updateCallbacks.add(callback)
+    return () => updateCallbacks.delete(callback) // 返回清理函数
+  }
+
+  // 内部扩展：统一分发更新事件
+  const eventBusExtension = EditorView.updateListener.of((update) => {
+    // 触发所有订阅者
+    updateCallbacks.forEach((cb) => cb(update))
+
+    // 处理原有的 onChange
+    if (update.docChanged) {
+      props.onChange?.(update.state.doc.toString())
+    }
+  })
 
   onMounted(() => {
     if (!container.value) return
@@ -30,33 +59,29 @@ export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: Us
     const startState = EditorState.create({
       doc: props.initialDoc || '',
       extensions: [
-        // 1. 基础配置
         basicSetup,
-        markdown(),
+        markdown({
+          extensions: [GFM, Subscript, Superscript],
+        }),
         EditorView.lineWrapping,
-
-        // 2. 状态管理 Compartments
         codeMirrorTheme,
         readonlyConfig.of(EditorState.readOnly.of(!!props.readonly)),
 
-        // 3. 核心功能：自动补全 (含 Slash 指令)
+        // 功能扩展
         autocompletion({
-          override: [slashCommandSource, componentAttributeSource], // 注入自定义补全
-          icons: false, // 纯文字列表更像 Notion
+          override: [slashCommandSource, componentAttributeSource],
+          icons: false,
           defaultKeymap: true,
         }),
-
-        // 4. 核心功能：自定义块高亮
         customBlockExtension,
         slashHintExtension,
         createComponentEditorExtension({ onEdit: props.onComponentEdit }),
 
-        // 5. 事件监听
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            props.onChange?.(update.state.doc.toString())
-          }
-        }),
+        // 注册事件总线扩展
+        eventBusExtension,
+
+        // 合并外部传入的扩展
+        ...(props.extensions || []),
       ],
     })
 
@@ -68,9 +93,11 @@ export function useCodeMirror(container: Ref<HTMLElement | undefined>, props: Us
 
   onUnmounted(() => {
     view.value?.destroy()
+    updateCallbacks.clear()
   })
 
   return {
     view,
+    onViewUpdate, // 导出钩子
   }
 }

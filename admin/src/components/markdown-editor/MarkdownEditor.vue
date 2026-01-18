@@ -1,8 +1,20 @@
 <script setup lang="ts">
-import { NButton, NCard, NForm, NFormItem, NInput, NModal, NSpace, NSwitch, useThemeVars } from 'naive-ui'
+import {
+  NButton,
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NModal,
+  NSpace,
+  NSwitch,
+  useThemeVars,
+} from 'naive-ui'
 import { computed, reactive, ref, watch } from 'vue'
 
+import EditorFloatingMenu from '@/components/markdown-editor/EditorFloatingMenu.vue'
 import { useCodeMirror } from '@/composables/markdown-editor/use-codemirror.ts'
+import { useFloatingMenu } from '@/composables/markdown-editor/use-floating-menu.ts'
 import { getMarkdownComponent } from '@/composables/markdown/shared/components'
 import { cah } from '@/utils/chromaHelper'
 
@@ -64,9 +76,7 @@ const formatComponentLine = () => {
   const keys = [...definedKeys, ...extraKeys].filter(
     (key) => key in componentEditor.attrs || componentTouchedKeys.has(key),
   )
-  const attrsString = keys
-    .map((key) => `${key}="${componentEditor.attrs[key] ?? ''}"`)
-    .join(' ')
+  const attrsString = keys.map((key) => `${key}="${componentEditor.attrs[key] ?? ''}"`).join(' ')
   const prefix = componentEditor.isComponentSyntax
     ? `::: component ${componentEditor.name}`
     : `::: ${componentEditor.name}`
@@ -89,7 +99,7 @@ const updateAttr = (key: string, value: string | boolean) => {
 }
 
 // 优雅的调用
-const { view } = useCodeMirror(editorRef, {
+const { view, onViewUpdate } = useCodeMirror(editorRef, {
   initialDoc: props.modelValue,
   onChange: (val) => {
     emit('update:modelValue', val)
@@ -103,6 +113,12 @@ const { view } = useCodeMirror(editorRef, {
     componentTouchedKeys.clear()
     componentEditor.show = true
   },
+})
+
+// 加载 tooltip 相关（floatmenu）
+const { isVisible, menuPos, activeFormats, executeCommand } = useFloatingMenu({
+  view,
+  onViewUpdate,
 })
 
 // 如果父组件通过代码修改了 modelValue (非输入触发)，需要同步回编辑器
@@ -127,12 +143,18 @@ watch(
       :style="editorStyle"
     ></div>
 
-    <NModal v-model:show="componentEditor.show" style="width: 520px; max-width: 90vw;">
+    <NModal
+      v-model:show="componentEditor.show"
+      style="width: 520px; max-width: 90vw"
+    >
       <NCard
         :title="componentMeta?.label ?? '组件参数'"
         size="small"
       >
-        <NForm label-placement="left" label-width="110px">
+        <NForm
+          label-placement="left"
+          label-width="110px"
+        >
           <NFormItem
             v-for="attr in componentMeta?.attrs ?? []"
             :key="attr.key"
@@ -152,10 +174,17 @@ watch(
           </NFormItem>
         </NForm>
         <NSpace justify="end">
-          <NButton @click="componentEditor.show = false">关闭</NButton>
+          <NButton @click="componentEditor.show = false"> 关闭 </NButton>
         </NSpace>
       </NCard>
     </NModal>
+
+    <EditorFloatingMenu
+      :visible="isVisible"
+      :pos="menuPos"
+      :active-formats="activeFormats"
+      @command="executeCommand"
+    />
   </div>
 </template>
 
