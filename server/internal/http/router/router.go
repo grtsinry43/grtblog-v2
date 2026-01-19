@@ -1,10 +1,13 @@
 package router
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 
 	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/htmlsnapshot"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/websiteinfo"
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
@@ -13,6 +16,7 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/turnstile"
+	"github.com/grtsinry43/grtblog-v2/server/internal/ws"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -46,14 +50,25 @@ func Register(app *fiber.App, deps Dependencies) {
 	if eventBus == nil {
 		eventBus = infraevent.NewInMemoryBus()
 	}
+	wsManager := ws.NewManager(ws.Config{
+		CacheSize:       3,
+		RoomTTL:         30 * time.Second,
+		CleanupInterval: 5 * time.Second,
+	})
+	ws.RegisterArticleUpdateSubscriber(eventBus, wsManager)
+
+	contentRepo := persistence.NewContentRepository(deps.DB)
+	htmlSnapshotSvc := htmlsnapshot.NewService(contentRepo, "")
+	htmlsnapshot.RegisterArticleUpdateSubscriber(eventBus, htmlSnapshotSvc)
 
 	websiteInfoRepo := persistence.NewWebsiteInfoRepository(deps.DB)
 	websiteInfoSvc := websiteinfo.NewService(websiteInfoRepo)
 	websiteInfoHandler := handler.NewWebsiteInfoHandler(websiteInfoSvc)
 
-	registerPublicRoutes(v2, deps, websiteInfoHandler)
+	registerPublicRoutes(v2, deps, websiteInfoHandler, htmlSnapshotSvc)
 	registerAuthRoutes(v2, deps, sysCfgSvc)
 	deps.EventBus = eventBus
+	registerWSRoutes(v2, wsManager)
 	registerArticlePublicRoutes(v2, deps)
 	registerTaxonomyPublicRoutes(v2, deps)
 	registerUserRoutes(v2, deps, websiteInfoHandler)

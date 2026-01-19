@@ -1,5 +1,5 @@
 import { getApi } from '$lib/shared/clients/api';
-import type { PostDetail, PostListResponse } from '$lib/models/post';
+import type { PostDetail, PostLatestCheckResponse, PostListResponse } from '$lib/models/post';
 
 type PostListOptions = {
 	page?: number;
@@ -25,5 +25,18 @@ export const getPostDetail = async (
 ): Promise<PostDetail | null> => {
 	const api = getApi(fetcher);
 	const result = await api<PostDetail>(`/articles/short/${shortUrl}`);
+	return result ?? null;
+};
+
+export const checkPostLatest = async (
+	fetcher: typeof fetch | undefined,
+	id: number,
+	hash: string
+): Promise<PostLatestCheckResponse | null> => {
+	const api = getApi(fetcher);
+	const result = await api<PostLatestCheckResponse>(`/articles/${id}/latest`, {
+		method: 'POST',
+		body: { hash }
+	});
 	return result ?? null;
 };

@@ -195,7 +195,7 @@ func (s *Service) LoginWithProvider(ctx context.Context, cmd OAuthLoginCmd) (*Lo
 		return nil, err
 	}
 
-	// 映射/注册本地用户
+	// 映射 / 注册本地用户
 	user, err := s.users.FindByOAuth(ctx, providerCfg.ProviderKey, external.ProviderID)
 	if err != nil {
 		if errors.Is(err, identity.ErrUserNotFound) {

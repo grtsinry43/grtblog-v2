@@ -18,12 +18,50 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     name: 'articles',
     icon: 'icon-[mage--dashboard-chart]',
     label: '文章',
-    meta: {
-      componentName: 'Articles',
-      pinned: true,
-      showTab: true,
-    },
-    component: 'articles/index',
+    redirect: 'articles/list',
+    children: [
+      {
+        path: 'list',
+        name: 'articleList',
+        label: '文章列表',
+        icon: 'icon-[mage--dashboard-chart]',
+        meta: {
+          componentName: 'ArticleList',
+          showTab: true,
+        },
+        component: 'articles/index',
+      },
+      {
+        path: 'edit/new',
+        name: 'articleCreate',
+        label: '新建文章',
+        show: false,
+        meta: {
+          componentName: 'ArticleEdit',
+          showTab: true,
+          enableMultiTab: true,
+          renderTabTitle() {
+            return '新建文章'
+          },
+        },
+        component: 'articles/edit',
+      },
+      {
+        path: 'edit/:id',
+        name: 'articleEdit',
+        label: '编辑文章',
+        show: false,
+        meta: {
+          componentName: 'ArticleEdit',
+          showTab: true,
+          enableMultiTab: true,
+          renderTabTitle({ id }) {
+            return `编辑文章${id ? `-${id}` : ''}`
+          },
+        },
+        component: 'articles/edit',
+      },
+    ],
   },
   {
     path: 'user-center',

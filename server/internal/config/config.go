@@ -114,6 +114,14 @@ func getEnvAsDuration(key string, fallback time.Duration) time.Duration {
 	if value == "" {
 		return fallback
 	}
+	if strings.HasSuffix(value, "d") {
+		daysPart := strings.TrimSuffix(value, "d")
+		days, err := strconv.Atoi(daysPart)
+		if err != nil {
+			return fallback
+		}
+		return time.Duration(days) * 24 * time.Hour
+	}
 	d, err := time.ParseDuration(value)
 	if err != nil {
 		return fallback

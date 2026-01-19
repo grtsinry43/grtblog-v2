@@ -19,6 +19,9 @@ export type PostDetail = {
 	title: string;
 	summary: string;
 	content: string;
+	contentHash: string;
+	leadIn?: string | null;
+	toc?: TOCNode[];
 	shortUrl: string;
 	cover?: string | null;
 	isPublished: boolean;
@@ -27,6 +30,29 @@ export type PostDetail = {
 	isOriginal: boolean;
 	createdAt: string;
 	updatedAt: string;
+};
+
+export type TOCNode = {
+	name: string;
+	anchor: string;
+	children?: TOCNode[];
+};
+
+export type PostLatestCheckResponse = {
+	latest: boolean;
+	contentHash: string;
+	title?: string;
+	leadIn?: string | null;
+	toc?: TOCNode[];
+	content?: string;
+};
+
+export type PostContentPayload = {
+	contentHash: string;
+	title?: string;
+	leadIn?: string | null;
+	toc?: TOCNode[];
+	content?: string;
 };
 
 export type PostListResponse = {

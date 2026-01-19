@@ -100,3 +100,8 @@ type ListArticlesReq struct {
 	Published  *bool   `json:"published,omitempty"`
 	Search     *string `json:"search,omitempty"`
 }
+
+// CheckArticleLatestReq 文章版本校验请求。
+type CheckArticleLatestReq struct {
+	Hash string `json:"hash"`
+}

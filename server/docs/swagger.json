@@ -732,6 +732,46 @@
                 }
             }
         },
+        "/articles/{id}/latest": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Article"
+                ],
+                "summary": "校验文章是否最新",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "文章版本校验参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CheckArticleLatestReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.CheckArticleLatestResp"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -1290,6 +1330,9 @@
                 "content": {
                     "type": "string"
                 },
+                "contentHash": {
+                    "type": "string"
+                },
                 "cover": {
                     "type": "string"
                 },
@@ -1416,6 +1459,40 @@
                 },
                 "shortUrl": {
                     "type": "string"
+                }
+            }
+        },
+        "contract.CheckArticleLatestReq": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.CheckArticleLatestResp": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "contentHash": {
+                    "type": "string"
+                },
+                "latest": {
+                    "type": "boolean"
+                },
+                "leadIn": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "toc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.TOCNode"
+                    }
                 }
             }
         },

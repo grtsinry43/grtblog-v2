@@ -54,6 +54,7 @@ type Article struct {
 	LeadIn      *string
 	TOC         []TOCNode
 	Content     string
+	ContentHash string
 	AuthorID    int64
 	Cover       *string
 	CategoryID  *int64
@@ -82,6 +83,7 @@ type Moment struct {
 	Summary     string
 	AISummary   *string
 	Content     string
+	ContentHash string
 	AuthorID    int64
 	TOC         []TOCNode
 	Image       *string
@@ -115,6 +117,7 @@ type Page struct {
 	IsBuiltin   bool
 	TOC         []TOCNode
 	Content     string
+	ContentHash string
 	CommentID   *int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

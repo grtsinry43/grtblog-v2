@@ -11,6 +11,7 @@ type ArticleResp struct {
 	LeadIn      *string      `json:"leadIn,omitempty"`
 	TOC         []TOCNode    `json:"toc,omitempty"`
 	Content     string       `json:"content"`
+	ContentHash string       `json:"contentHash"`
 	AuthorID    int64        `json:"authorId"`
 	Cover       *string      `json:"cover,omitempty"`
 	CategoryID  *int64       `json:"categoryId,omitempty"`
@@ -73,4 +74,19 @@ type ArticleListResp struct {
 	Total int64                 `json:"total"`
 	Page  int                   `json:"page"`
 	Size  int                   `json:"size"`
+}
+
+// ArticleContentPayload 文章内容推送数据。
+type ArticleContentPayload struct {
+	ContentHash string    `json:"contentHash"`
+	Title       string    `json:"title,omitempty"`
+	LeadIn      *string   `json:"leadIn,omitempty"`
+	TOC         []TOCNode `json:"toc"`
+	Content     string    `json:"content,omitempty"`
+}
+
+// CheckArticleLatestResp 文章版本校验响应。
+type CheckArticleLatestResp struct {
+	Latest bool `json:"latest"`
+	ArticleContentPayload
 }

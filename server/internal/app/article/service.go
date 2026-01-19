@@ -61,6 +61,7 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 		LeadIn:      cmd.LeadIn,
 		TOC:         toc,
 		Content:     cmd.Content,
+		ContentHash: content.ArticleContentHash(cmd.Title, cmd.LeadIn, cmd.Content),
 		AuthorID:    authorID,
 		Cover:       cmd.Cover,
 		CategoryID:  cmd.CategoryID,
@@ -132,6 +133,7 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 	existing.LeadIn = cmd.LeadIn
 	existing.TOC = toc
 	existing.Content = cmd.Content
+	existing.ContentHash = content.ArticleContentHash(cmd.Title, cmd.LeadIn, cmd.Content)
 	existing.Cover = cmd.Cover
 	existing.CategoryID = cmd.CategoryID
 	shortURL := strings.TrimSpace(cmd.ShortURL)
@@ -161,12 +163,16 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 
 	now := time.Now()
 	_ = s.events.Publish(ctx, ArticleUpdated{
-		ID:        existing.ID,
-		AuthorID:  existing.AuthorID,
-		Title:     existing.Title,
-		ShortURL:  existing.ShortURL,
-		Published: existing.IsPublished,
-		At:        now,
+		ID:          existing.ID,
+		AuthorID:    existing.AuthorID,
+		Title:       existing.Title,
+		ShortURL:    existing.ShortURL,
+		Published:   existing.IsPublished,
+		ContentHash: existing.ContentHash,
+		LeadIn:      existing.LeadIn,
+		TOC:         existing.TOC,
+		Content:     existing.Content,
+		At:          now,
 	})
 	if !prevPublished && existing.IsPublished {
 		_ = s.events.Publish(ctx, ArticlePublished{

@@ -1,6 +1,10 @@
 package article
 
-import "time"
+import (
+	"time"
+
+	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
+)
 
 type ArticleCreated struct {
 	ID        int64
@@ -17,12 +21,16 @@ func (e ArticleCreated) OccurredAt() time.Time {
 }
 
 type ArticleUpdated struct {
-	ID        int64
-	AuthorID  int64
-	Title     string
-	ShortURL  string
-	Published bool
-	At        time.Time
+	ID          int64
+	AuthorID    int64
+	Title       string
+	ShortURL    string
+	Published   bool
+	ContentHash string
+	LeadIn      *string
+	TOC         []content.TOCNode
+	Content     string
+	At          time.Time
 }
 
 func (e ArticleUpdated) Name() string { return "article.updated" }

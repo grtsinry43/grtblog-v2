@@ -1,110 +1,164 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { NButton, NCard, NDataTable, NPagination, NTag } from 'naive-ui'
+import { h, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-import MarkdownEditor from '@/components/markdown-editor/MarkdownEditor.vue'
-import MarkdownPreview from '@/components/markdown-editor/MarkdownPreview.vue'
+import { ScrollContainer } from '@/components'
+import { listArticles } from '@/services/articles'
 
-const value = ref('# Hello Markdown Editor\n\n试着输入一些内容...')
-</script>
+import type { ArticleListItem } from '@/services/articles'
+import type { DataTableColumns } from 'naive-ui'
 
-<template>
-  <div class="editor-container">
-    <div class="pane editor-pane">
-      <markdown-editor
-        v-model="value"
-        class="h-full"
-      />
-    </div>
+defineOptions({
+  name: 'ArticleList',
+})
 
-    <div class="divider"></div>
+const router = useRouter()
 
-    <div class="pane preview-pane">
-      <markdown-preview :source="value" />
-    </div>
-  </div>
-</template>
+const list = ref<ArticleListItem[]>([])
+const loading = ref(false)
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
 
-<style scoped>
-.editor-container {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-  overflow: hidden;
+const columns: DataTableColumns<ArticleListItem> = [
+  {
+    title: '标题',
+    key: 'title',
+    width: 260,
+    render: (row) => h('div', { class: 'font-medium' }, row.title),
+  },
+  {
+    title: '分类',
+    key: 'categoryName',
+    width: 140,
+    render: (row) => row.categoryName || '-',
+  },
+  {
+    title: '标签',
+    key: 'tags',
+    render: (row) => {
+      if (!row.tags || row.tags.length === 0) {
+        return '-'
+      }
+      return h(
+        'div',
+        { class: 'flex flex-wrap gap-1' },
+        row.tags.map((tag) =>
+          h(
+            NTag,
+            { size: 'small', type: 'info', bordered: false },
+            { default: () => tag },
+          ),
+        ),
+      )
+    },
+  },
+  {
+    title: '数据',
+    key: 'metrics',
+    width: 160,
+    render: (row) => `${row.views} / ${row.likes} / ${row.comments}`,
+  },
+  {
+    title: '更新时间',
+    key: 'updatedAt',
+    width: 180,
+    render: (row) => formatDate(row.updatedAt),
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 120,
+    render: (row) =>
+      h(
+        NButton,
+        {
+          size: 'small',
+          type: 'primary',
+          secondary: true,
+          onClick: () => toEdit(row.id),
+        },
+        { default: () => '编辑' },
+      ),
+  },
+]
+
+function formatDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString()
 }
 
-.pane {
-  height: 100%;
-  min-height: 0;
-  overflow: auto;
-  position: relative;
-}
-
-.preview-pane {
-  padding: 0;
-}
-
-@media (max-width: 768px) {
-  .editor-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) 1px minmax(0, 1fr);
+async function fetchList() {
+  loading.value = true
+  try {
+    const response = await listArticles({
+      page: page.value,
+      pageSize: pageSize.value,
+    })
+    list.value = response.items
+    total.value = response.total
+  } finally {
+    loading.value = false
   }
 }
 
-.pane::-webkit-scrollbar,
-.editor-pane :deep(.cm-scroller::-webkit-scrollbar),
-.preview-pane :deep(.markdown-preview::-webkit-scrollbar) {
-  width: 3px;
-  height: 3px;
-}
-.pane::-webkit-scrollbar-track,
-.editor-pane :deep(.cm-scroller::-webkit-scrollbar-track),
-.preview-pane :deep(.markdown-preview::-webkit-scrollbar-track) {
-  background: transparent;
-}
-.pane::-webkit-scrollbar-thumb,
-.editor-pane :deep(.cm-scroller::-webkit-scrollbar-thumb),
-.preview-pane :deep(.markdown-preview::-webkit-scrollbar-thumb) {
-  background: color-mix(
-    in srgb,
-    var(--primary-color),
-    var(--popover-color, var(--card-color)) 85%
-  );
-  border-radius: 0;
-  transition: background-color 160ms ease;
-}
-.pane::-webkit-scrollbar-thumb:hover,
-.editor-pane :deep(.cm-scroller::-webkit-scrollbar-thumb:hover),
-.preview-pane :deep(.markdown-preview::-webkit-scrollbar-thumb:hover) {
-  background: color-mix(
-    in srgb,
-    var(--primary-color),
-    var(--popover-color, var(--card-color)) 70%
-  );
-}
-.pane {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(
-      in srgb,
-      var(--primary-color),
-      var(--popover-color, var(--card-color)) 85%
-    )
-    transparent;
+function handlePageChange(value: number) {
+  page.value = value
+  fetchList()
 }
 
-.editor-pane :deep(.cm-editor) {
-  height: auto !important;
-  min-height: 100%;
+function handlePageSizeChange(value: number) {
+  pageSize.value = value
+  page.value = 1
+  fetchList()
 }
 
-.editor-pane :deep(.cm-scroller) {
-  height: auto !important;
-  overflow: visible !important;
+function toCreate() {
+  router.push({ name: 'articleCreate' })
 }
 
-.preview-pane :deep(.markdown-preview) {
-  height: auto !important;
-  overflow: visible !important;
+function toEdit(id: number) {
+  router.push({ name: 'articleEdit', params: { id } })
 }
-</style>
+
+onMounted(async () => {
+  await fetchList()
+})
+</script>
+
+<template>
+  <ScrollContainer wrapper-class="flex flex-col gap-y-3">
+    <NCard>
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-[var(--text-color-3)]">文章列表</div>
+        <NButton
+          type="primary"
+          @click="toCreate"
+        >
+          新建文章
+        </NButton>
+      </div>
+    </NCard>
+    <NCard>
+      <NDataTable
+        :columns="columns"
+        :data="list"
+        :loading="loading"
+        :row-key="(row) => row.id"
+      />
+      <div class="flex justify-end pt-4">
+        <NPagination
+          :page="page"
+          :page-size="pageSize"
+          :item-count="total"
+          show-size-picker
+          :page-sizes="[10, 20, 50]"
+          @update:page="handlePageChange"
+          @update:page-size="handlePageSizeChange"
+        />
+      </div>
+    </NCard>
+  </ScrollContainer>
+</template>

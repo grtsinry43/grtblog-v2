@@ -8,9 +8,9 @@ import type { Router } from 'vue-router'
 const Layout = () => import('@/layout/index.vue')
 
 export function setupRouterGuard(router: Router) {
-  const { resolveMenuRoute, cleanup } = useUserStore()
+  const { resolveMenuRoute, cleanup, refreshAccessInfo } = useUserStore()
 
-  const { token } = toRefsUserStore()
+  const { token, user } = toRefsUserStore()
   const { routerEventBus } = useEventBus()
 
   router.beforeEach(async (to, from, next) => {
@@ -30,6 +30,17 @@ export function setupRouterGuard(router: Router) {
       cleanup()
       next()
       return false
+    }
+
+    if (token.value && user.value.id === null) {
+      try {
+        await refreshAccessInfo()
+      } catch (error) {
+        console.error('Error refreshing user access info:', error)
+        cleanup()
+        next()
+        return false
+      }
     }
 
     if (token.value && !router.hasRoute('layout')) {

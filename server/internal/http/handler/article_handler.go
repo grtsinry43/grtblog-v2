@@ -273,6 +273,54 @@ func (h *ArticleHandler) ListArticles(c *fiber.Ctx) error {
 	return response.Success(c, listResponse)
 }
 
+// CheckArticleLatest godoc
+// @Summary 校验文章是否最新
+// @Tags Article
+// @Accept json
+// @Produce json
+// @Param id path int true "文章ID"
+// @Param request body contract.CheckArticleLatestReq true "文章版本校验参数"
+// @Success 200 {object} contract.CheckArticleLatestResp
+// @Router /articles/{id}/latest [post]
+func (h *ArticleHandler) CheckArticleLatest(c *fiber.Ctx) error {
+	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	if err != nil {
+		return response.NewBizErrorWithMsg(response.ParamsError, "无效的文章ID")
+	}
+
+	var req contract.CheckArticleLatestReq
+	if err := c.BodyParser(&req); err != nil {
+		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
+	}
+
+	article, err := h.svc.GetArticleByID(c.Context(), id)
+	if errors.Is(err, content.ErrArticleNotFound) {
+		return response.NewBizErrorWithMsg(response.NotFound, "文章不存在")
+	} else if err != nil {
+		return err
+	}
+
+	if req.Hash == article.ContentHash {
+		return response.Success(c, contract.CheckArticleLatestResp{
+			Latest: true,
+			ArticleContentPayload: contract.ArticleContentPayload{
+				ContentHash: article.ContentHash,
+			},
+		})
+	}
+
+	return response.Success(c, contract.CheckArticleLatestResp{
+		Latest: false,
+		ArticleContentPayload: contract.ArticleContentPayload{
+			ContentHash: article.ContentHash,
+			Title:       article.Title,
+			LeadIn:      article.LeadIn,
+			TOC:         mapTOCNodes(article.TOC),
+			Content:     article.Content,
+		},
+	})
+}
+
 // DeleteArticle godoc
 // @Summary 删除文章
 // @Tags Article
@@ -413,9 +461,6 @@ func (h *ArticleHandler) toArticleListItemResp(ctx context.Context, article *con
 	return &resp, nil
 }
 func mapTOCNodes(nodes []content.TOCNode) []contract.TOCNode {
-	if len(nodes) == 0 {
-		return nil
-	}
 	result := make([]contract.TOCNode, len(nodes))
 	for i, node := range nodes {
 		result[i] = contract.TOCNode{

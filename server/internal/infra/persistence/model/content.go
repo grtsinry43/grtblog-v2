@@ -62,6 +62,7 @@ type Article struct {
 	LeadIn      *string        `gorm:"column:lead_in;type:text"`
 	TOC         []byte         `gorm:"column:toc;type:jsonb;not null"`
 	Content     string         `gorm:"column:content;type:text;not null"`
+	ContentHash string         `gorm:"column:content_hash;size:32;not null"`
 	AuthorID    int64          `gorm:"column:author_id;not null"`
 	Cover       *string        `gorm:"column:cover;size:255"`
 	CategoryID  *int64         `gorm:"column:category_id"`
@@ -94,6 +95,7 @@ type Moment struct {
 	Summary     string         `gorm:"column:summary;type:text;not null"`
 	AISummary   string         `gorm:"column:ai_summary;type:text"`
 	Content     string         `gorm:"column:content;type:text;not null"`
+	ContentHash string         `gorm:"column:content_hash;size:32;not null"`
 	AuthorID    int64          `gorm:"column:author_id;not null"`
 	TOC         []byte         `gorm:"column:toc;type:jsonb;not null"`
 	Image       string         `gorm:"column:img"`
@@ -131,6 +133,7 @@ type Page struct {
 	IsBuiltin   bool           `gorm:"column:is_builtin"`
 	TOC         []byte         `gorm:"column:toc;type:jsonb;not null"`
 	Content     string         `gorm:"column:content;type:text;not null"`
+	ContentHash string         `gorm:"column:content_hash;size:32;not null"`
 	CommentID   *int64         `gorm:"column:comment_id"`
 	CreatedAt   time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at;autoUpdateTime"`

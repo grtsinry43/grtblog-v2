@@ -1,3 +1,7 @@
+import { $fetch, FetchError } from 'ofetch'
+
+import type { FetchOptions, FetchResponse } from 'ofetch'
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api/v2').replace(/\/$/, '')
 
 type ResponseInterceptor<T> = (ctx: { data: T; envelope: ApiEnvelope<T> }) => void | Promise<void>
@@ -62,9 +66,19 @@ function normalizePath(path: string) {
   return path
 }
 
-export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+function shouldSetJsonContentType(body: FetchOptions['body']) {
+  if (!body) return false
+  if (typeof body === 'string') return true
+  if (typeof FormData !== 'undefined' && body instanceof FormData) return false
+  if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) return false
+  if (typeof Blob !== 'undefined' && body instanceof Blob) return false
+  if (typeof ArrayBuffer !== 'undefined' && body instanceof ArrayBuffer) return false
+  return true
+}
+
+export async function request<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const headers = new Headers(options.headers || {})
-  if (options.body && !headers.has('Content-Type')) {
+  if (shouldSetJsonContentType(options.body) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
   const bearer = tokenProvider ? tokenProvider() : null
@@ -73,13 +87,23 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${normalizePath(path)}`, {
-      ...options,
-      headers,
-    })
+    let response: FetchResponse<string>
+    try {
+      response = await $fetch.raw(`${API_BASE_URL}${normalizePath(path)}`, {
+        ...options,
+        headers,
+        responseType: 'text',
+      })
+    } catch (error) {
+      if (error instanceof FetchError && error.response) {
+        response = error.response as FetchResponse<string>
+      } else {
+        throw error
+      }
+    }
 
     const status = response.status
-    const text = await response.text()
+    const text = typeof response._data === 'string' ? response._data : ''
 
     let payload: ApiEnvelope<T> | null = null
     if (text) {
@@ -90,7 +114,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
       }
     }
 
-    if (!response.ok) {
+    if (status < 200 || status >= 300) {
       throw new ApiError(payload?.msg || `请求失败（${status}）`, {
         code: payload?.code,
         bizErr: payload?.bizErr,
