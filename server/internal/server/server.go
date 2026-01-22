@@ -36,9 +36,14 @@ type Server struct {
 // New builds a Fiber server with registered routes and middlewares.
 func New(cfg config.Config, db *gorm.DB) *Server {
 	logFile := initLogging()
+	sysCfgRepo := persistence.NewSysConfigRepository(db)
+	sysCfgSvc := sysconfig.NewService(sysCfgRepo, cfg.Turnstile)
+	bodyLimit := sysCfgSvc.UploadMaxSizeBytes(context.Background())
+
 	app := fiber.New(fiber.Config{
 		AppName:           cfg.App.Name,
 		EnablePrintRoutes: cfg.App.Env == "development",
+		BodyLimit:         bodyLimit,
 
 		// 核心：全局错误处理，自动把业务错误包装成统一响应
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -94,8 +99,6 @@ func New(cfg config.Config, db *gorm.DB) *Server {
 	})
 	turnstileClient := turnstile.NewClient(cfg.Turnstile)
 	eventBus := infraevent.NewInMemoryBus()
-	sysCfgRepo := persistence.NewSysConfigRepository(db)
-	sysCfgSvc := sysconfig.NewService(sysCfgRepo, cfg.Turnstile)
 
 	// 中间件：为每个请求附加 requestId（Meta 用）
 	app.Use(func(c *fiber.Ctx) error {

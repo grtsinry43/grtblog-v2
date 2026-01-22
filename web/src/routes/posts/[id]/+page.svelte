@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { get, writable } from 'svelte/store';
-	import { PostDetail } from '$lib/modules/post';
-	import { checkPostLatest } from '$lib/queries/post';
-	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/models/post';
+	import { PostDetail } from '$lib/ui/post';
+	import { checkPostLatest } from '$lib/infrastructure/post';
+	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/domain/post';
 	import { browser } from '$app/environment';
+	import type { PageData } from './$types';
 
-	let { data } = $props();
+	let { data }: { data: PageData } = $props();
 	const postStore = writable<PostDetailModel | null>(null);
 	let socket: WebSocket | null = null;
 	let showUpdateHint = $state(false);

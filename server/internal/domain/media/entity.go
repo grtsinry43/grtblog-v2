@@ -8,6 +8,7 @@ type UploadFile struct {
 	Path      string
 	Type      string
 	Size      int64
+	Hash      string
 	CreatedAt time.Time
 }
 

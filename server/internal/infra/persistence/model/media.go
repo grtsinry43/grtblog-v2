@@ -8,6 +8,7 @@ type UploadFile struct {
 	Path      string    `gorm:"column:path;size:255;not null"`
 	Type      string    `gorm:"column:type;size:45;not null"`
 	Size      int64     `gorm:"column:size;not null"`
+	Hash      string    `gorm:"column:hash;size:64"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 }
 

@@ -1,4 +1,4 @@
-import { getPostList } from '$lib/queries/post';
+import { getPostList } from '$lib/infrastructure/post';
 
 export const load = async ({ fetch, params, url }) => {
 	const rawPage = Number(params.page ?? '1');

@@ -2,8 +2,6 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-@variant dark (&:where(.dark, .dark *));
-
 @theme {
     /* Fonts */
     --font-sans: "Inter", "Noto Sans SC", -apple-system, sans-serif;
@@ -68,64 +66,91 @@
     --radius-5xl: 2.5rem;
 }
 
-/* Base Styles */
-body {
-    background-color: var(--color-ink-50);
-    color: var(--color-ink-900);
-    -webkit-font-smoothing: antialiased;
-    transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    body {
+        background-color: var(--color-ink-50);
+        color: var(--color-ink-900);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dark body {
+        background-color: var(--color-ink-950);
+        color: var(--color-ink-200);
+    }
+
+    ::selection {
+        background: rgba(45, 212, 191, 0.15);
+        color: var(--color-jade-800);
+    }
+
+    .dark ::selection {
+        background: rgba(45, 212, 191, 0.25);
+        color: var(--color-jade-100);
+    }
+
+    button {
+        cursor: pointer;
+    }
 }
 
-:root[class~="dark"] body {
-    background-color: var(--color-ink-950);
-    color: var(--color-ink-200);
+@layer utilities {
+    .glass-panel {
+        background-color: rgb(255 255 255 / 0.4);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgb(255 255 255 / 0.6);
+    }
+
+    .dark .glass-panel {
+        background-color: rgb(28 25 23 / 0.4);
+        border: 1px solid rgb(28 25 23 / 0.6);
+    }
+
+    .paper-texture {
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 0.05;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+    }
+
+    .bg-noise {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0.04;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .dark .bg-noise {
+        opacity: 0.035;
+        filter: invert(1) sepia(10%) hue-rotate(10deg);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 }
 
-/* Selection */
-::selection {
-    background: rgba(45, 212, 191, 0.15);
-    color: var(--color-jade-800);
-}
-
-:root[class~="dark"] ::selection {
-    background: rgba(45, 212, 191, 0.25);
-    color: var(--color-jade-100);
-}
-
-/* Utilities */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-/* Noise Texture */
-.bg-noise {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-:root[class~="dark"] .bg-noise {
-    opacity: 0.035;
-    filter: invert(1) sepia(10%) hue-rotate(10deg);
-}
-
-/* Global resets for polish */
-button {
-    cursor: pointer;
-}
-
-/* Markdown preview styling (aligned with admin preview) */
+/* Markdown preview styling */
 .markdown-preview {
     width: 100%;
     line-height: 1.6;
@@ -133,39 +158,39 @@ button {
     overflow-wrap: anywhere;
     background-color: transparent;
     color: inherit;
-    --md-hljs-fg: #24292f;
+    --md-hljs-fg: var(--color-ink-800);
     --md-hljs-bg: transparent;
-    --md-hljs-comment: #6e7781;
-    --md-hljs-keyword: #cf222e;
-    --md-hljs-string: #0a3069;
-    --md-hljs-number: #0550ae;
-    --md-hljs-title: #116329;
-    --md-hljs-variable: #953800;
-    --md-hljs-attr: #8250df;
-    --md-hljs-built-in: #0550ae;
-    --md-hljs-literal: #0550ae;
-    --md-hljs-type: #953800;
-    --md-component-border: rgba(17, 24, 39, 0.2);
-    --md-component-bg: rgba(17, 24, 39, 0.03);
-    --md-component-name: #111827;
+    --md-hljs-comment: var(--color-ink-400);
+    --md-hljs-keyword: var(--color-cinnabar-600);
+    --md-hljs-string: var(--color-jade-700);
+    --md-hljs-number: var(--color-amber-600);
+    --md-hljs-title: var(--color-jade-800);
+    --md-hljs-variable: var(--color-ink-500);
+    --md-hljs-attr: var(--color-jade-600);
+    --md-hljs-built-in: var(--color-jade-700);
+    --md-hljs-literal: var(--color-jade-700);
+    --md-hljs-type: var(--color-ink-600);
+    --md-component-border: var(--color-ink-200);
+    --md-component-bg: var(--color-ink-50);
+    --md-component-name: var(--color-ink-900);
 }
 
 .dark .markdown-preview {
-    --md-hljs-fg: #c9d1d9;
+    --md-hljs-fg: var(--color-ink-200);
     --md-hljs-bg: transparent;
-    --md-hljs-comment: #8b949e;
-    --md-hljs-keyword: #ff7b72;
-    --md-hljs-string: #a5d6ff;
-    --md-hljs-number: #79c0ff;
-    --md-hljs-title: #7ee787;
-    --md-hljs-variable: #ffa657;
-    --md-hljs-attr: #d2a8ff;
-    --md-hljs-built-in: #79c0ff;
-    --md-hljs-literal: #79c0ff;
-    --md-hljs-type: #ffa657;
-    --md-component-border: rgba(255, 255, 255, 0.2);
-    --md-component-bg: rgba(255, 255, 255, 0.04);
-    --md-component-name: #e5e7eb;
+    --md-hljs-comment: var(--color-ink-500);
+    --md-hljs-keyword: var(--color-cinnabar-500);
+    --md-hljs-string: var(--color-jade-300);
+    --md-hljs-number: var(--color-amber-500);
+    --md-hljs-title: var(--color-jade-400);
+    --md-hljs-variable: var(--color-ink-400);
+    --md-hljs-attr: var(--color-jade-400);
+    --md-hljs-built-in: var(--color-jade-300);
+    --md-hljs-literal: var(--color-jade-300);
+    --md-hljs-type: var(--color-ink-300);
+    --md-component-border: var(--color-ink-800);
+    --md-component-bg: var(--color-ink-900);
+    --md-component-name: var(--color-ink-100);
 }
 
 .markdown-preview .hljs,

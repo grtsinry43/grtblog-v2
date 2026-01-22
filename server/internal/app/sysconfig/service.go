@@ -98,3 +98,30 @@ func (s *Service) Turnstile(ctx context.Context) (turnstile.Settings, error) {
 	}
 	return settings, nil
 }
+
+// UploadMaxSizeBytes 返回上传文件的最大大小（字节），范围 1MB~50MB，默认 50MB。
+func (s *Service) UploadMaxSizeBytes(ctx context.Context) int {
+	const (
+		uploadKey     = "upload.maxSizeMB"
+		defaultSizeMB = 50
+		minSizeMB     = 1
+		maxSizeMB     = 50
+	)
+
+	sizeMB := defaultSizeMB
+	cfg, err := s.repo.GetByKey(ctx, uploadKey)
+	if err == nil {
+		val := strings.TrimSpace(cfg.Value)
+		if parsed, parseErr := strconv.Atoi(val); parseErr == nil {
+			sizeMB = parsed
+		}
+	}
+
+	if sizeMB < minSizeMB {
+		sizeMB = minSizeMB
+	}
+	if sizeMB > maxSizeMB {
+		sizeMB = maxSizeMB
+	}
+	return sizeMB * 1024 * 1024
+}

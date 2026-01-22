@@ -27,3 +27,15 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Design System
+design-system/
+
+# ridiculous AIs
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+

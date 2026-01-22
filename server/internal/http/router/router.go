@@ -1,6 +1,7 @@
 package router
 
 import (
+	"path/filepath"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -37,6 +38,7 @@ func Register(app *fiber.App, deps Dependencies) {
 
 	app.Get("/health/liveness", healthHandler.Liveness)
 	app.Get("/health/readiness", healthHandler.Readiness)
+	app.Static("/uploads", filepath.Join("storage", "uploads"))
 
 	api := app.Group("/api")
 	v2 := api.Group("/v2")

@@ -1,4 +1,4 @@
-import { getPostList } from '$lib/queries/post';
+import { getPostList } from '$lib/infrastructure/post';
 
 export const load = async ({ fetch, url }) => {
 	const rawPageSize = Number(url.searchParams.get('pageSize') ?? '10');

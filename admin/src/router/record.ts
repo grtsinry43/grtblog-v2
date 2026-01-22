@@ -64,6 +64,17 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     ],
   },
   {
+    path: 'files',
+    name: 'files',
+    icon: 'icon-[fluent--cloud-arrow-up-24-regular]',
+    label: '文件管理',
+    meta: {
+      componentName: 'Files',
+      showTab: true,
+    },
+    component: 'uploads/index',
+  },
+  {
     path: 'user-center',
     name: 'userCenter',
     icon: 'iconify ph--user-circle',

@@ -1,5 +1,5 @@
 import { getApi } from '$lib/shared/clients/api';
-import type { PostDetail, PostLatestCheckResponse, PostListResponse } from '$lib/models/post';
+import type { PostDetail, PostLatestCheckResponse, PostListResponse } from '$lib/domain/post';
 
 type PostListOptions = {
 	page?: number;
