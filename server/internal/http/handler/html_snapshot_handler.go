@@ -27,14 +27,12 @@ func NewHTMLSnapshotHandler(service *htmlsnapshot.Service) *HTMLSnapshotHandler 
 // @Success 200 {object} any
 // @Router /public/html/posts/refresh [post]
 func (h *HTMLSnapshotHandler) RefreshPostsHTML(c *fiber.Ctx) error {
-	go func() {
-		if h.service == nil {
-			return
-		}
-		if err := h.service.RefreshPostsHTML(context.Background()); err != nil {
-			log.Printf("[html-snapshot] generate posts html failed: %v", err)
-		}
-	}()
+	if h.service == nil {
+		return response.SuccessWithMessage[any](c, nil, "service not initialized")
+	}
+	if err := h.service.RefreshPostsHTML(context.Background()); err != nil {
+		log.Printf("[html-snapshot] generate posts html failed: %v", err)
+	}
 
 	return response.SuccessWithMessage[any](c, nil, "ok")
 }
