@@ -1,4 +1,5 @@
 export * from './useComponentModifier'
+export * from './useLeaveConfirm'
 export * from './useComponentThemeOverrides'
 export * from './useDiscreteApi'
 export * from './useInjection'

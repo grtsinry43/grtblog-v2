@@ -22,7 +22,15 @@ const props = defineProps<{
   modelValue: string
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'cursor-change', value: {
+    line: number
+    column: number
+    selectionChars: number
+    selectionTotal: number
+  }): void
+}>()
 
 const editorRef = ref<HTMLElement>()
 const themeVars = useThemeVars()
@@ -113,6 +121,24 @@ const { view, onViewUpdate } = useCodeMirror(editorRef, {
     componentTouchedKeys.clear()
     componentEditor.show = true
   },
+})
+
+onViewUpdate((update) => {
+  const pos = update.state.selection.main.head
+  const selection = update.state.selection.main
+  const selectionText =
+    selection.from === selection.to
+      ? ''
+      : update.state.doc.sliceString(selection.from, selection.to)
+  const selectionTotal = selectionText.length
+  const selectionChars = selectionText.replace(/\s/g, '').length
+  const line = update.state.doc.lineAt(pos)
+  emit('cursor-change', {
+    line: line.number,
+    column: pos - line.from + 1,
+    selectionChars,
+    selectionTotal,
+  })
 })
 
 // 加载 tooltip 相关（floatmenu）

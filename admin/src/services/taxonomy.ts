@@ -26,3 +26,17 @@ export function listTags() {
     method: 'GET',
   })
 }
+
+export function createCategory(payload: { name: string; shortUrl: string }) {
+  return request<CategoryItem>('/admin/categories', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export function createTag(name: string) {
+  return request<TagItem>('/admin/tags', {
+    method: 'POST',
+    body: { name },
+  })
+}
