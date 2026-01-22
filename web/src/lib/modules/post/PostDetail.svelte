@@ -161,7 +161,7 @@ onDestroy(() => {
 										<a
 											class="transition-colors hover:text-ink-900 {activeAnchor === item.anchor ? 'font-semibold text-ink-900' : ''}"
 											href={"#" + item.anchor}
-											on:click={(event) => scrollToAnchor(item.anchor, event)}
+											onclick={(event) => scrollToAnchor(item.anchor, event)}
 										>
 											{item.name}
 										</a>
@@ -172,7 +172,7 @@ onDestroy(() => {
 														<a
 															class="transition-colors hover:text-ink-800 {activeAnchor === child.anchor ? 'font-semibold text-ink-800' : ''}"
 															href={"#" + child.anchor}
-															on:click={(event) => scrollToAnchor(child.anchor, event)}
+															onclick={(event) => scrollToAnchor(child.anchor, event)}
 														>
 															{child.name}
 														</a>

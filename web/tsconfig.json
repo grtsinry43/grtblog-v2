@@ -10,10 +10,7 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler",
-		"paths": {
-			"$shared/*": ["../shared/*"]
-		}
+		"moduleResolution": "bundler"
 	},
 	"include": ["src/**/*.ts", "src/**/*.svelte", "src/**/*.d.ts", "../shared/**/*.ts"]
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias

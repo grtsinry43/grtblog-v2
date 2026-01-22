@@ -23,11 +23,13 @@
 
 {#if isOpen}
 	<!-- Backdrop -->
-	<div
+	<button
+		type="button"
+		aria-label="Close table of contents"
 		class="fixed inset-0 z-60 bg-ink-900/20 backdrop-blur-sm transition-opacity"
 		transition:fade={{ duration: 300 }}
 		onclick={onClose}
-	></div>
+	></button>
 
 	<!-- Sidebar Drawer -->
 	<div

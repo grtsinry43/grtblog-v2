@@ -145,6 +145,7 @@
 	<div
 		class="glass-dock py-3 px-1.5 flex flex-col gap-3 items-center hover:shadow-float transition-all duration-500"
 		onmouseleave={() => (hoveredItemId = null)}
+		role="presentation"
 	>
 		<!-- Avatar -->
 		<button
@@ -165,7 +166,11 @@
 				activeSection === item.id || item.children?.some((c) => c.id === activeSection)}
 
 			<!-- 菜单项容器 (处理 Hover) -->
-			<div class="relative flex items-center" onmouseenter={() => (hoveredItemId = item.id)}>
+			<div
+				class="relative flex items-center"
+				onmouseenter={() => (hoveredItemId = item.id)}
+				role="presentation"
+			>
 				<button
 					onclick={() => handleNavigate(item.id)}
 					class="nav-btn-desktop relative z-20 {isActive ? 'active' : ''}"
@@ -240,7 +245,7 @@
 	>
 		<!-- 背景层 (变形动画) -->
 		<div
-			class="absolute inset-0 bg-white/90 dark:bg-ink-900/90 backdrop-blur-xl border-white/40 dark:border-ink-700 shadow-glass dark:shadow-glass-dark transition-all ease-[cubic-bezier(0.23,1,0.32,1)]"
+			class="absolute inset-0 bg-white/90 dark:bg-ink-900/90 backdrop-blur-xl border-white/40 dark:border-ink-700 shadow-glass transition-all ease-[cubic-bezier(0.23,1,0.32,1)]"
 			class:duration-0={!isMobileMenuOpen && !isMenuAnimating}
 			class:duration-500={isMobileMenuOpen || isMenuAnimating}
 			style:opacity={1}
@@ -342,7 +347,6 @@
 						<div class="flex flex-col">
 							<!-- 一级菜单项 -->
 							<div
-								onclick={() => handleNavigate(item.id)}
 								class="group flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden cursor-pointer select-none
                 {isActive
 									? 'bg-white dark:bg-ink-800'
@@ -355,35 +359,42 @@
 									></div>
 								{/if}
 
-								<!-- 图标 -->
-								<div
-									class="w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-300 shrink-0
-                  {isActive
-										? 'bg-jade-100 text-jade-700 dark:bg-jade-900 dark:text-jade-300'
-										: 'bg-ink-100 text-ink-500 dark:bg-ink-950 dark:text-ink-400'}"
+								<button
+									type="button"
+									onclick={() => handleNavigate(item.id)}
+									class="flex flex-1 min-w-0 items-center gap-3 text-left"
 								>
-									<item.icon size={16} />
-								</div>
+									<!-- 图标 -->
+									<div
+										class="w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-300 shrink-0
+                  {isActive
+											? 'bg-jade-100 text-jade-700 dark:bg-jade-900 dark:text-jade-300'
+											: 'bg-ink-100 text-ink-500 dark:bg-ink-950 dark:text-ink-400'}"
+									>
+										<item.icon size={16} />
+									</div>
 
-								<!-- 文本 -->
-								<div class="flex-1 min-w-0">
-									<div
-										class="font-serif text-[15px] font-medium truncate {isActive
-											? 'text-jade-800 dark:text-jade-100'
-											: 'text-ink-700 dark:text-ink-300'}"
-									>
-										{item.label}
+									<!-- 文本 -->
+									<div class="flex-1 min-w-0">
+										<div
+											class="font-serif text-[15px] font-medium truncate {isActive
+												? 'text-jade-800 dark:text-jade-100'
+												: 'text-ink-700 dark:text-ink-300'}"
+										>
+											{item.label}
+										</div>
+										<div
+											class="text-[10px] text-ink-400 dark:text-ink-500 line-clamp-1 font-sans mt-0.5"
+										>
+											{item.desc}
+										</div>
 									</div>
-									<div
-										class="text-[10px] text-ink-400 dark:text-ink-500 line-clamp-1 font-sans mt-0.5"
-									>
-										{item.desc}
-									</div>
-								</div>
+								</button>
 
 								<!-- 展开/收起按钮 (独立交互) -->
 								{#if hasChildren}
 									<button
+										type="button"
 										onclick={(e) => toggleMobileSubmenu(e, item.id)}
 										class="p-2 -mr-2 rounded-full hover:bg-ink-100 dark:hover:bg-white/10 text-ink-400 transition-colors active:scale-90"
 									>
@@ -450,11 +461,13 @@
 
 	<!-- 全局遮罩 (点击外部关闭) -->
 	{#if isMobileMenuOpen}
-		<div
+		<button
+			type="button"
+			aria-label="Close menu"
 			transition:fade={{ duration: 300 }}
 			class="fixed inset-0 bg-ink-900/20 backdrop-blur-[2px] -z-10"
 			onclick={() => (isMobileMenuOpen = false)}
-		></div>
+		></button>
 	{/if}
 </div>
 
@@ -477,7 +490,7 @@
 	.glass-dock {
 		@apply bg-white/70 dark:bg-ink-900/70;
 		@apply border border-white/50 backdrop-blur-2xl dark:border-ink-700;
-		@apply shadow-glass dark:shadow-glass-dark;
+		@apply shadow-glass;
 		@apply rounded-full;
 	}
 
@@ -516,7 +529,7 @@
 	.shadow-glass-lg {
 		box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
 	}
-	:global(.dark) .shadow-glass-dark {
+	:global(.dark) .shadow-glass {
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 	}
 </style>

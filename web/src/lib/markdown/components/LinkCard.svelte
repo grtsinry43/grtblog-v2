@@ -7,9 +7,12 @@
 		contentHtml?: string;
 	}>();
 
-	const openInNewTab = typeof newtab === 'string' ? newtab !== 'false' : Boolean(newtab);
-	const target = openInNewTab ? '_blank' : '_self';
-	const rel = openInNewTab ? 'noreferrer' : undefined;
+	const openInNewTab = $derived.by(() => {
+		const value = newtab;
+		return typeof value === 'string' ? value !== 'false' : Boolean(value);
+	});
+	const target = $derived(openInNewTab ? '_blank' : '_self');
+	const rel = $derived(openInNewTab ? 'noreferrer' : undefined);
 </script>
 
 <a

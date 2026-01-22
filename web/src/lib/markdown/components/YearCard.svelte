@@ -15,8 +15,8 @@
 		contentHtml?: string;
 	}>();
 
-	const target = url?.startsWith('http') ? '_blank' : '_self';
-	const rel = target === '_blank' ? 'noreferrer' : undefined;
+	const target = $derived((url ?? '').startsWith('http') ? '_blank' : '_self');
+	const rel = $derived(target === '_blank' ? 'noreferrer' : undefined);
 </script>
 
 <article class="group relative overflow-hidden rounded-3xl border border-ink-200/70 bg-white/80 shadow-float">
