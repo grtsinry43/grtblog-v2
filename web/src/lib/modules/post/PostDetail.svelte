@@ -1,7 +1,96 @@
 <script lang="ts">
-	import type { PostDetail } from '$lib/models/post';
+import { onDestroy, tick } from 'svelte';
+import type { PostDetail } from '$lib/models/post';
+import { renderMarkdown } from '$lib/shared/markdown';
+import type { TOCNode } from '$lib/models/post';
+import { mountMarkdownComponents } from '$lib/markdown/components';
+import '$lib/markdown/components/register';
 
 	let { post, updated = false } = $props<{ post: PostDetail | null; updated?: boolean }>();
+	let contentRoot: HTMLElement | null = $state(null);
+let activeAnchor = $state<string | null>(null);
+let observer: IntersectionObserver | null = null;
+let cleanupComponents: (() => void) | null = null;
+
+	const flattenTOC = (nodes?: TOCNode[]) => {
+		if (!nodes?.length) {
+			return [];
+		}
+		const anchors: string[] = [];
+		const walk = (items: TOCNode[]) => {
+			for (const item of items) {
+				anchors.push(item.anchor);
+				if (item.children?.length) {
+					walk(item.children);
+				}
+			}
+		};
+		walk(nodes);
+		return anchors;
+	};
+
+	let contentHtml = $derived(post ? renderMarkdown(post.content ?? '', flattenTOC(post.toc)) : '');
+
+	const setupObserver = () => {
+		if (!contentRoot || typeof IntersectionObserver === 'undefined') {
+			return;
+		}
+		observer?.disconnect();
+		const headings = contentRoot.querySelectorAll('h1, h2, h3, h4, h5, h6');
+		if (!headings.length) {
+			activeAnchor = null;
+			return;
+		}
+		observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries.filter((entry) => entry.isIntersecting);
+				if (!visible.length) {
+					return;
+				}
+				visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+				const target = visible[0]?.target as HTMLElement | undefined;
+				if (target?.id) {
+					activeAnchor = target.id;
+				}
+			},
+			{ rootMargin: '0px 0px -70% 0px', threshold: 0 }
+		);
+		headings.forEach((heading) => observer?.observe(heading));
+	};
+
+const refreshObserver = async () => {
+	await tick();
+	setupObserver();
+	cleanupComponents?.();
+	if (contentRoot) {
+		cleanupComponents = mountMarkdownComponents(contentRoot);
+	}
+};
+
+	const scrollToAnchor = (anchor: string, event: MouseEvent) => {
+		event.preventDefault();
+		if (!contentRoot) {
+			return;
+		}
+		const target = contentRoot.querySelector(`#${CSS.escape(anchor)}`) as HTMLElement | null;
+		if (!target) {
+			return;
+		}
+		target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		activeAnchor = anchor;
+		if (typeof history !== 'undefined') {
+			history.replaceState(null, '', `#${anchor}`);
+		}
+	};
+
+	$effect(() => {
+		void refreshObserver();
+	});
+
+onDestroy(() => {
+	observer?.disconnect();
+	cleanupComponents?.();
+});
 
 	const formatDate = (value?: string) => {
 		if (!value) {
@@ -48,14 +137,17 @@
 				<section class="space-y-8">
 					<div class="rounded-[28px] border border-ink-200/70 bg-white/80 p-6 shadow-float backdrop-blur">
 						<div class="text-sm font-semibold uppercase tracking-[0.25em] text-ink-400">Content</div>
-						<div class="mt-5 whitespace-pre-wrap text-[17px] leading-8 text-ink-800">
-							{post.content}
+						<div
+							class="markdown-preview markdown-body prose mt-5 max-w-none text-[17px] leading-8 text-ink-800"
+							bind:this={contentRoot}
+						>
+							{@html contentHtml}
 						</div>
 					</div>
 				</section>
 
 				{#if post.toc?.length}
-					<aside class="lg:sticky lg:top-24">
+					<aside class="lg:sticky lg:top-32 lg:max-h-[calc(100vh-10rem)] lg:overflow-auto">
 						<div class="rounded-3xl border border-ink-200/80 bg-white/90 p-5 shadow-subtle backdrop-blur">
 							<div class="flex items-center justify-between">
 								<span class="text-xs font-semibold uppercase tracking-[0.25em] text-ink-400">
@@ -66,14 +158,22 @@
 							<ul class="mt-4 space-y-3 text-sm text-ink-700">
 								{#each post.toc as item}
 									<li class="space-y-2">
-										<a class="transition-colors hover:text-ink-900" href={"#" + item.anchor}>
+										<a
+											class="transition-colors hover:text-ink-900 {activeAnchor === item.anchor ? 'font-semibold text-ink-900' : ''}"
+											href={"#" + item.anchor}
+											on:click={(event) => scrollToAnchor(item.anchor, event)}
+										>
 											{item.name}
 										</a>
 										{#if item.children?.length}
 											<ul class="space-y-1 pl-4 text-xs text-ink-500">
 												{#each item.children as child}
 													<li>
-														<a class="transition-colors hover:text-ink-800" href={"#" + child.anchor}>
+														<a
+															class="transition-colors hover:text-ink-800 {activeAnchor === child.anchor ? 'font-semibold text-ink-800' : ''}"
+															href={"#" + child.anchor}
+															on:click={(event) => scrollToAnchor(child.anchor, event)}
+														>
 															{child.name}
 														</a>
 													</li>

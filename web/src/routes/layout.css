@@ -124,3 +124,184 @@ body {
 button {
     cursor: pointer;
 }
+
+/* Markdown preview styling (aligned with admin preview) */
+.markdown-preview {
+    width: 100%;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    background-color: transparent;
+    color: inherit;
+    --md-hljs-fg: #24292f;
+    --md-hljs-bg: transparent;
+    --md-hljs-comment: #6e7781;
+    --md-hljs-keyword: #cf222e;
+    --md-hljs-string: #0a3069;
+    --md-hljs-number: #0550ae;
+    --md-hljs-title: #116329;
+    --md-hljs-variable: #953800;
+    --md-hljs-attr: #8250df;
+    --md-hljs-built-in: #0550ae;
+    --md-hljs-literal: #0550ae;
+    --md-hljs-type: #953800;
+    --md-component-border: rgba(17, 24, 39, 0.2);
+    --md-component-bg: rgba(17, 24, 39, 0.03);
+    --md-component-name: #111827;
+}
+
+.dark .markdown-preview {
+    --md-hljs-fg: #c9d1d9;
+    --md-hljs-bg: transparent;
+    --md-hljs-comment: #8b949e;
+    --md-hljs-keyword: #ff7b72;
+    --md-hljs-string: #a5d6ff;
+    --md-hljs-number: #79c0ff;
+    --md-hljs-title: #7ee787;
+    --md-hljs-variable: #ffa657;
+    --md-hljs-attr: #d2a8ff;
+    --md-hljs-built-in: #79c0ff;
+    --md-hljs-literal: #79c0ff;
+    --md-hljs-type: #ffa657;
+    --md-component-border: rgba(255, 255, 255, 0.2);
+    --md-component-bg: rgba(255, 255, 255, 0.04);
+    --md-component-name: #e5e7eb;
+}
+
+.markdown-preview .hljs,
+.markdown-preview pre.hljs {
+    color: var(--md-hljs-fg);
+    background-color: var(--md-hljs-bg);
+}
+
+.markdown-preview pre.hljs {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.markdown-preview .hljs-comment,
+.markdown-preview .hljs-quote {
+    color: var(--md-hljs-comment);
+}
+
+.markdown-preview .hljs-keyword,
+.markdown-preview .hljs-selector-tag,
+.markdown-preview .hljs-literal,
+.markdown-preview .hljs-section,
+.markdown-preview .hljs-link {
+    color: var(--md-hljs-keyword);
+}
+
+.markdown-preview .hljs-string,
+.markdown-preview .hljs-title,
+.markdown-preview .hljs-name,
+.markdown-preview .hljs-type,
+.markdown-preview .hljs-attribute,
+.markdown-preview .hljs-symbol,
+.markdown-preview .hljs-bullet,
+.markdown-preview .hljs-addition {
+    color: var(--md-hljs-string);
+}
+
+.markdown-preview .hljs-number,
+.markdown-preview .hljs-meta,
+.markdown-preview .hljs-built_in,
+.markdown-preview .hljs-builtin-name {
+    color: var(--md-hljs-number);
+}
+
+.markdown-preview .hljs-title,
+.markdown-preview .hljs-class .hljs-title {
+    color: var(--md-hljs-title);
+}
+
+.markdown-preview .hljs-variable,
+.markdown-preview .hljs-template-variable {
+    color: var(--md-hljs-variable);
+}
+
+.markdown-preview .hljs-attr,
+.markdown-preview .hljs-attribute {
+    color: var(--md-hljs-attr);
+}
+
+.markdown-preview .hljs-built_in,
+.markdown-preview .hljs-builtin-name {
+    color: var(--md-hljs-built-in);
+}
+
+.markdown-preview .hljs-literal {
+    color: var(--md-hljs-literal);
+}
+
+.markdown-preview .hljs-type {
+    color: var(--md-hljs-type);
+}
+
+.markdown-preview .hljs-deletion {
+    color: var(--md-hljs-keyword);
+}
+
+.markdown-preview .md-component-placeholder {
+    margin: 1rem 0;
+}
+
+.markdown-preview .md-component-fallback {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    border: 1px dashed var(--md-component-border);
+    border-radius: 10px;
+    background: var(--md-component-bg);
+}
+
+.markdown-preview .md-component-fallback__label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(107, 114, 128, 0.9);
+}
+
+.markdown-preview .md-component-fallback__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-component-name);
+}
+
+.markdown-preview .md-component-fallback__props {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.markdown-preview .md-component-fallback__prop {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: 999px;
+    border: 1px solid var(--md-component-border);
+    background: var(--md-component-bg);
+    color: var(--md-component-name);
+}
+
+.markdown-preview .md-component-fallback__prop.is-empty {
+    opacity: 0.6;
+}
+
+.markdown-preview .md-component-fallback__prop-key {
+    font-weight: 600;
+}
+
+.markdown-preview .md-component-fallback__prop-sep {
+    opacity: 0.6;
+}
+
+.markdown-preview .md-component-fallback__hint {
+    font-size: 12px;
+    color: rgba(107, 114, 128, 0.9);
+}

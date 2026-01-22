@@ -24,7 +24,7 @@
 {#if isOpen}
 	<!-- Backdrop -->
 	<div
-		class="fixed inset-0 z-[60] bg-ink-900/20 backdrop-blur-sm transition-opacity"
+		class="fixed inset-0 z-60 bg-ink-900/20 backdrop-blur-sm transition-opacity"
 		transition:fade={{ duration: 300 }}
 		onclick={onClose}
 	></div>

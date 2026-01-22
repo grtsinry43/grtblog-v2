@@ -15,7 +15,10 @@
 	let hasPrev = $derived(pagination.page > 1);
 	let hasNext = $derived(pagination.page < totalPages);
 
-	const buildPageLink = (page: number) => `?page=${page}&pageSize=${pagination.size}`;
+	const buildPageLink = (page: number) => {
+		const safePage = Number.isFinite(page) && page > 1 ? page : 1;
+		return safePage === 1 ? '/posts/' : `/posts/page/${safePage}/`;
+	};
 </script>
 
 <h1>Articles</h1>

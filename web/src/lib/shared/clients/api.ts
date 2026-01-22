@@ -60,6 +60,8 @@ export const api = ofetch.create(defaults);
 export const createServerApi = (svelteFetch: typeof fetch) => {
 	return ofetch.create({
 		...defaults,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-expect-error
 		// eslint-disable-next-line
 		fetch: svelteFetch as any, // 替换底层 fetch 为 SvelteKit 的特供版
 		// 如果需要服务端走内网 DNS，可以在这里覆盖 baseURL

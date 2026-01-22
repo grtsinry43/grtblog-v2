@@ -38,4 +38,3 @@
 
 ## Security & Configuration Tips
 - Runtime behavior is controlled via env vars like `APP_PORT`, `DB_DRIVER`, `DB_DSN`, `AUTH_SECRET`, and `AUTH_DEFAULT_ROLES`.
-- RBAC model lives in `configs/rbac_model.conf`; permissions are loaded from the `role_permission` table.
