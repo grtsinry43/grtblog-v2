@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PostList } from '$lib/ui/post';
+	import { PostList } from '$lib/modules/post';
 
 	let { data } = $props();
 </script>

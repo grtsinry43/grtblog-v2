@@ -475,7 +475,7 @@
 <TableOfContents isOpen={isTocOpen} onClose={() => (isTocOpen = false)} />
 
 <style>
-	@reference "../../../app.css";
+	@reference "../../../routes/layout.css";
 
 	/* --- 通用：隐藏滚动条 --- */
 	.no-scrollbar::-webkit-scrollbar {
@@ -488,37 +488,37 @@
 
 	/* --- Desktop Styles --- */
 	.glass-dock {
-		@apply dark:bg-ink-950/40 bg-white/40;
-		@apply border border-white/50 backdrop-blur-2xl dark:border-white/10;
+		@apply bg-white/70 dark:bg-ink-900/70;
+		@apply border border-white/50 backdrop-blur-2xl dark:border-ink-700;
 		@apply shadow-glass;
 		@apply rounded-full;
 	}
 
 	.glass-popover {
-		@apply dark:bg-ink-900/60 bg-white/60;
-		@apply border border-white/40 backdrop-blur-xl dark:border-white/10;
-		@apply shadow-float rounded-2xl;
+		@apply bg-white/80 dark:bg-ink-900/80;
+		@apply border border-white/50 backdrop-blur-xl dark:border-ink-700;
+		@apply rounded-xl shadow-xl;
 	}
 
 	.nav-btn-desktop {
 		@apply flex h-10 w-10 items-center justify-center rounded-full;
-		@apply text-ink-500 dark:text-ink-400;
-		@apply hover:bg-jade-50/50 dark:hover:bg-jade-900/20;
+		@apply text-ink-400 dark:text-ink-500;
+		@apply hover:bg-jade-50 dark:hover:bg-ink-800;
 		@apply hover:text-jade-600 dark:hover:text-jade-400;
-		@apply transition-all duration-300;
+		@apply transition-colors;
 	}
 
 	.nav-btn-desktop.active {
-		@apply bg-jade-500 dark:bg-jade-500 text-white;
-		@apply shadow-glow;
+		@apply bg-jade-800 text-white dark:bg-jade-600;
+		@apply shadow-lg shadow-jade-800/20 dark:shadow-jade-900/40;
 		@apply scale-110;
 	}
 
 	/* Tooltip */
 	.tooltip {
-		@apply bg-ink-900 dark:bg-ink-100 dark:text-ink-900 absolute left-14 text-white;
-		@apply rounded-full px-3 py-1.5 text-[12px] whitespace-nowrap;
-		@apply shadow-float pointer-events-none font-serif tracking-wide;
+		@apply absolute left-14 bg-ink-900 text-white dark:bg-white dark:text-ink-900;
+		@apply rounded-lg px-3 py-1.5 text-[12px] whitespace-nowrap;
+		@apply pointer-events-none font-serif tracking-wide shadow-xl;
 		@apply top-1/2 -translate-y-1/2;
 	}
 

@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { PostList } from '$lib/ui/post';
-	import type { PageData } from './$types';
+	import { PostList } from '$lib/modules/post';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 </script>
 
 <PostList posts={data.posts ?? []} pagination={data.pagination} />
