@@ -6,7 +6,7 @@
 	import { browser } from '$app/environment';
 
 	let { data } = $props();
-	const postStore = writable<PostDetailModel | null>(null);
+	const postStore = writable<PostDetailModel | null>(data.post ?? null);
 	let socket: WebSocket | null = null;
 	let showUpdateHint = $state(false);
 	let updateHintTimer: ReturnType<typeof setTimeout> | null = null;
