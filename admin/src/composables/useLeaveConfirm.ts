@@ -1,6 +1,6 @@
+import { useDialog } from 'naive-ui'
 import { onBeforeUnmount } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
-import { useDialog } from 'naive-ui'
 
 import { useComponentModifier } from '@/composables'
 

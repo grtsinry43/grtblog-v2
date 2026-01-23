@@ -51,6 +51,7 @@ func Register(app *fiber.App, deps Dependencies) {
 		sysCfgRepo := persistence.NewSysConfigRepository(deps.DB)
 		sysCfgSvc = sysconfig.NewService(sysCfgRepo, deps.Config.Turnstile)
 	}
+	deps.SysConfig = sysCfgSvc
 	eventBus := deps.EventBus
 	if eventBus == nil {
 		eventBus = infraevent.NewInMemoryBus()
@@ -94,7 +95,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerArticleAuthRoutes(v2, deps)
 	registerMomentAuthRoutes(v2, deps)
 	registerPageAuthRoutes(v2, deps)
-	registerAdminRoutes(v2, deps, websiteInfoHandler)
+	registerAdminRoutes(v2, deps, websiteInfoHandler, sysCfgSvc)
 	registerTaxonomyAdminRoutes(v2, deps)
 	registerWebhookAdminRoutes(v2, deps, webhookSvc)
 

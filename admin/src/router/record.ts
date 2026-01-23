@@ -2,6 +2,18 @@ import type { MenuMixedOptions } from './interface'
 
 export const routeRecordRaw: MenuMixedOptions[] = [
   {
+    path: 'dashboard',
+    name: 'dashboard',
+    icon: 'icon-[mage--dashboard-chart]',
+    label: '仪表板',
+    meta: {
+      componentName: 'Dashboard',
+      pinned: true,
+      showTab: true,
+    },
+    component: 'dashboard/index',
+  },
+  {
     path: 'articles',
     name: 'articleManagement',
     icon: 'iconify ph--article',
@@ -54,7 +66,7 @@ export const routeRecordRaw: MenuMixedOptions[] = [
   {
     path: 'notes',
     name: 'noteManagement',
-    icon: 'iconify ph--note',
+    icon: 'iconify ph--aperture-thin',
     label: '手记管理',
     redirect: 'notes/list',
     children: [
@@ -204,23 +216,25 @@ export const routeRecordRaw: MenuMixedOptions[] = [
   },
   {
     path: 'webhooks',
-    name: 'webhookManagement',
+    name: 'webhookList',
     icon: 'iconify ph--webhooks-logo',
     label: 'Webhook',
-    redirect: 'webhooks/list',
-    children: [
-      {
-        path: 'list',
-        name: 'webhookList',
-        label: 'Webhook 管理',
-        icon: 'iconify ph--webhooks-logo',
-        meta: {
-          componentName: 'WebhookList',
-          showTab: true,
-        },
-        component: 'webhooks/index',
-      },
-    ],
+    meta: {
+      componentName: 'WebhookList',
+      showTab: true,
+    },
+    component: 'webhooks/index',
+  },
+  {
+    path: 'settings',
+    name: 'systemSettings',
+    icon: 'iconify ph--gear-six',
+    label: '系统设置',
+    meta: {
+      componentName: 'SystemSettings',
+      showTab: true,
+    },
+    component: 'sysconfig/index',
   },
   {
     path: 'advanced',

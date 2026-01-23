@@ -1,7 +1,9 @@
 package sysconfig
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -198,4 +200,553 @@ func (s *Service) WebhookSettings(ctx context.Context) (WebhookSettings, error) 
 	}
 
 	return settings, nil
+}
+
+type UpdateItem struct {
+	Key          string
+	Value        *json.RawMessage
+	IsSensitive  *bool
+	GroupPath    *string
+	Label        *string
+	Description  *string
+	ValueType    *string
+	EnumOptions  *json.RawMessage
+	DefaultValue *json.RawMessage
+	VisibleWhen  *json.RawMessage
+	Sort         *int
+	Meta         *json.RawMessage
+}
+
+const (
+	valueTypeString = "string"
+	valueTypeNumber = "number"
+	valueTypeBool   = "bool"
+	valueTypeEnum   = "enum"
+	valueTypeJSON   = "json"
+)
+
+type UpdateValidationError struct {
+	Key     string
+	Message string
+	Cause   error
+}
+
+func (e *UpdateValidationError) Error() string {
+	if e.Cause != nil {
+		return fmt.Sprintf("%s: %v", e.Message, e.Cause)
+	}
+	return e.Message
+}
+
+func (s *Service) ListConfigs(ctx context.Context, keys []string) ([]domainconfig.SysConfig, error) {
+	return s.repo.List(ctx, keys)
+}
+
+func (s *Service) UpdateConfigs(ctx context.Context, items []UpdateItem) ([]domainconfig.SysConfig, error) {
+	if len(items) == 0 {
+		return nil, nil
+	}
+	uniqueKeys := make(map[string]struct{}, len(items))
+	keys := make([]string, 0, len(items))
+	for _, item := range items {
+		key := strings.TrimSpace(item.Key)
+		if key == "" {
+			continue
+		}
+		if _, ok := uniqueKeys[key]; ok {
+			continue
+		}
+		uniqueKeys[key] = struct{}{}
+		keys = append(keys, key)
+	}
+	existingList, err := s.repo.List(ctx, keys)
+	if err != nil {
+		return nil, err
+	}
+	existingMap := make(map[string]domainconfig.SysConfig, len(existingList))
+	for _, cfg := range existingList {
+		existingMap[cfg.Key] = cfg
+	}
+
+	toUpsert := make([]domainconfig.SysConfig, 0, len(items))
+	for _, item := range items {
+		key := strings.TrimSpace(item.Key)
+		if key == "" {
+			continue
+		}
+		current, exists := existingMap[key]
+		next := current
+		if !exists {
+			next = domainconfig.SysConfig{Key: key}
+		}
+		changed := false
+
+		targetValueType := normalizeValueType(current.ValueType)
+		if targetValueType == "" {
+			targetValueType = valueTypeString
+		}
+		if item.ValueType != nil {
+			targetValueType = normalizeValueType(*item.ValueType)
+			if err := validateValueType(targetValueType); err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "valueType 无效",
+					Cause:   err,
+				}
+			}
+			if !exists || targetValueType != current.ValueType {
+				next.ValueType = targetValueType
+				changed = true
+			}
+		} else if err := validateValueType(targetValueType); err != nil {
+			return nil, &UpdateValidationError{
+				Key:     key,
+				Message: "valueType 无效",
+				Cause:   err,
+			}
+		} else if !exists {
+			next.ValueType = targetValueType
+		}
+
+		targetSensitive := current.IsSensitive
+		if item.IsSensitive != nil {
+			targetSensitive = *item.IsSensitive
+			if !exists || targetSensitive != current.IsSensitive {
+				changed = true
+			}
+		} else if !exists {
+			targetSensitive = false
+		}
+		next.IsSensitive = targetSensitive
+
+		if item.GroupPath != nil {
+			groupPath := normalizeGroupPath(*item.GroupPath)
+			if !exists || groupPath != current.GroupPath {
+				next.GroupPath = groupPath
+				changed = true
+			}
+		} else if !exists {
+			next.GroupPath = ""
+		}
+
+		if item.Label != nil {
+			if !exists || *item.Label != current.Label {
+				next.Label = *item.Label
+				changed = true
+			}
+		} else if !exists {
+			next.Label = ""
+		}
+
+		if item.Description != nil {
+			if !exists || *item.Description != current.Description {
+				next.Description = *item.Description
+				changed = true
+			}
+		} else if !exists {
+			next.Description = ""
+		}
+
+		enumOptions := current.EnumOptions
+		enumValues := []string(nil)
+		if item.EnumOptions != nil {
+			if targetValueType != valueTypeEnum {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "enumOptions 仅适用于 enum 类型",
+				}
+			}
+			normalized, values, err := normalizeEnumOptions(*item.EnumOptions)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "enumOptions 无效",
+					Cause:   err,
+				}
+			}
+			enumOptions = normalized
+			enumValues = values
+			next.EnumOptions = enumOptions
+			changed = true
+		} else if !exists {
+			enumOptions = emptyJSONArray
+			next.EnumOptions = enumOptions
+		} else {
+			if len(enumOptions) == 0 {
+				enumOptions = emptyJSONArray
+			}
+			next.EnumOptions = enumOptions
+		}
+
+		if targetValueType == valueTypeEnum && len(enumValues) == 0 {
+			values, err := extractEnumOptionValues(enumOptions)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "enumOptions 无效",
+					Cause:   err,
+				}
+			}
+			enumValues = values
+		}
+
+		if item.VisibleWhen != nil {
+			normalized, err := normalizeJSONArray(*item.VisibleWhen)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "visibleWhen 无效",
+					Cause:   err,
+				}
+			}
+			next.VisibleWhen = normalized
+			changed = true
+		} else if !exists {
+			next.VisibleWhen = emptyJSONArray
+		} else if len(next.VisibleWhen) == 0 {
+			next.VisibleWhen = emptyJSONArray
+		}
+
+		if item.Meta != nil {
+			normalized, err := normalizeJSONObject(*item.Meta)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "meta 无效",
+					Cause:   err,
+				}
+			}
+			next.Meta = normalized
+			changed = true
+		} else if !exists {
+			next.Meta = emptyJSONObject
+		} else if len(next.Meta) == 0 {
+			next.Meta = emptyJSONObject
+		}
+
+		if item.DefaultValue != nil {
+			parsed, err := parseDefaultValueByType(targetValueType, *item.DefaultValue)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "defaultValue 无效",
+					Cause:   err,
+				}
+			}
+			next.DefaultValue = parsed
+			changed = true
+		} else if !exists {
+			next.DefaultValue = nil
+		}
+
+		if item.Sort != nil {
+			if !exists || *item.Sort != current.Sort {
+				next.Sort = *item.Sort
+				changed = true
+			}
+		} else if !exists {
+			next.Sort = 0
+		}
+
+		valueSet := false
+		if item.Value != nil {
+			parsed, isEmpty, err := parseValueByType(targetValueType, *item.Value)
+			if err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "value 无效",
+					Cause:   err,
+				}
+			}
+			if !(targetSensitive && isEmpty) {
+				next.Value = parsed
+				valueSet = true
+				if !exists || parsed != current.Value {
+					changed = true
+				}
+			}
+		} else if !exists {
+			next.Value = ""
+		}
+
+		if item.ValueType != nil && item.Value == nil && exists {
+			if err := validateStoredValue(targetValueType, current.Value); err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "value 与 valueType 不匹配",
+					Cause:   err,
+				}
+			}
+		}
+
+		if targetValueType == valueTypeEnum && len(enumValues) > 0 {
+			checkValue := next.Value
+			if !valueSet {
+				checkValue = current.Value
+			}
+			if err := validateEnumValue(enumValues, checkValue); err != nil {
+				return nil, &UpdateValidationError{
+					Key:     key,
+					Message: "value 不在 enumOptions 中",
+					Cause:   err,
+				}
+			}
+			if next.DefaultValue != nil {
+				if err := validateEnumValue(enumValues, *next.DefaultValue); err != nil {
+					return nil, &UpdateValidationError{
+						Key:     key,
+						Message: "defaultValue 不在 enumOptions 中",
+						Cause:   err,
+					}
+				}
+			}
+		}
+
+		if !exists && !valueSet {
+			continue
+		}
+		if !changed {
+			continue
+		}
+		next.ValueType = targetValueType
+		if len(next.EnumOptions) == 0 {
+			next.EnumOptions = emptyJSONArray
+		}
+		if len(next.VisibleWhen) == 0 {
+			next.VisibleWhen = emptyJSONArray
+		}
+		if len(next.Meta) == 0 {
+			next.Meta = emptyJSONObject
+		}
+		toUpsert = append(toUpsert, next)
+	}
+
+	if err := s.repo.Upsert(ctx, toUpsert); err != nil {
+		return nil, err
+	}
+	return s.repo.List(ctx, nil)
+}
+
+var (
+	emptyJSONArray  = json.RawMessage("[]")
+	emptyJSONObject = json.RawMessage("{}")
+)
+
+func normalizeValueType(valueType string) string {
+	valueType = strings.TrimSpace(strings.ToLower(valueType))
+	if valueType == "" {
+		return valueTypeString
+	}
+	return valueType
+}
+
+func validateValueType(valueType string) error {
+	switch valueType {
+	case valueTypeString, valueTypeNumber, valueTypeBool, valueTypeEnum, valueTypeJSON:
+		return nil
+	default:
+		return fmt.Errorf("unsupported valueType: %s", valueType)
+	}
+}
+
+func normalizeGroupPath(path string) string {
+	path = strings.TrimSpace(path)
+	path = strings.Trim(path, "/")
+	return path
+}
+
+func normalizeJSONArray(raw json.RawMessage) (json.RawMessage, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return emptyJSONArray, nil
+	}
+	var items []json.RawMessage
+	if err := json.Unmarshal(trimmed, &items); err != nil {
+		return nil, err
+	}
+	return append(json.RawMessage(nil), trimmed...), nil
+}
+
+func normalizeJSONObject(raw json.RawMessage) (json.RawMessage, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return emptyJSONObject, nil
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(trimmed, &obj); err != nil {
+		return nil, err
+	}
+	return append(json.RawMessage(nil), trimmed...), nil
+}
+
+func parseStringValue(raw json.RawMessage) (string, bool, error) {
+	var val *string
+	if err := json.Unmarshal(raw, &val); err != nil {
+		return "", false, err
+	}
+	if val == nil {
+		return "", true, nil
+	}
+	return *val, *val == "", nil
+}
+
+func parseNumberValue(raw json.RawMessage) (string, error) {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	var num json.Number
+	if err := decoder.Decode(&num); err != nil {
+		return "", err
+	}
+	if _, err := num.Float64(); err != nil {
+		return "", err
+	}
+	return num.String(), nil
+}
+
+func parseBoolValue(raw json.RawMessage) (string, error) {
+	var val bool
+	if err := json.Unmarshal(raw, &val); err != nil {
+		return "", err
+	}
+	return strconv.FormatBool(val), nil
+}
+
+func parseValueByType(valueType string, raw json.RawMessage) (string, bool, error) {
+	switch valueType {
+	case valueTypeString, valueTypeEnum:
+		val, isEmpty, err := parseStringValue(raw)
+		return val, isEmpty, err
+	case valueTypeNumber:
+		val, err := parseNumberValue(raw)
+		return val, false, err
+	case valueTypeBool:
+		val, err := parseBoolValue(raw)
+		return val, false, err
+	case valueTypeJSON:
+		trimmed := bytes.TrimSpace(raw)
+		if len(trimmed) == 0 {
+			return "", false, fmt.Errorf("empty json")
+		}
+		if !json.Valid(trimmed) {
+			return "", false, fmt.Errorf("invalid json")
+		}
+		return string(trimmed), false, nil
+	default:
+		return "", false, fmt.Errorf("unsupported valueType: %s", valueType)
+	}
+}
+
+func parseDefaultValueByType(valueType string, raw json.RawMessage) (*string, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return nil, nil
+	}
+	switch valueType {
+	case valueTypeString, valueTypeEnum:
+		val, _, err := parseStringValue(trimmed)
+		if err != nil {
+			return nil, err
+		}
+		return &val, nil
+	case valueTypeNumber:
+		val, err := parseNumberValue(trimmed)
+		if err != nil {
+			return nil, err
+		}
+		return &val, nil
+	case valueTypeBool:
+		val, err := parseBoolValue(trimmed)
+		if err != nil {
+			return nil, err
+		}
+		return &val, nil
+	case valueTypeJSON:
+		if !json.Valid(trimmed) {
+			return nil, fmt.Errorf("invalid json")
+		}
+		val := string(trimmed)
+		return &val, nil
+	default:
+		return nil, fmt.Errorf("unsupported valueType: %s", valueType)
+	}
+}
+
+func validateStoredValue(valueType string, value string) error {
+	switch valueType {
+	case valueTypeString, valueTypeEnum:
+		return nil
+	case valueTypeNumber:
+		if _, err := strconv.ParseFloat(value, 64); err != nil {
+			return err
+		}
+		return nil
+	case valueTypeBool:
+		if _, err := strconv.ParseBool(value); err != nil {
+			return err
+		}
+		return nil
+	case valueTypeJSON:
+		if !json.Valid([]byte(value)) {
+			return fmt.Errorf("invalid json")
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported valueType: %s", valueType)
+	}
+}
+
+func extractEnumOptionValues(raw json.RawMessage) ([]string, error) {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return nil, nil
+	}
+	var items []json.RawMessage
+	if err := json.Unmarshal(trimmed, &items); err != nil {
+		return nil, err
+	}
+	values := make([]string, 0, len(items))
+	for _, item := range items {
+		var strValue string
+		if err := json.Unmarshal(item, &strValue); err == nil {
+			values = append(values, strValue)
+			continue
+		}
+		var obj map[string]json.RawMessage
+		if err := json.Unmarshal(item, &obj); err != nil {
+			return nil, err
+		}
+		valueRaw, ok := obj["value"]
+		if !ok {
+			return nil, fmt.Errorf("enum option missing value")
+		}
+		if err := json.Unmarshal(valueRaw, &strValue); err != nil {
+			return nil, err
+		}
+		values = append(values, strValue)
+	}
+	return values, nil
+}
+
+func normalizeEnumOptions(raw json.RawMessage) (json.RawMessage, []string, error) {
+	normalized, err := normalizeJSONArray(raw)
+	if err != nil {
+		return nil, nil, err
+	}
+	values, err := extractEnumOptionValues(normalized)
+	if err != nil {
+		return nil, nil, err
+	}
+	return normalized, values, nil
+}
+
+func validateEnumValue(values []string, value string) error {
+	if len(values) == 0 {
+		return nil
+	}
+	for _, candidate := range values {
+		if candidate == value {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid enum value")
 }

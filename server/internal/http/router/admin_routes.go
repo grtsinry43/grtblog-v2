@@ -3,12 +3,13 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/handler"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/middleware"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
 )
 
-func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *handler.WebsiteInfoHandler) {
+func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *handler.WebsiteInfoHandler, sysCfgSvc *sysconfig.Service) {
 	adminGroup := v2.Group("", middleware.RequireAuth(deps.JWTManager), middleware.RequireAdmin())
 
 	websiteInfo := adminGroup.Group("/website-info")
@@ -24,6 +25,12 @@ func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler 
 	admin.Post("/oauth-providers", adminOAuth.Create)
 	admin.Put("/oauth-providers/:key", adminOAuth.Update)
 	admin.Delete("/oauth-providers/:key", adminOAuth.Delete)
+
+	if sysCfgSvc != nil {
+		sysConfigHandler := handler.NewSysConfigHandler(sysCfgSvc)
+		admin.Get("/sysconfig", sysConfigHandler.ListSysConfig)
+		admin.Put("/sysconfig", sysConfigHandler.UpdateSysConfig)
+	}
 
 	logHandler := handler.NewAdminLogHandler("storage/logs/app.log", 200)
 	adminLogs := adminGroup.Group("/admin")
