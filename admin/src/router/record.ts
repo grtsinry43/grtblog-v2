@@ -203,6 +203,26 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     ],
   },
   {
+    path: 'webhooks',
+    name: 'webhookManagement',
+    icon: 'iconify ph--webhooks-logo',
+    label: 'Webhook',
+    redirect: 'webhooks/list',
+    children: [
+      {
+        path: 'list',
+        name: 'webhookList',
+        label: 'Webhook 管理',
+        icon: 'iconify ph--webhooks-logo',
+        meta: {
+          componentName: 'WebhookList',
+          showTab: true,
+        },
+        component: 'webhooks/index',
+      },
+    ],
+  },
+  {
     path: 'advanced',
     name: 'advancedInfo',
     icon: 'iconify ph--info',

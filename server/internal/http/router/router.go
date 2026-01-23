@@ -1,6 +1,8 @@
 package router
 
 import (
+	"context"
+	"log"
 	"path/filepath"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/htmlsnapshot"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/webhook"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/websiteinfo"
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/handler"
@@ -61,6 +64,16 @@ func Register(app *fiber.App, deps Dependencies) {
 	ws.RegisterMomentUpdateSubscriber(eventBus, wsManager)
 	ws.RegisterPageUpdateSubscriber(eventBus, wsManager)
 
+	webhookSettings, err := sysCfgSvc.WebhookSettings(context.Background())
+	if err != nil {
+		log.Printf("webhook settings error: %v", err)
+	}
+	webhookRepo := persistence.NewWebhookRepository(deps.DB)
+	webhookSender := webhook.NewSender(webhookRepo, webhookSettings.Timeout)
+	webhookDispatcher := webhook.NewDispatcher(webhookRepo, webhookSender, webhookSettings.Workers, webhookSettings.QueueSize)
+	webhookSvc := webhook.NewService(webhookRepo, webhookSender)
+	webhook.RegisterSubscribers(eventBus, webhookDispatcher)
+
 	contentRepo := persistence.NewContentRepository(deps.DB)
 	htmlSnapshotSvc := htmlsnapshot.NewService(contentRepo, "")
 	htmlsnapshot.RegisterArticleUpdateSubscriber(eventBus, htmlSnapshotSvc)
@@ -83,6 +96,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerPageAuthRoutes(v2, deps)
 	registerAdminRoutes(v2, deps, websiteInfoHandler)
 	registerTaxonomyAdminRoutes(v2, deps)
+	registerWebhookAdminRoutes(v2, deps, webhookSvc)
 
 	docsHandler := handler.NewDocsHandler("docs/swagger.json")
 	app.Get("/docs/openapi.json", docsHandler.OpenAPI)

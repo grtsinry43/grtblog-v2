@@ -125,3 +125,77 @@ func (s *Service) UploadMaxSizeBytes(ctx context.Context) int {
 	}
 	return sizeMB * 1024 * 1024
 }
+
+type WebhookSettings struct {
+	Timeout   time.Duration
+	Workers   int
+	QueueSize int
+}
+
+// WebhookSettings 返回 Webhook 发送配置，优先读取 sys_config，未配置时回退默认值。
+// 约定 key：
+// - webhook.timeoutSeconds: 请求超时秒数
+// - webhook.workers: 并发 worker 数
+// - webhook.queueSize: 队列长度
+func (s *Service) WebhookSettings(ctx context.Context) (WebhookSettings, error) {
+	const (
+		timeoutKey  = "webhook.timeoutSeconds"
+		workersKey  = "webhook.workers"
+		queueKey    = "webhook.queueSize"
+		defaultSec  = 30
+		defaultWork = 4
+		defaultQ    = 200
+	)
+
+	settings := WebhookSettings{
+		Timeout:   time.Duration(defaultSec) * time.Second,
+		Workers:   defaultWork,
+		QueueSize: defaultQ,
+	}
+
+	applyInt := func(key string, apply func(int) error) error {
+		cfg, err := s.repo.GetByKey(ctx, key)
+		if err != nil {
+			if err == domainconfig.ErrSysConfigNotFound {
+				return nil
+			}
+			return fmt.Errorf("load %s: %w", key, err)
+		}
+		val := strings.TrimSpace(cfg.Value)
+		if val == "" {
+			return nil
+		}
+		parsed, err := strconv.Atoi(val)
+		if err != nil {
+			return fmt.Errorf("parse %s: %w", key, err)
+		}
+		return apply(parsed)
+	}
+
+	if err := applyInt(timeoutKey, func(val int) error {
+		if val > 0 {
+			settings.Timeout = time.Duration(val) * time.Second
+		}
+		return nil
+	}); err != nil {
+		return settings, err
+	}
+	if err := applyInt(workersKey, func(val int) error {
+		if val > 0 {
+			settings.Workers = val
+		}
+		return nil
+	}); err != nil {
+		return settings, err
+	}
+	if err := applyInt(queueKey, func(val int) error {
+		if val > 0 {
+			settings.QueueSize = val
+		}
+		return nil
+	}); err != nil {
+		return settings, err
+	}
+
+	return settings, nil
+}
