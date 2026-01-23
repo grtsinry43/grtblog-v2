@@ -10,12 +10,12 @@ import {
   NSwitch,
   useThemeVars,
 } from 'naive-ui'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import EditorFloatingMenu from '@/components/markdown-editor/EditorFloatingMenu.vue'
-import { useCodeMirror } from '@/composables/markdown-editor/use-codemirror.ts'
-import { useFloatingMenu } from '@/composables/markdown-editor/use-floating-menu.ts'
-import { getMarkdownComponent } from '@/composables/markdown/shared/components'
+import { useCodeMirror } from '@/composables/markdown-editor/use-codemirror'
+import { useComponentInserter } from '@/composables/markdown-editor/use-component-inserter.ts'
+import { useFloatingMenu } from '@/composables/markdown-editor/use-floating-menu'
 import { cah } from '@/utils/chromaHelper'
 
 const props = defineProps<{
@@ -24,16 +24,21 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
-  (e: 'cursor-change', value: {
-    line: number
-    column: number
-    selectionChars: number
-    selectionTotal: number
-  }): void
+  (
+    e: 'cursor-change',
+    value: {
+      line: number
+      column: number
+      selectionChars: number
+      selectionTotal: number
+    },
+  ): void
 }>()
 
 const editorRef = ref<HTMLElement>()
 const themeVars = useThemeVars()
+
+// 样式定义
 const editorStyle = computed(() => ({
   '--cm-bg': themeVars.value.cardColor,
   '--cm-fg': themeVars.value.textColor1,
@@ -65,64 +70,24 @@ const editorStyle = computed(() => ({
   '--cm-syntax-punctuation': themeVars.value.textColor3,
 }))
 
-const componentEditor = reactive({
-  show: false,
-  name: '',
-  lineFrom: 0,
-  lineTo: 0,
-  isComponentSyntax: false,
-  attrs: {} as Record<string, string>,
-})
-const componentTouchedKeys = new Set<string>()
-
-const componentMeta = computed(() => getMarkdownComponent(componentEditor.name))
-
-const formatComponentLine = () => {
-  const meta = componentMeta.value
-  const definedKeys = meta?.attrs?.map((attr) => attr.key) ?? []
-  const extraKeys = Object.keys(componentEditor.attrs).filter((key) => !definedKeys.includes(key))
-  const keys = [...definedKeys, ...extraKeys].filter(
-    (key) => key in componentEditor.attrs || componentTouchedKeys.has(key),
-  )
-  const attrsString = keys.map((key) => `${key}="${componentEditor.attrs[key] ?? ''}"`).join(' ')
-  const prefix = componentEditor.isComponentSyntax
-    ? `::: component ${componentEditor.name}`
-    : `::: ${componentEditor.name}`
-  return attrsString ? `${prefix}{${attrsString}}` : prefix
-}
-
-const applyComponentUpdate = () => {
-  if (!view.value || !componentEditor.show) return
-  const newLine = formatComponentLine()
-  view.value.dispatch({
-    changes: { from: componentEditor.lineFrom, to: componentEditor.lineTo, insert: newLine },
-  })
-  componentEditor.lineTo = componentEditor.lineFrom + newLine.length
-}
-
-const updateAttr = (key: string, value: string | boolean) => {
-  componentTouchedKeys.add(key)
-  componentEditor.attrs[key] = String(value)
-  applyComponentUpdate()
-}
-
-// 优雅的调用
+// 1. 初始化 CodeMirror
 const { view, onViewUpdate } = useCodeMirror(editorRef, {
   initialDoc: props.modelValue,
-  onChange: (val) => {
-    emit('update:modelValue', val)
-  },
-  onComponentEdit: (payload) => {
-    componentEditor.name = payload.name
-    componentEditor.lineFrom = payload.lineFrom
-    componentEditor.lineTo = payload.lineTo
-    componentEditor.isComponentSyntax = payload.isComponentSyntax
-    componentEditor.attrs = { ...payload.attrs }
-    componentTouchedKeys.clear()
-    componentEditor.show = true
-  },
+  onChange: (val) => emit('update:modelValue', val),
+  // 点击图标时，触发 inserter
+  onComponentEdit: (payload) => inserter.open(payload),
 })
 
+// 2. 挂载组件插入逻辑
+const inserter = useComponentInserter(view)
+
+// 3. 挂载浮动菜单逻辑
+const { isVisible, menuPos, activeFormats, executeCommand } = useFloatingMenu({
+  view,
+  onViewUpdate,
+})
+
+// 4. 光标与选择更新事件
 onViewUpdate((update) => {
   const pos = update.state.selection.main.head
   const selection = update.state.selection.main
@@ -130,25 +95,18 @@ onViewUpdate((update) => {
     selection.from === selection.to
       ? ''
       : update.state.doc.sliceString(selection.from, selection.to)
-  const selectionTotal = selectionText.length
-  const selectionChars = selectionText.replace(/\s/g, '').length
+
   const line = update.state.doc.lineAt(pos)
+
   emit('cursor-change', {
     line: line.number,
     column: pos - line.from + 1,
-    selectionChars,
-    selectionTotal,
+    selectionChars: selectionText.replace(/\s/g, '').length,
+    selectionTotal: selectionText.length,
   })
 })
 
-// 加载 tooltip 相关（floatmenu）
-const { isVisible, menuPos, activeFormats, executeCommand } = useFloatingMenu({
-  view,
-  onViewUpdate,
-})
-
-// 如果父组件通过代码修改了 modelValue (非输入触发)，需要同步回编辑器
-// 注意：要避免光标跳动，需要判断内容是否一致
+// 5. 外部 modelValue 变更同步
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -162,7 +120,7 @@ watch(
 </script>
 
 <template>
-  <div>
+  <div class="relative h-full">
     <div
       ref="editorRef"
       class="codemirror-wrapper h-full w-full overflow-visible rounded-md"
@@ -170,11 +128,11 @@ watch(
     ></div>
 
     <NModal
-      v-model:show="componentEditor.show"
+      v-model:show="inserter.state.show"
       style="width: 520px; max-width: 90vw"
     >
       <NCard
-        :title="componentMeta?.label ?? '组件参数'"
+        :title="inserter.componentMeta.value?.label ?? '组件参数'"
         size="small"
       >
         <NForm
@@ -182,25 +140,25 @@ watch(
           label-width="110px"
         >
           <NFormItem
-            v-for="attr in componentMeta?.attrs ?? []"
+            v-for="attr in inserter.componentMeta.value?.attrs ?? []"
             :key="attr.key"
             :label="attr.label"
           >
             <NSwitch
               v-if="attr.inputType === 'switch'"
-              :value="(componentEditor.attrs[attr.key] ?? attr.defaultValue ?? 'false') === 'true'"
-              @update:value="(val) => updateAttr(attr.key, val)"
+              :value="(inserter.state.attrs[attr.key] ?? attr.defaultValue ?? 'false') === 'true'"
+              @update:value="(val) => inserter.updateAttr(attr.key, val)"
             />
             <NInput
               v-else
-              :value="componentEditor.attrs[attr.key] ?? attr.defaultValue ?? ''"
+              :value="inserter.state.attrs[attr.key] ?? attr.defaultValue ?? ''"
               :placeholder="attr.placeholder"
-              @update:value="(val) => updateAttr(attr.key, val)"
+              @update:value="(val) => inserter.updateAttr(attr.key, val)"
             />
           </NFormItem>
         </NForm>
         <NSpace justify="end">
-          <NButton @click="componentEditor.show = false"> 关闭 </NButton>
+          <NButton @click="inserter.close">关闭</NButton>
         </NSpace>
       </NCard>
     </NModal>
@@ -218,7 +176,6 @@ watch(
 :deep(.cm-editor) {
   height: 100%;
 }
-
 :deep(.cm-content) {
   padding-bottom: 2rem;
 }

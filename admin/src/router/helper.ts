@@ -56,7 +56,7 @@ export function resolveMenu(options: MenuMixedOptions[], parentDisabled = false)
 }
 
 export function resolveRoute(options: MenuMixedOptions[]) {
-  const modules = import.meta.glob('@/views/**/*.vue')
+  const modules = import.meta.glob('@/views/**/*.{vue,tsx}')
 
   const routeOptions: RouteRecordRaw[] = []
 
@@ -81,10 +81,16 @@ export function resolveRoute(options: MenuMixedOptions[]) {
       let componentModule: (() => Promise<unknown>) | null = null
 
       if (!isEmpty(component) && isString(component)) {
-        const extractName = component.replace(/^\/|\.vue$/g, '')
-        const modulePath = `/src/views/${extractName}.vue`
-        if (modules[modulePath]) {
-          componentModule = modules[modulePath]
+        const extractName = component.replace(/^\/|\.vue$|\.tsx$/g, '') // 去掉可能的后缀
+
+        const vuePath = `/src/views/${extractName}.vue`
+        const tsxPath = `/src/views/${extractName}.tsx`
+
+        // 优先找 vue，没有就找 tsx，混用比较方便
+        if (modules[vuePath]) {
+          componentModule = modules[vuePath]
+        } else if (modules[tsxPath]) {
+          componentModule = modules[tsxPath]
         }
       }
 

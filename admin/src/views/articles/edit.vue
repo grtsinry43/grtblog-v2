@@ -3,6 +3,7 @@ import { PreviewLink20Regular } from '@vicons/fluent'
 import { PaperPlaneOutline, SaveOutline } from '@vicons/ionicons5'
 import {
   NButton,
+  NButtonGroup,
   NCard,
   NDivider,
   NDrawer,
@@ -10,507 +11,130 @@ import {
   NDynamicTags,
   NForm,
   NFormItem,
-  NAutoComplete,
   NInput,
   NModal,
   NPopover,
   NSelect,
   NSwitch,
   useMessage,
-  NButtonGroup,
+  NAutoComplete,
 } from 'naive-ui'
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref, toRef } from 'vue'
 
+// 组件
 import MarkdownEditor from '@/components/markdown-editor/MarkdownEditor.vue'
 import MarkdownPreview from '@/components/markdown-editor/MarkdownPreview.vue'
-import { useLeaveConfirm } from '@/composables'
-import { createArticle, getArticle, updateArticle } from '@/services/articles'
-import { createCategory, createTag, listCategories, listTags } from '@/services/taxonomy'
 
-import type { SelectOption } from 'naive-ui'
+// 逻辑 Hooks
+import { useArticleForm } from './composables/use-article-form'
+import { useEditorStats } from './composables/use-editor-stats'
+import { useTaxonomySelect } from './composables/use-taxonomy-select'
 
-defineOptions({
-  name: 'ArticleEdit',
-})
+defineOptions({ name: 'ArticleEdit' })
 
-const route = useRoute()
-const router = useRouter()
 const message = useMessage()
 
-const isCreating = computed(() => route.name === 'articleCreate')
+// 1. 初始化表单核心逻辑
+const { form, loading, saving, isCreating, fetch, save } = useArticleForm()
 
-const form = reactive({
-  title: '',
-  summary: '',
-  leadIn: '',
-  content: '',
-  cover: '',
-  categoryId: null as number | null,
-  tagIds: [] as number[],
-  shortUrl: '',
-  isPublished: false,
-  isTop: false,
-  isHot: false,
-  isOriginal: true,
-})
+// 2. 初始化分类与标签逻辑
+// 将表单中的响应式属性传给 Hook，实现双向绑定
+const {
+  categoryOptions,
+  tagOptions,
+  dynamicTags,
+  tagSearchValue,
+  autoCompleteOptions,
+  newCatModal,
+  setInitialTags,
+  handleTagsChange,
+  addTagFromSearch,
+  createNewCategory,
+} = useTaxonomySelect(toRef(form, 'tagIds'), toRef(form, 'categoryId'), message)
 
+// 3. 初始化编辑器统计逻辑
+const { cursorPos, selectionStats, statsIdle, markActivity, handleCursorChange, getStats } =
+  useEditorStats()
+
+// 4. 视图状态管理
+const showMeta = ref(false)
+const showPreview = ref(false)
+const previewMode = ref<'markdown' | 'page'>('markdown')
+
+// 5. 计算属性
+const stats = computed(() => getStats(form.content))
 const actionLabel = computed(() => {
   if (!form.isPublished) return '保存'
   return isCreating.value ? '发布' : '发布新版本'
 })
 const actionIcon = computed(() => (form.isPublished ? PaperPlaneOutline : SaveOutline))
-
-const categories = ref<SelectOption[]>([])
-const tags = ref<SelectOption[]>([])
-const dynamicTags = ref<string[]>([])
-const tagSearch = ref('')
-const tagsReady = ref(false)
-const syncingTags = ref(false)
-const loading = ref(false)
-const saving = ref(false)
-const showMeta = ref(false)
-const showPreview = ref(false)
-const previewMode = ref<'markdown' | 'page'>('markdown')
-const initialSnapshot = ref('')
-const showCategoryModal = ref(false)
-const creatingCategory = ref(false)
-const newCategory = reactive({
-  name: '',
-  shortUrl: '',
-})
-
 const previewUrl = computed(() => {
-  const slug = form.shortUrl.trim()
-  if (!slug) return ''
-  return `/posts/${slug}`
+  const slug = form.shortUrl?.trim()
+  return slug ? `/posts/${slug}` : ''
 })
 
-const cursorPos = ref({ line: 1, column: 1 })
-const selectionStats = ref({ chars: 0, total: 0 })
-const charCount = computed(() => form.content.replace(/\s/g, '').length)
-const totalCharCount = computed(() => form.content.length)
-const chineseCharCount = computed(() => (form.content.match(/[\u4e00-\u9fff]/g) ?? []).length)
-const wordCount = computed(() => (form.content.match(/[A-Za-z0-9]+/g) ?? []).length)
-const whitespaceCount = computed(() => (form.content.match(/\s/g) ?? []).length)
-const paragraphCount = computed(() => {
-  return form.content
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean).length
-})
-const lineCount = computed(() => {
-  if (!form.content) return 0
-  return form.content.split('\n').length
-})
-const headingCount = computed(() => {
-  return form.content
-    .split('\n')
-    .filter((line) => /^#{1,6}\s+\S+/.test(line.trim())).length
-})
-const tagOptions = computed(() =>
-  tags.value.map((item) => ({ label: item.label as string, value: item.label as string })),
-)
-const readingMinutes = computed(() => {
-  if (!charCount.value) return 0
-  return Math.max(1, Math.ceil(charCount.value / 300))
-})
-const statsIdle = ref(true)
-let statsIdleTimer: ReturnType<typeof setTimeout> | null = null
-
-const isDirty = computed(() => {
-  const snapshot = JSON.stringify({
-    title: form.title,
-    summary: form.summary,
-    leadIn: form.leadIn,
-    content: form.content,
-    cover: form.cover,
-    categoryId: form.categoryId,
-    tagIds: form.tagIds,
-    shortUrl: form.shortUrl,
-    isPublished: form.isPublished,
-    isTop: form.isTop,
-    isHot: form.isHot,
-    isOriginal: form.isOriginal,
-  })
-  return initialSnapshot.value !== '' && snapshot !== initialSnapshot.value
-})
-
-const articleId = computed(() => {
-  if (isCreating.value) return null
-  const raw = route.params.id
-  const id = typeof raw === 'string' ? Number(raw) : Array.isArray(raw) ? Number(raw[0]) : NaN
-  return Number.isFinite(id) ? id : null
-})
-
-function resetForm() {
-  form.title = ''
-  form.summary = ''
-  form.leadIn = ''
-  form.content = ''
-  form.cover = ''
-  form.categoryId = null
-  form.tagIds = []
-  dynamicTags.value = []
-  form.shortUrl = ''
-  form.isPublished = false
-  form.isTop = false
-  form.isHot = false
-  form.isOriginal = true
-}
-
-async function fetchTaxonomy() {
-  const [categoryList, tagList] = await Promise.all([listCategories(), listTags()])
-  categories.value = categoryList.map((item) => ({
-    label: item.name,
-    value: item.id,
-  }))
-  tags.value = tagList.map((item) => ({
-    label: item.name,
-    value: item.id,
-  }))
-  tagsReady.value = true
-}
-
-async function fetchArticle() {
-  if (isCreating.value) {
-    resetForm()
-    return
-  }
-  if (!articleId.value) {
-    message.error('无效的文章ID')
-    router.replace({ name: 'articleList' })
-    return
-  }
-  loading.value = true
-  try {
-    const result = await getArticle(articleId.value)
-    form.title = result.title
-    form.summary = result.summary || ''
-    form.leadIn = result.leadIn || ''
-    form.content = result.content
-    form.cover = result.cover || ''
-    form.categoryId = result.categoryId ?? null
-    form.tagIds = result.tags?.map((tag) => tag.id) ?? []
-    dynamicTags.value = result.tags?.map((tag) => tag.name) ?? []
-    form.shortUrl = result.shortUrl
-    form.isPublished = result.isPublished
-    form.isTop = result.isTop
-    form.isHot = result.isHot
-    form.isOriginal = result.isOriginal
-  } finally {
-    loading.value = false
-  }
-}
-
-function captureSnapshot() {
-  initialSnapshot.value = JSON.stringify({
-    title: form.title,
-    summary: form.summary,
-    leadIn: form.leadIn,
-    content: form.content,
-    cover: form.cover,
-    categoryId: form.categoryId,
-    tagIds: form.tagIds,
-    shortUrl: form.shortUrl,
-    isPublished: form.isPublished,
-    isTop: form.isTop,
-    isHot: form.isHot,
-    isOriginal: form.isOriginal,
-  })
-}
-
-function toList() {
-  router.push({ name: 'articleList' })
-}
-
-function normalizeText(value: string) {
-  const trimmed = value.trim()
-  return trimmed.length > 0 ? trimmed : null
-}
-
-async function saveArticle() {
-  if (!form.title.trim()) {
-    message.error('请输入标题')
-    return
-  }
-  if (!form.content.trim()) {
-    message.error('请输入正文内容')
-    return
-  }
-  if (!isCreating.value && !form.shortUrl.trim()) {
-    message.error('短链接不能为空')
-    return
-  }
-
-  saving.value = true
-  try {
-    const payload = {
-      title: form.title.trim(),
-      summary: form.summary.trim(),
-      leadIn: normalizeText(form.leadIn),
-      content: form.content,
-      cover: normalizeText(form.cover),
-      categoryId: form.categoryId ?? null,
-      tagIds: form.tagIds,
-      shortUrl: normalizeText(form.shortUrl),
-      isPublished: form.isPublished,
-      isTop: form.isTop,
-      isHot: form.isHot,
-      isOriginal: form.isOriginal,
-    }
-
-    if (isCreating.value) {
-      await createArticle(payload)
-      captureSnapshot()
-      toList()
-    } else if (articleId.value) {
-      await updateArticle(articleId.value, {
-        ...payload,
-        shortUrl: form.shortUrl.trim(),
-      })
-      captureSnapshot()
-      toList()
-    }
-  } finally {
-    saving.value = false
-  }
-}
-
-function openMeta() {
-  showMeta.value = true
-}
-
-function togglePreview() {
-  showPreview.value = !showPreview.value
-}
-
-function setPreviewMode(mode: 'markdown' | 'page') {
-  previewMode.value = mode
-}
-
-function updateCursor(value: {
-  line: number
-  column: number
-  selectionChars: number
-  selectionTotal: number
-}) {
-  cursorPos.value = { line: value.line, column: value.column }
-  selectionStats.value = { chars: value.selectionChars, total: value.selectionTotal }
-}
-
-async function syncTags(next: string[]) {
-  if (!tagsReady.value || syncingTags.value) return
-  syncingTags.value = true
-  try {
-    const names = next.map((name) => name.trim()).filter(Boolean)
-    if (!names.length) {
-      form.tagIds = []
-      return
-    }
-    const existingIds: number[] = []
-    const toCreate: string[] = []
-    names.forEach((name) => {
-      const found = tags.value.find((option) => option.label === name)
-      if (found && typeof found.value === 'number') {
-        existingIds.push(found.value)
-      } else {
-        toCreate.push(name)
-      }
-    })
-
-    const createdIds: number[] = []
-    for (const name of toCreate) {
-      const created = await createTag(name)
-      tags.value = [...tags.value, { label: created.name, value: created.id }]
-      createdIds.push(created.id)
-    }
-
-    form.tagIds = Array.from(new Set([...existingIds, ...createdIds]))
-  } finally {
-    syncingTags.value = false
-  }
-}
-
-function addTagFromSearch(value: string) {
-  if (!value) return
-  if (!dynamicTags.value.includes(value)) {
-    dynamicTags.value = [...dynamicTags.value, value]
-  }
-  tagSearch.value = ''
-}
-
-function openCategoryModal() {
-  newCategory.name = ''
-  newCategory.shortUrl = ''
-  showCategoryModal.value = true
-}
-
-async function handleCreateCategory() {
-  const name = newCategory.name.trim()
-  const shortUrl = newCategory.shortUrl.trim()
-  if (!name) {
-    message.error('请输入分类名称')
-    return
-  }
-  if (!shortUrl) {
-    message.error('请输入分类短链接')
-    return
-  }
-  creatingCategory.value = true
-  try {
-    const created = await createCategory({ name, shortUrl })
-    const option = { label: created.name, value: created.id }
-    categories.value = [...categories.value, option]
-    form.categoryId = created.id
-    message.success('分类已创建')
-    showCategoryModal.value = false
-  } finally {
-    creatingCategory.value = false
-  }
-}
-
-async function handleTagSelection(next: Array<number | string>) {
-  if (!next.length) {
-    form.tagIds = []
-    tagSelection.value = []
-    return
-  }
-
-  const existing = next.filter((val) => typeof val === 'number') as number[]
-  const pending = next.filter((val) => typeof val === 'string') as string[]
-
-  if (!pending.length) {
-    form.tagIds = existing
-    tagSelection.value = existing
-    return
-  }
-
-  const createdIds: number[] = []
-  for (const name of pending) {
-    const trimmed = name.trim()
-    if (!trimmed) continue
-    const existed = tags.value.find((option) => option.label === trimmed)
-    if (existed && typeof existed.value === 'number') {
-      createdIds.push(existed.value)
-      continue
-    }
-    const created = await createTag(trimmed)
-    tags.value = [...tags.value, { label: created.name, value: created.id }]
-    createdIds.push(created.id)
-  }
-
-  const merged = Array.from(new Set([...existing, ...createdIds]))
-  form.tagIds = merged
-  tagSelection.value = merged
-}
-
-function markStatsActivity() {
-  statsIdle.value = false
-  if (statsIdleTimer) clearTimeout(statsIdleTimer)
-  statsIdleTimer = setTimeout(() => {
-    statsIdle.value = true
-  }, 800)
-}
-
-function setDraftMode() {
-  form.isPublished = false
-}
-
-function setPublishMode() {
-  form.isPublished = true
-}
-
+// 6. 生命周期
 onMounted(async () => {
-  await fetchTaxonomy()
-  await fetchArticle()
-  captureSnapshot()
-  await syncTags(dynamicTags.value)
-})
-
-onBeforeUnmount(() => {
-  if (statsIdleTimer) clearTimeout(statsIdleTimer)
-})
-
-watch(dynamicTags, (next) => {
-  syncTags(next)
-})
-
-
-useLeaveConfirm({
-  when: isDirty,
-  title: '未保存的更改',
-  content: '当前内容未保存，确定要离开吗？',
-  positiveText: '离开',
-  negativeText: '继续编辑',
+  // 加载文章数据
+  const data = await fetch()
+  // 如果加载成功且有 tags 数据（带名字），初始化标签 UI
+  if (data?.tags) {
+    setInitialTags(data.tags)
+  }
 })
 </script>
 
 <template>
   <div class="flex h-full min-h-0 flex-col">
-    <!-- Toolbar -->
     <header
-      class="z-10 flex shrink-0 flex-col gap-3 px-4 py-3 backdrop-blur sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0"
+      class="z-10 flex shrink-0 flex-col gap-3 px-10 py-8 backdrop-blur sm:h-24 sm:flex-row sm:items-center sm:justify-between sm:py-0"
     >
-      <!-- Left: Title -->
       <div class="flex w-full items-center gap-4 sm:flex-1">
         <NInput
           v-model:value="form.title"
           placeholder="在这里开始你的写作吧..."
           :bordered="false"
           class="flex-1 text-xl! leading-tight font-bold sm:text-2xl!"
-          style="
-            --n-caret-color: var(--primary-color);
-            --n-placeholder-color: inherit;
-            --n-border: none;
-            --n-box-shadow-focus: none;
-            background-color: transparent;
-            padding: 0;
-          "
+          style="--n-caret-color: var(--primary-color); background-color: transparent"
         />
       </div>
 
-      <!-- Right: Meta & Actions -->
       <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-nowrap sm:gap-4">
         <div class="flex items-baseline gap-1">
-          <div class="iconify ph--link-simple self-center" />
+          <div class="iconify self-center ph--link-simple" />
           <span class="text-xs leading-none">/posts/</span>
           <input
             v-model="form.shortUrl"
-            placeholder="slug"
-            class="w-24 border-b border-current/30 p-0 pb-0.5 text-[11px] leading-none focus:border-[var(--primary-color)] focus:outline-none sm:w-32"
+            placeholder="请填写短链接"
+            class="w-24 border-b border-current/30 p-0 pb-0.5 text-[11px] leading-none focus:border-primary focus:outline-none sm:w-32"
           />
         </div>
 
-          <n-button-group>
-            <n-button
-              :type="!form.isPublished ? 'primary' : 'default'"
-              :ghost="form.isPublished"
-              @click="setDraftMode"
-            >
-              草稿
-            </n-button>
-            <n-button
-              :type="form.isPublished ? 'primary' : 'default'"
-              :ghost="!form.isPublished"
-              @click="setPublishMode"
-            >
-              发布
-            </n-button>
-          </n-button-group>
+        <NButtonGroup>
+          <NButton
+            :type="!form.isPublished ? 'primary' : 'default'"
+            :ghost="form.isPublished"
+            @click="form.isPublished = false"
+          >
+            草稿
+          </NButton>
+          <NButton
+            :type="form.isPublished ? 'primary' : 'default'"
+            :ghost="!form.isPublished"
+            @click="form.isPublished = true"
+          >
+            发布
+          </NButton>
+        </NButtonGroup>
 
         <div class="flex items-center gap-2">
           <NButton
             quaternary
             circle
             size="small"
-            @click="openMeta"
+            @click="showMeta = true"
           >
-            <template #icon>
-              <div
-                class="iconify text-xl ph--sliders-horizontal"
-              />
-            </template>
+            <template #icon><div class="iconify text-xl ph--sliders-horizontal" /></template>
           </NButton>
 
           <NButton
@@ -518,48 +142,43 @@ useLeaveConfirm({
             circle
             size="small"
             :type="showPreview ? 'primary' : 'default'"
-            @click="togglePreview"
+            @click="showPreview = !showPreview"
           >
-            <template #icon>
-              <PreviewLink20Regular />
-            </template>
+            <template #icon><PreviewLink20Regular /></template>
           </NButton>
 
           <NButton
             type="primary"
             size="medium"
             :loading="saving"
-            @click="saveArticle"
+            @click="save"
             class="px-5 font-medium shadow-sm active:scale-95"
           >
-            <template #icon>
-              <component :is="actionIcon" />
-            </template>
+            <template #icon><component :is="actionIcon" /></template>
             {{ actionLabel }}
           </NButton>
         </div>
       </div>
     </header>
 
-    <!-- Main Workspace -->
     <main class="flex min-h-0 flex-1 overflow-hidden">
-      <!-- Editor Container -->
       <div
         class="editor-container grid h-full min-h-0 w-full"
         :class="showPreview ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'"
       >
         <div
           class="pane editor-pane relative h-full overflow-auto"
-          @scroll="markStatsActivity"
-          @wheel="markStatsActivity"
+          @scroll="markActivity"
+          @wheel="markActivity"
         >
           <MarkdownEditor
             v-model="form.content"
             class="h-full min-h-full"
-            @cursor-change="updateCursor"
+            @cursor-change="handleCursorChange"
           />
+
           <div
-            class="pointer-events-none absolute bottom-3 right-3 z-10 transition-opacity duration-200"
+            class="pointer-events-none absolute right-3 bottom-3 z-10 transition-opacity duration-200"
             :class="statsIdle ? 'opacity-75 hover:opacity-100' : 'opacity-0'"
           >
             <NCard
@@ -573,35 +192,31 @@ useLeaveConfirm({
                   :disabled="!statsIdle"
                   content-style="padding: 4px 6px;"
                 >
-                  <template #trigger>
-                    <span class="cursor-help">字数 {{ charCount }}</span>
-                  </template>
+                  <template #trigger
+                    ><span class="cursor-help">字数 {{ stats.charCount }}</span></template
+                  >
                   <div class="flex flex-col gap-0.5 text-[11px] leading-tight">
                     <span v-if="selectionStats.total">选中 {{ selectionStats.chars }}</span>
-                    <span>中文 {{ chineseCharCount }}</span>
-                    <span>英文词 {{ wordCount }}</span>
-                    <span>字符 {{ totalCharCount }}</span>
-                    <span>非空白 {{ charCount }}</span>
-                    <span>空白 {{ whitespaceCount }}</span>
-                    <span>段落 {{ paragraphCount }}</span>
-                    <span>行数 {{ lineCount }}</span>
-                    <span>标题 {{ headingCount }}</span>
+                    <span>中文 {{ stats.chineseCharCount }}</span>
+                    <span>英文词 {{ stats.wordCount }}</span>
+                    <span>字符 {{ stats.totalCharCount }}</span>
+                    <span>段落 {{ stats.paragraphCount }}</span>
                   </div>
                 </NPopover>
                 <span v-if="selectionStats.total">选中 {{ selectionStats.chars }} 字</span>
                 <span>{{ cursorPos.line }}:{{ cursorPos.column }}</span>
-                <span>预计阅读 {{ readingMinutes }} 分钟</span>
+                <span>预计阅读 {{ stats.readingMinutes }} 分钟</span>
               </div>
             </NCard>
           </div>
         </div>
+
         <div
           v-if="showPreview"
           class="pane preview-pane relative h-full overflow-auto"
-          @scroll="markStatsActivity"
-          @wheel="markStatsActivity"
+          @scroll="markActivity"
         >
-          <div class="absolute right-3 top-3 z-10">
+          <div class="absolute top-3 right-3 z-10">
             <NPopover
               trigger="click"
               placement="bottom-end"
@@ -614,33 +229,30 @@ useLeaveConfirm({
                   size="small"
                   class="shadow-sm"
                 >
-                  <template #icon>
-                    <div class="iconify text-lg ph--dots-three-vertical" />
-                  </template>
+                  <template #icon><div class="iconify text-lg ph--dots-three-vertical" /></template>
                 </NButton>
               </template>
               <div class="flex flex-col gap-1 p-1">
-                <n-button
+                <NButton
                   :type="previewMode === 'markdown' ? 'primary' : 'default'"
                   quaternary
                   size="small"
                   class="w-full justify-start px-2"
-                  @click="setPreviewMode('markdown')"
+                  @click="previewMode = 'markdown'"
+                  >Markdown 预览</NButton
                 >
-                  Markdown 预览
-                </n-button>
-                <n-button
+                <NButton
                   :type="previewMode === 'page' ? 'primary' : 'default'"
                   quaternary
                   size="small"
                   class="w-full justify-start px-2"
-                  @click="setPreviewMode('page')"
+                  @click="previewMode = 'page'"
+                  >网页预览</NButton
                 >
-                  网页预览
-                </n-button>
               </div>
             </NPopover>
           </div>
+
           <MarkdownPreview
             v-if="previewMode === 'markdown'"
             :source="form.content"
@@ -653,7 +265,7 @@ useLeaveConfirm({
             <iframe
               v-if="previewUrl"
               :src="previewUrl"
-              class="h-full w-full"
+              class="h-full w-full border-0"
             />
             <div
               v-else
@@ -666,7 +278,6 @@ useLeaveConfirm({
       </div>
     </main>
 
-    <!-- Settings Drawer -->
     <NDrawer
       v-model:show="showMeta"
       placement="right"
@@ -680,7 +291,6 @@ useLeaveConfirm({
         body-style="padding: 24px;"
       >
         <div class="flex flex-col gap-6">
-          <!-- Classification Section -->
           <div class="space-y-4">
             <div class="flex items-center gap-2 text-sm font-medium">
               <div class="iconify ph--tag" />
@@ -691,63 +301,63 @@ useLeaveConfirm({
               label-width="auto"
               class="space-y-4"
             >
-                <NFormItem
-                  label="分类"
-                  :show-feedback="false"
-                >
+              <NFormItem
+                label="分类"
+                :show-feedback="false"
+              >
+                <div class="flex w-full items-center gap-2">
+                  <NSelect
+                    v-model:value="form.categoryId"
+                    :options="categoryOptions"
+                    placeholder="选择分类"
+                    clearable
+                    filterable
+                    class="flex-1"
+                  />
+                  <NButton
+                    quaternary
+                    size="small"
+                    @click="newCatModal.show = true"
+                    >新建</NButton
+                  >
+                </div>
+              </NFormItem>
+              <NFormItem
+                label="标签"
+                :show-feedback="false"
+              >
+                <div class="flex w-full flex-col gap-2">
+                  <NDynamicTags
+                    :value="dynamicTags"
+                    @update:value="handleTagsChange"
+                  />
                   <div class="flex items-center gap-2">
-                    <NSelect
-                      v-model:value="form.categoryId"
-                      :options="categories"
-                      placeholder="选择分类"
-                      clearable
-                      filterable
+                    <NAutoComplete
+                      v-model:value="tagSearchValue"
+                      :options="autoCompleteOptions"
+                      placeholder="搜索或创建标签"
                       class="flex-1"
+                      @select="addTagFromSearch"
+                      :input-props="{
+                        onKeydown: (e: KeyboardEvent) => {
+                          if (e.key === 'Enter') addTagFromSearch(tagSearchValue)
+                        },
+                      }"
                     />
                     <NButton
                       quaternary
                       size="small"
-                      @click="openCategoryModal"
+                      @click="addTagFromSearch(tagSearchValue)"
+                      >添加</NButton
                     >
-                      新建
-                    </NButton>
                   </div>
-                </NFormItem>
-                <NFormItem
-                  label="标签"
-                  :show-feedback="false"
-                >
-                  <div class="flex flex-col gap-2">
-                    <NDynamicTags v-model:value="dynamicTags" />
-                    <div class="flex items-center gap-2">
-                      <NAutoComplete
-                        v-model:value="tagSearch"
-                        :options="tagOptions"
-                        placeholder="搜索或创建标签"
-                        class="flex-1"
-                        @select="addTagFromSearch"
-                        :input-props="{
-                          onKeydown: (e: KeyboardEvent) => {
-                            if (e.key === 'Enter') addTagFromSearch(tagSearch)
-                          },
-                        }"
-                      />
-                      <NButton
-                        quaternary
-                        size="small"
-                        @click="addTagFromSearch(tagSearch)"
-                      >
-                        添加
-                      </NButton>
-                    </div>
-                  </div>
-                </NFormItem>
-              </NForm>
+                </div>
+              </NFormItem>
+            </NForm>
           </div>
 
           <NDivider style="margin: 0" />
 
-          <!-- Meta Info Section -->
           <div class="space-y-4">
             <div class="flex items-center gap-2 text-sm font-medium">
               <div class="iconify ph--article" />
@@ -777,40 +387,43 @@ useLeaveConfirm({
                   v-model:value="form.cover"
                   placeholder="图片 URL"
                 >
-                  <template #prefix>
-                      <div class="iconify ph--image" />
-                    </template>
-                  </NInput>
-                </NFormItem>
+                  <template #prefix><div class="iconify ph--image" /></template>
+                </NInput>
+              </NFormItem>
             </NForm>
           </div>
 
           <NDivider style="margin: 0" />
 
-          <!-- Attributes Section -->
           <div class="space-y-4">
             <div class="flex items-center gap-2 text-sm font-medium">
               <div class="iconify ph--toggle-left" />
               <span>属性</span>
             </div>
             <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center justify-between rounded-lg px-4 py-3">
-                <span class="text-sm">置顶</span>
-                <NSwitch
+              <div
+                class="flex items-center justify-between rounded-lg px-4 py-3"
+              >
+                <span class="text-sm">置顶</span
+                ><NSwitch
                   v-model:value="form.isTop"
                   size="small"
                 />
               </div>
-              <div class="flex items-center justify-between rounded-lg px-4 py-3">
-                <span class="text-sm">热门</span>
-                <NSwitch
+              <div
+                class="flex items-center justify-between rounded-lg  px-4 py-3"
+              >
+                <span class="text-sm">热门</span
+                ><NSwitch
                   v-model:value="form.isHot"
                   size="small"
                 />
               </div>
-              <div class="flex items-center justify-between rounded-lg px-4 py-3">
-                <span class="text-sm">原创</span>
-                <NSwitch
+              <div
+                class="flex items-center justify-between rounded-lg px-4 py-3"
+              >
+                <span class="text-sm">原创</span
+                ><NSwitch
                   v-model:value="form.isOriginal"
                   size="small"
                 />
@@ -822,7 +435,7 @@ useLeaveConfirm({
     </NDrawer>
 
     <NModal
-      v-model:show="showCategoryModal"
+      v-model:show="newCatModal.show"
       style="width: 420px; max-width: 90vw"
     >
       <NCard
@@ -838,29 +451,33 @@ useLeaveConfirm({
             label="名称"
             :show-feedback="false"
           >
-            <NInput v-model:value="newCategory.name" placeholder="例如：随笔" />
+            <NInput
+              v-model:value="newCatModal.name"
+              placeholder="例如：随笔"
+            />
           </NFormItem>
           <NFormItem
             label="短链接"
             :show-feedback="false"
           >
-            <NInput v-model:value="newCategory.shortUrl" placeholder="例如：notes" />
+            <NInput
+              v-model:value="newCatModal.slug"
+              placeholder="例如：notes"
+            />
           </NFormItem>
         </NForm>
         <div class="mt-4 flex justify-end gap-2">
           <NButton
             quaternary
-            @click="showCategoryModal = false"
+            @click="newCatModal.show = false"
+            >取消</NButton
           >
-            取消
-          </NButton>
           <NButton
             type="primary"
-            :loading="creatingCategory"
-            @click="handleCreateCategory"
+            :loading="newCatModal.loading"
+            @click="createNewCategory"
+            >创建并选择</NButton
           >
-            创建并选择
-          </NButton>
         </div>
       </NCard>
     </NModal>
