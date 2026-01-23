@@ -11,6 +11,7 @@
     --font-mono: "JetBrains Mono", monospace;
 
     /* Colors: Ink (Warm Grayscale) */
+    --color-ink-0: #ffffff;
     --color-ink-50: #fafaf9;
     --color-ink-100: #f5f5f4;
     --color-ink-200: #e7e5e4;
@@ -19,6 +20,7 @@
     --color-ink-500: #78716c;
     --color-ink-600: #57534e;
     --color-ink-700: #44403c;
+    --color-ink-750: #373330;
     --color-ink-800: #292524;
     --color-ink-900: #1c1917;
     --color-ink-950: #0c0a09;
@@ -39,21 +41,39 @@
     /* Colors: Functional */
     --color-cinnabar-50: #fef2f2;
     --color-cinnabar-100: #fee2e2;
+    --color-cinnabar-200: #fecaca;
+    --color-cinnabar-300: #fca5a5;
+    --color-cinnabar-400: #f87171;
     --color-cinnabar-500: #ef4444;
     --color-cinnabar-600: #dc2626;
+    --color-cinnabar-700: #b91c1c;
+    --color-cinnabar-800: #991b1b;
     --color-cinnabar-900: #7f1d1d;
+    --color-cinnabar-950: #450a0a;
 
     --color-amber-50: #fffbeb;
     --color-amber-100: #fef3c7;
+    --color-amber-200: #fde68a;
+    --color-amber-300: #fcd34d;
+    --color-amber-400: #fbbf24;
     --color-amber-500: #f59e0b;
     --color-amber-600: #d97706;
+    --color-amber-700: #b45309;
+    --color-amber-800: #92400e;
     --color-amber-900: #78350f;
+    --color-amber-950: #451a03;
 
     --color-bamboo-50: #f0fdf4;
     --color-bamboo-100: #dcfce7;
+    --color-bamboo-200: #bbf7d0;
+    --color-bamboo-300: #86efac;
+    --color-bamboo-400: #4ade80;
     --color-bamboo-500: #22c55e;
     --color-bamboo-600: #16a34a;
+    --color-bamboo-700: #15803d;
+    --color-bamboo-800: #166534;
     --color-bamboo-900: #14532d;
+    --color-bamboo-950: #052e16;
 
     /* Shadows */
     --shadow-glass: 0 8px 32px 0 rgba(100, 100, 100, 0.05);
@@ -93,13 +113,29 @@ body {
 }
 
 /* Utilities */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
+@utility no-scrollbar {
+    &::-webkit-scrollbar {
+        display: none;
+    }
 
-.no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+@utility article-enter {
+    animation: article-enter 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes article-enter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Noise Texture */

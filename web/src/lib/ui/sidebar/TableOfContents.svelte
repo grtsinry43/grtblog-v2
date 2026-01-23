@@ -2,88 +2,135 @@
 	import { X, Hash, ChevronRight } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import type { TOCNode } from '$lib/features/post/types';
 
-	let { isOpen, onClose } = $props<{
+	interface Props {
 		isOpen: boolean;
 		onClose: () => void;
-	}>();
+		toc?: TOCNode[];
+		activeAnchor?: string | null;
+		onAnchorClick?: (anchor: string, e: MouseEvent) => void;
+	}
 
-	// Mock Data for Visual Design
-	const tocItems = [
-		{ level: 1, text: 'Introduction', id: 'intro' },
-		{ level: 2, text: 'why Svelte?', id: 'why' },
-		{ level: 2, text: 'The Compiler Approach', id: 'compiler' },
-		{ level: 1, text: 'Core Concepts', id: 'core' },
-		{ level: 2, text: 'Reactivity', id: 'reactivity' },
-		{ level: 3, text: 'Runes', id: 'runes' },
-		{ level: 2, text: 'Templating', id: 'templating' },
-		{ level: 1, text: 'Conclusion', id: 'conclusion' }
-	];
+	let { isOpen, onClose, toc = [], activeAnchor, onAnchorClick }: Props = $props();
+
+	// Flatten TOC for mobile simpler display if needed, or keep nested
+	const flattenedToc = $derived.by(() => {
+		const result: { level: number; name: string; anchor: string }[] = [];
+		const walk = (nodes: TOCNode[], level: number) => {
+			for (const node of nodes) {
+				result.push({ level, name: node.name, anchor: node.anchor });
+				if (node.children) walk(node.children, level + 1);
+			}
+		};
+		walk(toc, 1);
+		return result;
+	});
 </script>
 
 {#if isOpen}
 	<!-- Backdrop -->
 	<button
 		type="button"
-		aria-label="Close table of contents"
-		class="fixed inset-0 z-60 bg-ink-900/20 backdrop-blur-sm transition-opacity"
+		class="backdrop"
 		transition:fade={{ duration: 300 }}
 		onclick={onClose}
+		aria-label="关闭目录"
 	></button>
 
 	<!-- Sidebar Drawer -->
-	<div
-		class="fixed right-0 top-0 bottom-0 z-[61] w-72 bg-white/90 dark:bg-ink-900/90 backdrop-blur-2xl border-l border-white/50 dark:border-ink-700 shadow-2xl flex flex-col"
-		transition:fly={{ x: 300, duration: 400, easing: cubicOut, opacity: 1 }}
-	>
+	<div class="drawer" transition:fly={{ x: 280, duration: 400, easing: cubicOut, opacity: 1 }}>
 		<!-- Header -->
-		<div
-			class="flex items-center justify-between px-5 h-16 border-b border-ink-100 dark:border-ink-800/50 shrink-0"
-		>
-			<div class="flex items-center gap-2 text-ink-800 dark:text-jade-100 font-serif font-bold">
-				<Hash size={18} class="text-jade-600 dark:text-jade-400" />
-				<span>Contents</span>
+		<header class="drawer-header">
+			<div class="header-content">
+				<Hash size={16} class="text-jade-600 dark:text-jade-400" />
+				<span>本页目录</span>
 			</div>
-			<button
-				onclick={onClose}
-				class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-ink-100 dark:hover:bg-white/10 text-ink-500 transition-colors"
-			>
-				<X size={18} />
+			<button onclick={onClose} class="close-btn">
+				<X size={16} />
 			</button>
-		</div>
+		</header>
 
 		<!-- Scrollable Content -->
-		<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-1">
-			{#each tocItems as item}
-				<a
-					href="#{item.id}"
-					onclick={(e) => {
-						e.preventDefault();
-						onClose();
-					}}
-					class="group flex items-center gap-2 py-2 px-3 rounded-lg text-sm transition-all hover:bg-jade-50 dark:hover:bg-white/5"
-					style:padding-left="{item.level * 12 + 4}px"
-				>
-					{#if item.level === 1}
-						<ChevronRight
-							size={14}
-							class="text-jade-500 opacity-0 group-hover:opacity-100 transition-opacity -ml-4"
-						/>
-					{/if}
-					<span
-						class="truncate {item.level === 1
-							? 'font-medium text-ink-900 dark:text-ink-200'
-							: 'text-ink-500 dark:text-ink-400'}"
+		<nav class="drawer-content no-scrollbar">
+			{#if flattenedToc.length > 0}
+				{#each flattenedToc as item}
+					<a
+						href="#{item.anchor}"
+						class="toc-link {activeAnchor === item.anchor ? 'active' : ''}"
+						style:padding-left="{item.level * 12 + 8}px"
+						onclick={(e) => {
+							if (onAnchorClick) onAnchorClick(item.anchor, e);
+							onClose();
+						}}
 					>
-						{item.text}
-					</span>
-				</a>
-			{/each}
-		</div>
+						{#if item.level === 1 && activeAnchor === item.anchor}
+							<div class="active-indicator" transition:fade></div>
+						{/if}
+						<span class="truncate">{item.name}</span>
+					</a>
+				{/each}
+			{:else}
+				<div class="empty-state">未发现目录内容</div>
+			{/if}
+		</nav>
 
 		<!-- Footer Decoration -->
-		<div class="p-4 border-t border-ink-100 dark:border-ink-800/50 text-center">
-			<div class="text-[10px] text-ink-300 uppercase tracking-widest">On this page</div>
-		</div>
+		<footer class="drawer-footer">
+			<span class="footer-label">匠心营造 · 秩序与呼吸</span>
+		</footer>
 	</div>
 {/if}
+
+<style>
+	@reference "../../../routes/layout.css";
+
+	.backdrop {
+		@apply fixed inset-0 z-[100] bg-ink-950/20 backdrop-blur-[2px];
+	}
+
+	.drawer {
+		@apply fixed top-0 right-0 bottom-0 z-[101] w-64 bg-white/95 dark:bg-ink-900/95;
+		@apply flex flex-col border-l border-ink-100 shadow-2xl backdrop-blur-xl dark:border-ink-800/50;
+	}
+
+	.drawer-header {
+		@apply flex h-14 shrink-0 items-center justify-between border-b border-ink-50 px-5 dark:border-ink-800/30;
+	}
+
+	.header-content {
+		@apply flex items-center gap-2 font-serif text-sm font-bold text-ink-900 dark:text-jade-100;
+	}
+
+	.close-btn {
+		@apply flex h-8 w-8 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-ink-50 dark:hover:bg-white/5;
+	}
+
+	.drawer-content {
+		@apply flex flex-1 flex-col gap-0.5 overflow-y-auto py-4;
+	}
+
+	.toc-link {
+		@apply relative flex items-center px-4 py-2 text-[13px] text-ink-500 transition-all hover:bg-jade-50/50 hover:text-jade-600 dark:text-ink-400 dark:hover:bg-white/5 dark:hover:text-jade-400;
+	}
+
+	.toc-link.active {
+		@apply bg-jade-50/80 font-bold text-jade-700 dark:bg-jade-900/20 dark:text-jade-400;
+	}
+
+	.active-indicator {
+		@apply absolute top-1/2 left-0 h-4 w-1 -translate-y-1/2 rounded-r-full bg-jade-600 dark:bg-jade-500;
+	}
+
+	.drawer-footer {
+		@apply border-t border-ink-50 p-4 text-center dark:border-ink-800/30;
+	}
+
+	.footer-label {
+		@apply font-mono text-[9px] tracking-[0.2em] text-ink-300 uppercase dark:text-ink-500;
+	}
+
+	.empty-state {
+		@apply p-8 text-center text-xs font-light text-ink-300 italic;
+	}
+</style>

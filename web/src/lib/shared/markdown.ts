@@ -1,4 +1,4 @@
-import { createMarkdownIt } from '$lib/markdown/core';
+import { createMarkdownIt } from '$lib/shared/markdown/core';
 
 const markdown = createMarkdownIt();
 

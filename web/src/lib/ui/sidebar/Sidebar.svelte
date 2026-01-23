@@ -8,16 +8,15 @@
 		User,
 		Menu,
 		X,
-		ChevronRight,
 		ChevronDown,
-		Hash,
-		Code,
+		Terminal,
 		Coffee,
 		Sparkles,
-		Terminal,
-		Camera,
-		Zap,
-		List
+		Code,
+		List,
+		Sun,
+		Moon,
+		Monitor
 	} from 'lucide-svelte';
 	import { slide, fade, fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -25,6 +24,7 @@
 	import { page } from '$app/stores';
 	import { SectionId } from './types';
 	import TableOfContents from './TableOfContents.svelte';
+	import { themeManager } from '$lib/shared/theme.svelte';
 
 	type NavItem = {
 		id: SectionId;
@@ -34,35 +34,26 @@
 		children?: { id: SectionId; label: string; icon?: any }[];
 	};
 
-	// --- 2. Props ---
 	let { activeSection, onNavigate } = $props<{
 		activeSection: SectionId;
 		onNavigate: (id: SectionId) => void;
 	}>();
 
-	// --- 3. 状态管理 (Runes) ---
 	let isMobileMenuOpen = $state(false);
-	let scrollProgress = $state(0);
-	let hoveredItemId = $state<SectionId | null>(null); // Desktop Hover 状态
-	let expandedMobileItems = $state<Set<SectionId>>(new Set()); // Mobile Accordion 状态
-	// let isScrolled = $state(false); // Removed: using direct scrollY binding
+	let hoveredItemId = $state<SectionId | null>(null);
+	let expandedMobileItems = $state<Set<SectionId>>(new Set());
 	let scrollY = $state(0);
-	// Interpolation progress: 0 (top/capsule) -> 1 (scrolled/full)
-	// Threshold: 50px
-	let navProgress = $derived(Math.max(0, Math.min(scrollY / 50, 1)));
-	let isTocOpen = $state(false); // Mobile TOC 状态
+	let navProgress = $derived(Math.max(0, Math.min(scrollY / 60, 1)));
+	let isTocOpen = $state(false);
 
-	// Animation state to fix "snap to close" bug
 	let isMenuAnimating = $state(false);
 	$effect(() => {
-		// Trigger animation flag when menu state changes
-		isMobileMenuOpen; // Dependency
+		isMobileMenuOpen;
 		isMenuAnimating = true;
-		const timer = setTimeout(() => (isMenuAnimating = false), 500); // 500ms matches duration-500
+		const timer = setTimeout(() => (isMenuAnimating = false), 500);
 		return () => clearTimeout(timer);
 	});
 
-	// --- 4. 导航数据配置 ---
 	const navItems: NavItem[] = [
 		{ id: SectionId.Home, label: '首页', icon: Home, desc: '回到开始的地方' },
 		{
@@ -90,32 +81,11 @@
 		{ id: SectionId.About, label: '关于', icon: User, desc: '我是谁' }
 	];
 
-	// --- 5. 辅助逻辑 ---
-
-	// 滚动监听
-	onMount(() => {
-		const handleScroll = () => {
-			const h = document.documentElement;
-			const st = h.scrollTop || document.body.scrollTop;
-			const sh = h.scrollHeight || document.body.scrollHeight;
-			const ch = h.clientHeight;
-			// 防止除以0
-			const percent = sh - ch > 0 ? st / (sh - ch) : 0;
-			scrollProgress = Math.min(Math.max(percent, 0), 1);
-
-			// 更新滚动状态 (阈值 20px)
-		};
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	});
-
-	// 导航处理
 	function handleNavigate(id: SectionId) {
 		onNavigate(id);
 		isMobileMenuOpen = false;
 	}
 
-	// 移动端折叠切换
 	function toggleMobileSubmenu(e: Event, id: SectionId) {
 		e.stopPropagation();
 		const newSet = new Set(expandedMobileItems);
@@ -124,71 +94,60 @@
 		expandedMobileItems = newSet;
 	}
 
-	// 计算当前显示的标题
 	let activeLabel = $derived(
 		navItems.find((n) => n.id === activeSection || n.children?.some((c) => c.id === activeSection))
 			?.label || '博客'
 	);
 
-	// 优先显示文章标题
 	let displayTitle = $derived.by(() => {
-		// Debug logging to help identify why title might be missing
-		// console.log('Sidebar Page Data:', $page.data);
 		const post = $page.data?.post;
 		const article = $page.data?.article;
 		return post?.title || article?.title || activeLabel;
 	});
+
+	// Get real post data for TOC
+	let postData = $derived($page.data?.post);
+
+	// Theme logic
+	const toggleTheme = () => {
+		const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
+		const nextIndex = (themes.indexOf(themeManager.current) + 1) % themes.length;
+		themeManager.set(themes[nextIndex]);
+	};
+
+	let ThemeIcon = $derived.by(() => {
+		if (themeManager.current === 'light') return Sun;
+		if (themeManager.current === 'dark') return Moon;
+		return Monitor;
+	});
 </script>
 
-<!-- ================= Desktop Dock (左侧悬浮) ================= -->
-<nav class="fixed left-4 top-1/2 -translate-y-1/2 z-50 hidden lg:block">
-	<div
-		class="glass-dock py-3 px-1.5 flex flex-col gap-3 items-center hover:shadow-float transition-all duration-500"
-		onmouseleave={() => (hoveredItemId = null)}
-		role="presentation"
-	>
+<!-- ================= Desktop Dock ================= -->
+<nav class="desktop-dock-container hidden lg:block">
+	<div class="glass-dock" onmouseleave={() => (hoveredItemId = null)} role="presentation">
 		<!-- Avatar -->
-		<button
-			class="w-10 h-10 mb-2 cursor-pointer hover:scale-105 transition-transform"
-			onclick={() => handleNavigate(SectionId.Home)}
-		>
-			<img
-				src="https://dogeoss.grtsinry43.com/img/author.jpeg"
-				alt="Avatar"
-				class="rounded-full w-full h-full border-2 border-white/30"
-			/>
+		<button class="avatar-btn" onclick={() => handleNavigate(SectionId.Home)}>
+			<img src="https://dogeoss.grtsinry43.com/img/author.jpeg" alt="头像" class="avatar-img" />
 		</button>
 
-		<div class="w-full h-[1px] bg-ink-200/20 dark:bg-white/10 mb-1"></div>
+		<div class="dock-divider"></div>
 
 		{#each navItems as item (item.id)}
 			{@const isActive =
 				activeSection === item.id || item.children?.some((c) => c.id === activeSection)}
 
-			<!-- 菜单项容器 (处理 Hover) -->
 			<div
-				class="relative flex items-center"
+				class="nav-item-wrapper"
 				onmouseenter={() => (hoveredItemId = item.id)}
 				role="presentation"
 			>
-				<button
-					onclick={() => handleNavigate(item.id)}
-					class="nav-btn-desktop relative z-20 {isActive ? 'active' : ''}"
-				>
-					<item.icon
-						size={20}
-						strokeWidth={isActive ? 2.5 : 2}
-						class="transition-transform duration-300 group-hover:scale-110"
-					/>
+				<button onclick={() => handleNavigate(item.id)} class="nav-btn {isActive ? 'active' : ''}">
+					<item.icon size={16} strokeWidth={isActive ? 2.5 : 2} class="icon-transition" />
 				</button>
 
-				<!-- A. 二级菜单气泡 (Glass Popover) -->
 				{#if item.children && hoveredItemId === item.id}
-					<div
-						transition:fly={{ x: -5, duration: 200, opacity: 0 }}
-						class="absolute left-12 top-1/2 -translate-y-1/2 z-10 pl-2"
-					>
-						<div class="glass-popover p-1 min-w-[140px] flex flex-col gap-0.5">
+					<div transition:fly={{ x: -4, duration: 200, opacity: 0 }} class="popover-wrapper">
+						<div class="glass-popover">
 							{#each item.children as subItem}
 								{@const isSubActive = activeSection === subItem.id}
 								<button
@@ -196,258 +155,159 @@
 										e.stopPropagation();
 										handleNavigate(subItem.id);
 									}}
-									class="relative z-10 flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors text-left
-                   {isSubActive
-										? 'bg-jade-50 text-jade-700 dark:bg-jade-900/30 dark:text-jade-300'
-										: 'text-ink-600 dark:text-ink-400 hover:bg-ink-100 dark:hover:bg-white/5'}"
+									class="popover-item {isSubActive ? 'active' : ''}"
 								>
-									{#if subItem.icon}
-										<subItem.icon size={14} class={isSubActive ? 'opacity-100' : 'opacity-70'} />
-									{/if}
 									{subItem.label}
 								</button>
 							{/each}
 						</div>
 					</div>
-
-					<!-- B. 普通 Tooltip -->
 				{:else if !item.children && hoveredItemId === item.id}
-					<span transition:fade={{ duration: 150 }} class="tooltip">
+					<span transition:fade={{ duration: 150 }} class="dock-tooltip">
 						{item.label}
 					</span>
 				{/if}
 			</div>
 		{/each}
+
+		<div class="dock-divider mt-1"></div>
+
+		<!-- Theme Toggle -->
+		<button onclick={toggleTheme} class="nav-btn mt-1" title="切换主题 ({themeManager.current})">
+			<ThemeIcon size={16} />
+		</button>
 	</div>
 </nav>
 
-<!-- ================= Mobile Floating Capsule (顶部悬浮) ================= -->
+<!-- ================= Mobile Floating Capsule ================= -->
 <svelte:window bind:scrollY />
 
 <div
-	class="fixed z-50 lg:hidden flex justify-center transition-all ease-[cubic-bezier(0.23,1,0.32,1)]"
-	class:duration-0={!isMobileMenuOpen && !isMenuAnimating}
-	class:duration-500={isMobileMenuOpen || isMenuAnimating}
-	class:top-0={isMobileMenuOpen}
-	class:inset-x-0={isMobileMenuOpen}
-	style:top={isMobileMenuOpen ? undefined : `${16 * (1 - navProgress)}px`}
-	style:left={isMobileMenuOpen ? undefined : `${16 * (1 - navProgress)}px`}
-	style:right={isMobileMenuOpen ? undefined : `${16 * (1 - navProgress)}px`}
+	class="mobile-nav-container lg:hidden"
+	class:is-open={isMobileMenuOpen}
+	class:is-animating={isMenuAnimating}
+	style:top={isMobileMenuOpen ? '0' : `${12 * (1 - navProgress)}px`}
+	style:left={isMobileMenuOpen ? '0' : `${12 * (1 - navProgress)}px`}
+	style:right={isMobileMenuOpen ? '0' : `${12 * (1 - navProgress)}px`}
 >
 	<div
-		class="relative w-full mx-auto overflow-hidden transition-all ease-[cubic-bezier(0.23,1,0.32,1)]"
-		class:duration-0={!isMobileMenuOpen && !isMenuAnimating}
-		class:duration-500={isMobileMenuOpen || isMenuAnimating}
-		class:shadow-glass-lg={isMobileMenuOpen}
+		class="capsule-wrapper"
+		class:shadow-xl={isMobileMenuOpen}
 		class:rounded-none={isMobileMenuOpen}
 		class:h-screen={isMobileMenuOpen}
-		style:border-radius={isMobileMenuOpen ? undefined : `${24 * (1 - navProgress)}px`}
+		style:border-radius={isMobileMenuOpen ? '0' : `${12 * (1 - navProgress)}px`}
 	>
-		<!-- 背景层 (变形动画) -->
-		<div
-			class="absolute inset-0 bg-white/90 dark:bg-ink-900/90 backdrop-blur-xl border-white/40 dark:border-ink-700 shadow-glass transition-all ease-[cubic-bezier(0.23,1,0.32,1)]"
-			class:duration-0={!isMobileMenuOpen && !isMenuAnimating}
-			class:duration-500={isMobileMenuOpen || isMenuAnimating}
-			style:opacity={1}
-			style:border-width="1px"
-			style:height={isMobileMenuOpen ? '100vh' : '3rem'}
-			style:min-height={isMobileMenuOpen ? '100vh' : '3rem'}
-		></div>
+		<!-- Background -->
+		<div class="capsule-bg" style:height={isMobileMenuOpen ? '100vh' : '2.5rem'}></div>
 
-		<!-- 1. 收起状态栏 (Collapsed Header) -->
-		<div class="relative z-10 flex items-center justify-between px-3 h-12">
-			<!-- 左侧信息 & 菜单开关 -->
-			<div class="flex items-center gap-3">
+		<!-- Header Bar -->
+		<div class="capsule-header">
+			<div class="header-left">
 				<button
 					onclick={(e) => {
 						e.stopPropagation();
 						isMobileMenuOpen = !isMobileMenuOpen;
 					}}
-					class="w-9 h-9 flex items-center justify-center rounded-full active:scale-90 transition-transform"
+					class="avatar-trigger"
 				>
-					<div
-						class="w-8 h-8 rounded-full border border-ink-100 dark:border-ink-700 overflow-hidden shrink-0"
-					>
+					<div class="avatar-capsule">
 						<img
 							src="https://dogeoss.grtsinry43.com/img/author.jpeg"
-							alt="A"
-							class="w-full h-full object-cover"
+							alt="头像"
+							class="avatar-img-mobile"
 						/>
 					</div>
 				</button>
 
-				<div
-					class="flex flex-col justify-center transition-all duration-300"
-					class:opacity-0={isMobileMenuOpen}
-				>
-					<span
-						class="text-sm font-serif font-bold text-ink-900 dark:text-jade-100 leading-none truncate max-w-[200px]"
-						>{displayTitle}</span
-					>
+				<div class="title-wrapper" class:hidden={isMobileMenuOpen}>
+					<span class="capsule-title">{displayTitle}</span>
 				</div>
 			</div>
 
-			<!-- 右侧按钮组 (TOC & Menu Icon for visual balance if needed, but we used Avatar as Menu Trigger above? Wait, let's keep Menu button)
-           Alignment Fix: The previous logic had a separate Menu button. The user wants "vertical centering".
-           Let's standardise: Left = Avatar/Title, Right = TOC + Menu Toggle.
-      -->
+			<div class="header-right">
+				{#if postData?.toc?.length}
+					<button
+						onclick={(e) => {
+							e.stopPropagation();
+							isTocOpen = true;
+						}}
+						class="icon-btn"
+					>
+						<List size={16} />
+					</button>
+				{/if}
 
-			<div class="flex items-center gap-1">
-				<!-- TOC Trigger -->
-				<button
-					onclick={(e) => {
-						e.stopPropagation();
-						isTocOpen = true;
-					}}
-					class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-ink-600 dark:text-ink-300"
-				>
-					<List size={20} />
-				</button>
-
-				<!-- Main Menu Trigger -->
 				<button
 					onclick={(e) => {
 						e.stopPropagation();
 						isMobileMenuOpen = !isMobileMenuOpen;
 					}}
-					class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					class="icon-btn"
 				>
 					{#if isMobileMenuOpen}
-						<X size={20} class="text-ink-600 dark:text-ink-300" />
+						<X size={16} />
 					{:else}
-						<!-- Use a generic menu icon or maybe a different one since Avatar can also be Home?
-                 Let's stick to Menu icon for clarity as requested. -->
-						<Menu size={20} class="text-ink-600 dark:text-ink-300" />
+						<Menu size={16} />
 					{/if}
 				</button>
 			</div>
 		</div>
 
-		<!-- 2. 展开菜单内容 (Expanded Content) -->
+		<!-- Expanded Menu -->
 		{#if isMobileMenuOpen}
-			<div
-				transition:slide={{ duration: 400, axis: 'y' }}
-				class="relative z-10 px-2 pb-6 pt-0 flex flex-col max-h-[75vh] overflow-y-auto no-scrollbar"
-			>
-				<!-- 装饰标题 -->
-				<div
-					class="px-4 pb-4 pt-2 border-b border-ink-200/50 dark:border-ink-700/50 mb-3 flex items-center justify-between"
-				>
-					<span class="text-xs font-bold text-ink-400 uppercase tracking-widest">Navigation</span>
-					<span class="text-[10px] text-ink-300 font-mono">MENU</span>
+			<div transition:slide={{ duration: 400 }} class="mobile-menu-content no-scrollbar">
+				<div class="menu-divider-row">
+					<span class="menu-divider-label">主导航</span>
+					<div class="flex items-center gap-4">
+						<button
+							onclick={toggleTheme}
+							class="text-[10px] text-ink-400 flex items-center gap-1.5 active:text-jade-600 transition-colors uppercase tracking-widest font-mono"
+						>
+							<ThemeIcon size={12} />
+							{themeManager.current}
+						</button>
+						<span class="menu-divider-tag">MENU</span>
+					</div>
 				</div>
 
-				<div class="flex flex-col gap-1">
+				<div class="menu-list">
 					{#each navItems as item}
 						{@const isActive =
 							activeSection === item.id || item.children?.some((c) => c.id === activeSection)}
 						{@const hasChildren = !!item.children}
 						{@const isExpanded = expandedMobileItems.has(item.id)}
 
-						<div class="flex flex-col">
-							<!-- 一级菜单项 -->
-							<div
-								class="group flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 relative overflow-hidden cursor-pointer select-none
-                {isActive
-									? 'bg-white dark:bg-ink-800'
-									: 'hover:bg-white/50 dark:hover:bg-ink-800/50'}"
-							>
-								<!-- 激活边框 -->
-								{#if isActive}
-									<div
-										class="absolute inset-0 border border-jade-200 dark:border-jade-800 rounded-xl pointer-events-none"
-									></div>
-								{/if}
-
-								<button
-									type="button"
-									onclick={() => handleNavigate(item.id)}
-									class="flex flex-1 min-w-0 items-center gap-3 text-left"
-								>
-									<!-- 图标 -->
-									<div
-										class="w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-300 shrink-0
-                  {isActive
-											? 'bg-jade-100 text-jade-700 dark:bg-jade-900 dark:text-jade-300'
-											: 'bg-ink-100 text-ink-500 dark:bg-ink-950 dark:text-ink-400'}"
-									>
-										<item.icon size={16} />
+						<div class="menu-item-group">
+							<div class="menu-item {isActive ? 'active' : ''}">
+								<button type="button" onclick={() => handleNavigate(item.id)} class="menu-item-btn">
+									<div class="menu-icon-box {isActive ? 'active' : ''}">
+										<item.icon size={13} />
 									</div>
-
-									<!-- 文本 -->
-									<div class="flex-1 min-w-0">
-										<div
-											class="font-serif text-[15px] font-medium truncate {isActive
-												? 'text-jade-800 dark:text-jade-100'
-												: 'text-ink-700 dark:text-ink-300'}"
-										>
-											{item.label}
-										</div>
-										<div
-											class="text-[10px] text-ink-400 dark:text-ink-500 line-clamp-1 font-sans mt-0.5"
-										>
-											{item.desc}
-										</div>
-									</div>
+									<span class="menu-label {isActive ? 'active' : ''}">{item.label}</span>
 								</button>
 
-								<!-- 展开/收起按钮 (独立交互) -->
 								{#if hasChildren}
 									<button
 										type="button"
 										onclick={(e) => toggleMobileSubmenu(e, item.id)}
-										class="p-2 -mr-2 rounded-full hover:bg-ink-100 dark:hover:bg-white/10 text-ink-400 transition-colors active:scale-90"
+										class="submenu-toggle"
 									>
-										<ChevronDown
-											size={16}
-											class="transition-transform duration-300 {isExpanded
-												? 'rotate-180 text-jade-600'
-												: ''}"
-										/>
+										<ChevronDown size={14} class="toggle-icon {isExpanded ? 'expanded' : ''}" />
 									</button>
 								{/if}
 							</div>
 
-							<!-- 二级菜单 (Tree Accordion) -->
 							{#if hasChildren && isExpanded}
-								<div
-									transition:slide={{ duration: 300, easing: cubicOut }}
-									class="flex flex-col gap-1 mt-1 mb-2 relative"
-								>
-									<!-- 垂直树线 -->
-									<div
-										class="absolute left-[39px] top-0 bottom-4 w-[1px] bg-ink-200 dark:bg-ink-700"
-									></div>
-
+								<div transition:slide={{ duration: 300 }} class="submenu-list">
+									<div class="tree-line"></div>
 									{#each item.children as subItem}
 										{@const isSubActive = activeSection === subItem.id}
 										<button
 											onclick={() => handleNavigate(subItem.id)}
-											class="relative flex items-center gap-3 pl-[54px] pr-4 py-2.5 rounded-lg ml-2 mr-2 transition-colors text-left group/sub
-                       {isSubActive
-												? 'bg-jade-50/50 dark:bg-jade-900/20'
-												: 'hover:bg-white/60 dark:hover:bg-white/5'}"
+											class="submenu-item {isSubActive ? 'active' : ''}"
 										>
-											<!-- 水平分支线 -->
-											<div
-												class="absolute left-[31px] top-1/2 w-4 h-[1px] bg-ink-200 dark:bg-ink-700"
-											></div>
-
-											{#if subItem.icon}
-												<subItem.icon
-													size={14}
-													class="{isSubActive
-														? 'text-jade-600 dark:text-jade-400'
-														: 'text-ink-400'} transition-colors"
-												/>
-											{/if}
-											<span
-												class="text-sm font-medium {isSubActive
-													? 'text-jade-700 dark:text-jade-300'
-													: 'text-ink-600 dark:text-ink-400'}"
-											>
-												{subItem.label}
-											</span>
+											<div class="branch-line"></div>
+											<span>{subItem.label}</span>
 										</button>
 									{/each}
 								</div>
@@ -459,77 +319,226 @@
 		{/if}
 	</div>
 
-	<!-- 全局遮罩 (点击外部关闭) -->
 	{#if isMobileMenuOpen}
 		<button
 			type="button"
-			aria-label="Close menu"
 			transition:fade={{ duration: 300 }}
-			class="fixed inset-0 bg-ink-900/20 backdrop-blur-[2px] -z-10"
+			class="mobile-nav-backdrop"
 			onclick={() => (isMobileMenuOpen = false)}
 		></button>
 	{/if}
 </div>
 
-<!-- ================= Mobile TOC Drawer ================= -->
-<TableOfContents isOpen={isTocOpen} onClose={() => (isTocOpen = false)} />
+<!-- TOC Component with Real Data -->
+<TableOfContents
+	isOpen={isTocOpen}
+	onClose={() => (isTocOpen = false)}
+	toc={postData?.toc}
+	activeAnchor={$page.url.hash.slice(1)}
+/>
 
 <style>
 	@reference "../../../routes/layout.css";
 
-	/* --- 通用：隐藏滚动条 --- */
-	.no-scrollbar::-webkit-scrollbar {
-		display: none;
-	}
-	.no-scrollbar {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+	/* --- Desktop Dock --- */
+	.desktop-dock-container {
+		@apply fixed top-1/2 left-4 z-50 hidden -translate-y-1/2 lg:block;
 	}
 
-	/* --- Desktop Styles --- */
 	.glass-dock {
-		@apply bg-white/70 dark:bg-ink-900/70;
-		@apply border border-white/50 backdrop-blur-2xl dark:border-ink-700;
-		@apply shadow-glass;
-		@apply rounded-full;
+		@apply flex flex-col items-center gap-2 rounded-full border border-ink-100 bg-white/80 px-1.5 py-2.5 shadow-sm backdrop-blur-2xl dark:border-ink-800/50 dark:bg-ink-900/80;
+	}
+
+	.avatar-btn {
+		@apply mb-1 h-8 w-8 cursor-pointer transition-transform hover:scale-105;
+	}
+
+	.avatar-img {
+		@apply h-full w-full rounded-full border border-white/40 shadow-sm;
+	}
+
+	.dock-divider {
+		@apply mb-1 h-px w-4 bg-ink-100 dark:bg-ink-800/50;
+	}
+
+	.nav-item-wrapper {
+		@apply relative flex items-center;
+	}
+
+	.nav-btn {
+		@apply flex h-8 w-8 items-center justify-center rounded-full text-ink-400 transition-all hover:bg-jade-50 hover:text-jade-600 dark:text-ink-500 dark:hover:bg-white/5 dark:hover:text-jade-400;
+	}
+
+	.nav-btn.active {
+		@apply scale-105 bg-jade-800 text-white shadow-md dark:bg-jade-600;
+	}
+
+	.popover-wrapper {
+		@apply absolute top-1/2 left-10 z-10 -translate-y-1/2 pl-2;
 	}
 
 	.glass-popover {
-		@apply bg-white/80 dark:bg-ink-900/80;
-		@apply border border-white/50 backdrop-blur-xl dark:border-ink-700;
-		@apply rounded-xl shadow-xl;
+		@apply flex min-w-[100px] flex-col rounded-lg border border-ink-50 bg-white/95 py-1 shadow-xl backdrop-blur-xl dark:border-ink-800 dark:bg-ink-900/95;
 	}
 
-	.nav-btn-desktop {
-		@apply flex h-10 w-10 items-center justify-center rounded-full;
-		@apply text-ink-400 dark:text-ink-500;
-		@apply hover:bg-jade-50 dark:hover:bg-ink-800;
-		@apply hover:text-jade-600 dark:hover:text-jade-400;
-		@apply transition-colors;
+	.popover-item {
+		@apply px-4 py-1.5 text-left text-[12px] font-normal text-ink-600 transition-colors hover:bg-jade-50 hover:text-jade-700 dark:text-ink-400 dark:hover:bg-white/5 dark:hover:text-jade-300;
 	}
 
-	.nav-btn-desktop.active {
-		@apply bg-jade-800 text-white dark:bg-jade-600;
-		@apply shadow-lg shadow-jade-800/20 dark:shadow-jade-900/40;
-		@apply scale-110;
+	.popover-item.active {
+		@apply bg-jade-50/50 font-bold text-jade-700 dark:bg-jade-900/20 dark:text-jade-400;
 	}
 
-	/* Tooltip */
-	.tooltip {
-		@apply absolute left-14 bg-ink-900 text-white dark:bg-white dark:text-ink-900;
-		@apply rounded-lg px-3 py-1.5 text-[12px] whitespace-nowrap;
-		@apply pointer-events-none font-serif tracking-wide shadow-xl;
-		@apply top-1/2 -translate-y-1/2;
+	.dock-tooltip {
+		@apply pointer-events-none absolute top-1/2 left-12 -translate-y-1/2 rounded bg-ink-900 px-2 py-0.5 font-serif text-[10px] tracking-widest whitespace-nowrap text-white shadow-lg dark:bg-white dark:text-ink-900;
 	}
 
-	/* --- Shadows --- */
-	.shadow-glass {
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+	/* --- Mobile Capsule --- */
+	.mobile-nav-container {
+		@apply fixed inset-x-0 z-[90] flex justify-center transition-all ease-[cubic-bezier(0.23,1,0.32,1)] lg:hidden;
 	}
-	.shadow-glass-lg {
-		box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+
+	.mobile-nav-container.is-open {
+		@apply inset-x-0;
 	}
-	:global(.dark) .shadow-glass {
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+	.mobile-nav-container.is-animating {
+		@apply duration-500;
+	}
+
+	.capsule-wrapper {
+		@apply relative mx-auto w-full overflow-hidden transition-all ease-[cubic-bezier(0.23,1,0.32,1)];
+	}
+
+	.capsule-bg {
+		@apply absolute inset-0 border border-ink-50 bg-white/90 shadow-sm backdrop-blur-xl transition-all duration-500 dark:border-ink-800/40 dark:bg-ink-900/95;
+	}
+
+	.capsule-header {
+		@apply relative z-10 flex h-10 items-center justify-between px-3;
+	}
+
+	.header-left {
+		@apply flex items-center gap-2;
+	}
+
+	.avatar-trigger {
+		@apply flex h-7 w-7 items-center justify-center rounded-full transition-transform active:scale-95;
+	}
+
+	.avatar-capsule {
+		@apply h-6 w-6 shrink-0 overflow-hidden rounded-full border border-ink-50 dark:border-ink-800;
+	}
+
+	.avatar-img-mobile {
+		@apply h-full w-full object-cover;
+	}
+
+	.title-wrapper {
+		@apply flex flex-col justify-center transition-all duration-300;
+	}
+
+	.capsule-title {
+		@apply max-w-[150px] truncate font-serif text-[12px] leading-none font-bold text-ink-900 dark:text-jade-100;
+	}
+
+	.header-right {
+		@apply flex items-center gap-0.5;
+	}
+
+	.icon-btn {
+		@apply flex h-8 w-8 items-center justify-center rounded-full text-ink-500 active:bg-ink-50 dark:text-ink-400 dark:active:bg-white/5;
+	}
+
+	.mobile-menu-content {
+		@apply relative z-10 no-scrollbar flex max-h-[70vh] flex-col overflow-y-auto px-2 pb-6;
+	}
+
+	.menu-divider-row {
+		@apply mb-2 flex items-center justify-between border-b border-ink-50 px-4 pt-1 pb-3 opacity-80 dark:border-ink-800/30;
+	}
+
+	.menu-divider-label {
+		@apply text-[10px] font-bold tracking-widest text-ink-400 uppercase;
+	}
+
+	.menu-divider-tag {
+		@apply font-mono text-[8px] text-ink-300;
+	}
+
+	.menu-list {
+		@apply flex flex-col gap-0.5;
+	}
+
+	.menu-item-group {
+		@apply flex flex-col;
+	}
+
+	.menu-item {
+		@apply relative flex items-center gap-2 overflow-hidden rounded-lg px-3 py-1.5 transition-all;
+	}
+
+	.menu-item.active {
+		@apply border border-jade-100/50 bg-jade-50/50 dark:border-jade-800/20 dark:bg-jade-900/10;
+	}
+
+	.menu-item-btn {
+		@apply flex min-w-0 flex-1 items-center gap-3 text-left;
+	}
+
+	.menu-icon-box {
+		@apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-50 text-ink-400 transition-colors dark:bg-ink-800;
+	}
+
+	.menu-icon-box.active {
+		@apply bg-jade-600 text-white shadow-sm;
+	}
+
+	.menu-label {
+		@apply font-serif text-[13px] font-medium text-ink-700 dark:text-ink-300;
+	}
+
+	.menu-label.active {
+		@apply text-jade-800 dark:text-jade-100;
+	}
+
+	.submenu-toggle {
+		@apply -mr-1 rounded-full p-1.5 text-ink-300;
+	}
+
+	.toggle-icon {
+		@apply transition-transform duration-300;
+	}
+
+	.toggle-icon.expanded {
+		@apply rotate-180 text-jade-600;
+	}
+
+	.submenu-list {
+		@apply relative mt-0.5 mb-1.5 flex flex-col gap-0.5;
+	}
+
+	.tree-line {
+		@apply absolute top-0 bottom-3 left-[31px] w-[1px] bg-ink-100 dark:bg-ink-800/50;
+	}
+
+	.submenu-item {
+		@apply relative mx-1 flex items-center gap-2 rounded-md py-1.5 pr-4 pl-11 text-left text-[12px] font-normal text-ink-500 transition-colors hover:text-jade-600 dark:text-ink-400;
+	}
+
+	.submenu-item.active {
+		@apply font-bold text-jade-700 dark:text-jade-300;
+	}
+
+	.branch-line {
+		@apply absolute top-1/2 left-[24px] h-[1px] w-3 bg-ink-100 dark:bg-ink-800/50;
+	}
+
+	.mobile-nav-backdrop {
+		@apply fixed inset-0 -z-10 bg-ink-950/20 backdrop-blur-[1px];
+	}
+
+	.empty-state {
+		@apply p-8 text-center text-xs font-light text-ink-300 italic;
 	}
 </style>

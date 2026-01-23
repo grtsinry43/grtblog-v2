@@ -19,170 +19,8 @@ const APP_NAME = import.meta.env.VITE_APP_NAME
 
 const { dependencies, devDependencies } = packageJson
 
-const directoryStructureHighlight = ref('')
 const dependenciesCodeHighlight = ref('')
 const devDependenciesCodeHighlight = ref('')
-
-const dir = ` 📂 lithe-admin
-├── 📄 README.en_US.md
-├── 📄 README.md
-├── 📄 eslint.config.ts
-├── 📄 index.html
-├── 📄 package.json
-├── 📄 pnpm-lock.yaml
-└── 📂 public/
-│  └── 📂 assets/
-│    ├── 📄 preloader.css
-│  ├── 📄 favicon.ico
-└── 📂 src/
-│  ├── 📄 App.vue
-│  └── 📂 assets/
-│    ├── 📄 base.css
-│    ├── 📄 main.css
-│    ├── 📄 noise.png
-│    ├── 📄 texture.png
-│    ├── 📄 topography.svg
-│  └── 📂 components/
-│    ├── 📄 AppLogo.vue
-│    ├── 📄 Noise.vue
-│    ├── 📄 UserAvatar.vue
-│    ├── 📄 UserDropdown.vue
-│    └── 📂 button-animation/
-│      ├── 📄 ButtonAnimation.test.ts
-│      ├── 📄 ButtonAnimation.vue
-│      ├── 📄 ButtonAnimationProvider.vue
-│      ├── 📄 index.ts
-│      ├── 📄 injection.ts
-│      ├── 📄 interface.ts
-│    └── 📂 collapse-transition/
-│      ├── 📄 CollapseTransition.test.ts
-│      ├── 📄 CollapseTransition.vue
-│      ├── 📄 CollapseTransitionTrigger.vue
-│      ├── 📄 index.ts
-│      ├── 📄 interface.ts
-│    └── 📂 empty-placeholder/
-│      ├── 📄 EmptyPlaceholder.test.ts
-│      ├── 📄 EmptyPlaceholder.vue
-│      ├── 📄 index.ts
-│    └── 📂 hint-help/
-│      ├── 📄 HintHelp.test.ts
-│      ├── 📄 HintHelp.vue
-│      ├── 📄 index.ts
-│    ├── 📄 index.ts
-│    └── 📂 scroll-container/
-│      ├── 📄 ScrollContainer.test.ts
-│      ├── 📄 ScrollContainer.vue
-│      ├── 📄 index.ts
-│  └── 📂 composables/
-│    ├── 📄 index.ts
-│    ├── 📄 useComponentModifier.ts
-│    ├── 📄 useComponentThemeOverrides.ts
-│    ├── 📄 useDiscreteApi.ts
-│    ├── 📄 useInjection.ts
-│    ├── 📄 useResettable.ts
-│    ├── 📄 useTheme.ts
-│  └── 📂 event-bus/
-│    ├── 📄 index.ts
-│    ├── 📄 interface.ts
-│  └── 📂 injection/
-│    ├── 📄 index.ts
-│    ├── 📄 interface.ts
-│  └── 📂 layout/
-│    └── 📂 aside/
-│      ├── 📄 SidebarMenu.vue
-│      ├── 📄 SidebarUserPanel.vue
-│      ├── 📄 index.vue
-│    └── 📂 footer/
-│      ├── 📄 index.vue
-│    └── 📂 header/
-│      └── 📂 action/
-│        ├── 📄 AvatarDropdown.vue
-│        ├── 📄 FullScreen.vue
-│        ├── 📄 PreferencesDrawer.vue
-│        ├── 📄 SignOut.vue
-│        ├── 📄 ThemeModePopover.vue
-│        └── 📂 component/
-│          ├── 📄 LayoutThumbnail.vue
-│          ├── 📄 WatermarkModal.vue
-│        ├── 📄 index.vue
-│      ├── 📄 index.vue
-│      └── 📂 logo/
-│        ├── 📄 index.vue
-│      └── 📂 navigation/
-│        ├── 📄 Breadcrumb.vue
-│        ├── 📄 HorizontalMenu.vue
-│        ├── 📄 NavigationButton.vue
-│        ├── 📄 index.vue
-│    ├── 📄 index.vue
-│    └── 📂 main/
-│      ├── 📄 index.vue
-│    └── 📂 mobile/
-│      ├── 📄 MobileHeader.vue
-│      ├── 📄 MobileLeftAside.vue
-│      ├── 📄 MobileRightAside.vue
-│    └── 📂 tabs/
-│      ├── 📄 index.vue
-│  ├── 📄 main.ts
-│  └── 📂 router/
-│    ├── 📄 guard.ts
-│    ├── 📄 helper.ts
-│    ├── 📄 index.ts
-│    ├── 📄 record.ts
-│  └── 📂 stores/
-│    ├── 📄 index.ts
-│    ├── 📄 preferences.ts
-│    ├── 📄 tabs.ts
-│    ├── 📄 user.ts
-│  └── 📂 theme/
-│    ├── 📄 common.ts
-│    ├── 📄 dark.ts
-│    ├── 📄 light.ts
-│  └── 📂 types/
-│    ├── 📄 env.d.ts
-│    ├── 📄 vue-router.d.ts
-│    ├── 📄 window.d.ts
-│  └── 📂 utils/
-│    ├── 📄 checkVersion.ts
-│    ├── 📄 chromaHelper.ts
-│    ├── 📄 tailwindColor.test.ts
-│    ├── 📄 tailwindColor.ts
-│  └── 📂 views/
-│    └── 📂 about/
-│      ├── 📄 index.vue
-│    └── 📂 dashboard/
-│      ├── 📄 index.vue
-│    └── 📂 data-show/
-│      └── 📂 data-form/
-│        ├── 📄 index.vue
-│      └── 📂 data-table/
-│        ├── 📄 ActionModal.vue
-│        ├── 📄 index.vue
-│    └── 📂 drag-drop/
-│      ├── 📄 index.vue
-│    └── 📂 dynamic-route/
-│      ├── 📄 index.vue
-│    └── 📂 error-page/
-│      ├── 📄 404.vue
-│      ├── 📄 index.vue
-│    └── 📂 feedback/
-│      ├── 📄 discreteApi.ts
-│      ├── 📄 index.vue
-│    └── 📂 multi-level-menu/
-│      ├── 📄 index.vue
-│    └── 📂 sign-in/
-│      └── 📂 component/
-│        ├── 📄 Illustration1.vue
-│        ├── 📄 Illustration2.vue
-│        ├── 📄 Illustration3.vue
-│        ├── 📄 ThemeColorPopover.vue
-│      ├── 📄 index.vue
-├── 📄 tailwind.config.ts
-├── 📄 tsconfig.app.json
-├── 📄 tsconfig.json
-├── 📄 tsconfig.node.json
-├── 📄 tsconfig.vitest.json
-├── 📄 vite.config.ts
-└── 📄 vitest.config.ts`
 
 onMounted(async () => {
   if (!codeToHtml) {
@@ -190,16 +28,6 @@ onMounted(async () => {
     const shiki = await import('https://cdn.jsdelivr.net/npm/shiki@3.7.0/+esm')
     codeToHtml = shiki.codeToHtml
   }
-
-  codeToHtml(dir, {
-    lang: 'markdown',
-    themes: {
-      light: 'min-light',
-      dark: 'dark-plus',
-    },
-  })
-    .then((result: string) => (directoryStructureHighlight.value = result))
-    .catch(() => (directoryStructureHighlight.value = dir))
 
   codeToHtml(JSON.stringify(dependencies, null, 2), {
     lang: 'json',
@@ -295,16 +123,39 @@ onMounted(async () => {
         </NButton>
         构建。
       </p>
+      <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        grtblog-v2 是对 v1 的系统性重构：回到单体结构、减少依赖与复杂度，以默认 SSG 为主、按需引入 SSR / API，
+        面向创作者与读者打造一个可持续维护的内容平台。
+      </p>
+      <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        本后台为 lithe admin 的二次开发版本，专为 grtblog-v2 的内容管理、发布与运营流程定制。
+      </p>
+      <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        项目由 Go API、SvelteKit 前台、Vue 后台与共享 Markdown 组件能力组成。
+      </p>
+      <div class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+        <p>面向用户的核心能力：</p>
+        <ul class="mt-1 list-disc pl-5">
+          <li>Markdown 写作与组件块：相册、提示框、时间轴、链接卡片、年终卡片等。</li>
+          <li>文章与元信息管理：摘要/导语/封面/短链、置顶/热门/原创、分类与标签。</li>
+          <li>媒体资源管理：图片与文件上传、预览、重命名与下载。</li>
+          <li>账号与安全：JWT + RBAC 权限控制、OAuth 绑定、登录限流与人机校验。</li>
+        </ul>
+      </div>
+      <div class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+        <p>渲染与更新机制：</p>
+        <ul class="mt-1 list-disc pl-5">
+          <li>SvelteKit 作为渲染器输出 SSR 页面，后端抓取生成静态 HTML 快照对外发布。</li>
+          <li>文章变更触发事件驱动的异步刷新，并通过 WebSocket 推送内容更新。</li>
+          <li>前台基于内容哈希校验版本，必要时拉取最新内容。</li>
+          <li>规划引入脏路径计算，仅刷新受影响的页面与列表。</li>
+        </ul>
+      </div>
+      <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        另外提供 WebSocket 房间能力，用于内容互动场景。
+      </p>
     </NCard>
     <div class="flex gap-x-2 max-lg:flex-col">
-      <NCard
-        title="目录结构"
-        :size="isMaxMd ? 'small' : undefined"
-      >
-        <NScrollbar container-style="max-height: 1100px;">
-          <div v-html="directoryStructureHighlight"></div>
-        </NScrollbar>
-      </NCard>
       <NCard
         title="依赖信息"
         :size="isMaxMd ? 'small' : undefined"

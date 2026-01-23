@@ -5,10 +5,9 @@ import { ref } from 'vue'
 import router from '@/router'
 import { resolveMenu, resolveRoute } from '@/router/helper'
 import { routeRecordRaw } from '@/router/record'
+import { getAccessInfo } from '@/services/auth'
 
 import { pinia } from '.'
-
-import { getAccessInfo } from '@/services/auth'
 
 import type { MenuMixedOptions } from '@/router/interface'
 import type { MenuOption } from 'naive-ui'
@@ -105,7 +104,20 @@ export const useUserStore = defineStore('userStore', () => {
       if (isAdmin) {
         resolve(routeRecordRaw)
       } else {
-        const allowedRoutes = ['dashboard', 'dataShow', 'notfoundPage', 'about', 'userCenter']
+        const allowedRoutes = [
+          'articleManagement',
+          'noteManagement',
+          'pageManagement',
+          'albumManagement',
+          'commentInteraction',
+          'friendLinkManagement',
+          'unionManagement',
+          'fileManagement',
+          'pluginManagement',
+          'advancedInfo',
+          'systemMonitor',
+          'about',
+        ]
         const filteredRoutes = routeRecordRaw.filter((route) => {
           return !route.type && route.name && allowedRoutes.includes(route.name as string)
         })

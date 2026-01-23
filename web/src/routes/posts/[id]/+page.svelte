@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { get, writable } from 'svelte/store';
-	import { PostDetail } from '$lib/modules/post';
-	import { checkPostLatest } from '$lib/queries/post';
-	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/models/post';
+	import { PostDetail } from '$lib/features/post';
+	import { checkPostLatest } from '$lib/features/post/api';
+	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/features/post/types';
 	import { browser } from '$app/environment';
 
 	let { data } = $props();
