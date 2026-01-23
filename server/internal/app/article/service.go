@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/contentutil"
 	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 )
@@ -29,7 +30,7 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 		shortURL = strings.TrimSpace(*cmd.ShortURL)
 	}
 	if shortURL == "" {
-		shortURL = generateShortURLFromTitle(cmd.Title)
+		shortURL = contentutil.GenerateShortURLFromTitle(cmd.Title)
 	}
 	shortURL, err := s.ensureShortURLAvailable(ctx, shortURL)
 	if err != nil {
@@ -51,8 +52,8 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 		createdAt = *cmd.CreatedAt
 	}
 
-	toc := generateTOC(cmd.Content)
-	summary := buildSummary(cmd.Summary, cmd.Content)
+	toc := contentutil.GenerateTOC(cmd.Content)
+	summary := contentutil.BuildSummary(cmd.Summary, cmd.Content)
 
 	article := &content.Article{
 		Title:       cmd.Title,
@@ -124,8 +125,8 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 		return nil, err
 	}
 
-	toc := generateTOC(cmd.Content)
-	summary := buildSummary(cmd.Summary, cmd.Content)
+	toc := contentutil.GenerateTOC(cmd.Content)
+	summary := contentutil.BuildSummary(cmd.Summary, cmd.Content)
 
 	// 更新字段
 	existing.Title = cmd.Title
@@ -268,7 +269,7 @@ func (s *Service) ensureShortURLAvailable(ctx context.Context, shortURL string) 
 	shortURL = strings.TrimSpace(shortURL)
 	if shortURL == "" {
 		for i := 0; i < 5; i++ {
-			candidate := generateRandomShortURL()
+			candidate := contentutil.GenerateRandomShortURL()
 			_, err := s.repo.GetArticleByShortURL(ctx, candidate)
 			if err != nil {
 				if errors.Is(err, content.ErrArticleNotFound) {

@@ -7,6 +7,8 @@ import (
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/article"
 	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/moment"
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/page"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 )
@@ -42,8 +44,66 @@ func RegisterArticleUpdateSubscriber(bus appEvent.Bus, manager *Manager) {
 	}))
 }
 
+func RegisterMomentUpdateSubscriber(bus appEvent.Bus, manager *Manager) {
+	if bus == nil || manager == nil {
+		return
+	}
+	bus.Subscribe(moment.MomentUpdated{}.Name(), handlerFunc(func(ctx context.Context, event appEvent.Event) error {
+		updated, ok := event.(moment.MomentUpdated)
+		if !ok {
+			return nil
+		}
+		payload := contract.MomentContentPayload{
+			ContentHash: updated.ContentHash,
+			Title:       updated.Title,
+			Summary:     updated.Summary,
+			TOC:         mapTOCNodes(updated.TOC),
+			Content:     updated.Content,
+		}
+		data, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+		manager.Broadcast(momentRoomKey(updated.ID), data)
+		return nil
+	}))
+}
+
+func RegisterPageUpdateSubscriber(bus appEvent.Bus, manager *Manager) {
+	if bus == nil || manager == nil {
+		return
+	}
+	bus.Subscribe(page.PageUpdated{}.Name(), handlerFunc(func(ctx context.Context, event appEvent.Event) error {
+		updated, ok := event.(page.PageUpdated)
+		if !ok {
+			return nil
+		}
+		payload := contract.PageContentPayload{
+			ContentHash: updated.ContentHash,
+			Title:       updated.Title,
+			Description: updated.Description,
+			TOC:         mapTOCNodes(updated.TOC),
+			Content:     updated.Content,
+		}
+		data, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+		manager.Broadcast(pageRoomKey(updated.ID), data)
+		return nil
+	}))
+}
+
 func articleRoomKey(id int64) string {
 	return fmt.Sprintf("article:%d", id)
+}
+
+func momentRoomKey(id int64) string {
+	return fmt.Sprintf("moment:%d", id)
+}
+
+func pageRoomKey(id int64) string {
+	return fmt.Sprintf("page:%d", id)
 }
 
 func mapTOCNodes(nodes []content.TOCNode) []contract.TOCNode {

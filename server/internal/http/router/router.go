@@ -58,6 +58,8 @@ func Register(app *fiber.App, deps Dependencies) {
 		CleanupInterval: 5 * time.Second,
 	})
 	ws.RegisterArticleUpdateSubscriber(eventBus, wsManager)
+	ws.RegisterMomentUpdateSubscriber(eventBus, wsManager)
+	ws.RegisterPageUpdateSubscriber(eventBus, wsManager)
 
 	contentRepo := persistence.NewContentRepository(deps.DB)
 	htmlSnapshotSvc := htmlsnapshot.NewService(contentRepo, "")
@@ -72,9 +74,13 @@ func Register(app *fiber.App, deps Dependencies) {
 	deps.EventBus = eventBus
 	registerWSRoutes(v2, wsManager)
 	registerArticlePublicRoutes(v2, deps)
+	registerMomentPublicRoutes(v2, deps)
+	registerPagePublicRoutes(v2, deps)
 	registerTaxonomyPublicRoutes(v2, deps)
 	registerUserRoutes(v2, deps, websiteInfoHandler)
 	registerArticleAuthRoutes(v2, deps)
+	registerMomentAuthRoutes(v2, deps)
+	registerPageAuthRoutes(v2, deps)
 	registerAdminRoutes(v2, deps, websiteInfoHandler)
 	registerTaxonomyAdminRoutes(v2, deps)
 

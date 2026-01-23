@@ -1,6 +1,10 @@
-package article
+package contentutil
+
+// 把公共逻辑抽取了下，文章手记页面都能用欸
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"regexp"
 	"strings"
@@ -20,8 +24,9 @@ type heading struct {
 
 var markdownParser = goldmark.New()
 var tocAnchorSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
+var shortURLSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 
-func generateTOC(markdown string) []content.TOCNode {
+func GenerateTOC(markdown string) []content.TOCNode {
 	headings := extractHeadings(markdown)
 	if len(headings) == 0 {
 		return nil
@@ -62,6 +67,54 @@ func generateTOC(markdown string) []content.TOCNode {
 		result[i] = *node
 	}
 	return result
+}
+
+func BuildSummary(summary, content string) string {
+	if strings.TrimSpace(summary) != "" {
+		return summary
+	}
+	return truncateRunes(content, 200)
+}
+
+func GenerateShortURLFromTitle(title string) string {
+	args := pinyin.NewArgs()
+	args.Style = pinyin.Normal
+
+	var builder strings.Builder
+	wordCount := 0
+	for _, r := range title {
+		if r >= 0x4e00 && r <= 0x9fa5 {
+			py := pinyin.Pinyin(string(r), args)
+			if len(py) == 0 || len(py[0]) == 0 || py[0][0] == "" {
+				continue
+			}
+			if wordCount > 0 {
+				builder.WriteByte('-')
+			}
+			builder.WriteString(py[0][0])
+			wordCount++
+		} else if unicode.IsSpace(r) {
+			if wordCount > 0 {
+				builder.WriteByte('-')
+			}
+			wordCount++
+		} else {
+			builder.WriteRune(r)
+		}
+
+		if wordCount >= 10 {
+			break
+		}
+	}
+
+	slug := shortURLSanitizer.ReplaceAllString(builder.String(), "")
+	return strings.ToLower(slug)
+}
+
+func GenerateRandomShortURL() string {
+	bytes := make([]byte, 4)
+	_, _ = rand.Read(bytes)
+	return hex.EncodeToString(bytes)
 }
 
 func extractHeadings(markdown string) []heading {
@@ -165,13 +218,6 @@ func slugifyHeading(input string) string {
 	slug = strings.Trim(slug, "-")
 	slug = strings.ToLower(slug)
 	return slug
-}
-
-func buildSummary(summary, content string) string {
-	if strings.TrimSpace(summary) != "" {
-		return summary
-	}
-	return truncateRunes(content, 200)
 }
 
 func truncateRunes(input string, limit int) string {
