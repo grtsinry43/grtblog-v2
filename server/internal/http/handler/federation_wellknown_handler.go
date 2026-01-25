@@ -110,7 +110,7 @@ func (h *FederationWellKnownHandler) resolveInstanceName(settings federationconf
 
 func (h *FederationWellKnownHandler) resolveInstanceURL(c *fiber.Ctx, settings federationconfig.Settings) string {
 	if strings.TrimSpace(settings.InstanceURL) != "" {
-		return strings.TrimRight(settings.InstanceURL, "/")
+		return normalizeInstanceURL(settings.InstanceURL)
 	}
 	scheme := "https"
 	if c.Protocol() != "" {

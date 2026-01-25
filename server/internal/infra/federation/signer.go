@@ -51,6 +51,9 @@ func (s *Signer) SignRequest(req *http.Request, body []byte, keyID string, priva
 	if req.Host == "" && req.URL != nil {
 		req.Host = req.URL.Host
 	}
+	if req.Header.Get("Host") == "" && req.Host != "" {
+		req.Header.Set("Host", req.Host)
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.signer.SignRequest(privateKey, keyID, req, body)
