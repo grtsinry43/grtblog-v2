@@ -44,6 +44,13 @@ func NewFederationFriendLinkHandler(
 }
 
 // RequestFriendLink handles signed federation friendlink requests.
+// @Summary 联合友链申请（入站）
+// @Tags Federation
+// @Accept json
+// @Produce json
+// @Param request body contract.FederationFriendLinkRequestReq true "友链申请参数"
+// @Success 200 {object} contract.FederationFriendLinkResponseResp
+// @Router /api/federation/friendlinks/request [post]
 func (h *FederationFriendLinkHandler) RequestFriendLink(c *fiber.Ctx) error {
 	body := c.Body()
 	req, err := parseFederationRequest(c)

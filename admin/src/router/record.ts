@@ -159,8 +159,30 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     name: 'unionManagement',
     icon: 'iconify ph--circles-three',
     label: '联合',
-    redirect: 'federation/settings',
+    redirect: 'federation/debug',
     children: [
+      {
+        path: 'debug',
+        name: 'federationDebug',
+        label: '联邦调试',
+        icon: 'iconify ph--bug',
+        meta: {
+          componentName: 'FederationDebug',
+          showTab: true,
+        },
+        component: 'federation/debug',
+      },
+      {
+        path: 'instances',
+        name: 'federationInstances',
+        label: '联邦实例',
+        icon: 'iconify ph--network',
+        meta: {
+          componentName: 'FederationInstances',
+          showTab: true,
+        },
+        component: 'federation/instances',
+      },
       {
         path: 'settings',
         name: 'unionSettings',

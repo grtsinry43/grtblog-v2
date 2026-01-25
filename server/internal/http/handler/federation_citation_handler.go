@@ -50,6 +50,13 @@ func NewFederationCitationHandler(
 }
 
 // RequestCitation handles signed citation requests from remote instances.
+// @Summary 联合引用申请（入站）
+// @Tags Federation
+// @Accept json
+// @Produce json
+// @Param request body contract.FederationCitationRequestReq true "引用申请参数"
+// @Success 200 {object} contract.FederationCitationResponseResp
+// @Router /api/federation/citations/request [post]
 func (h *FederationCitationHandler) RequestCitation(c *fiber.Ctx) error {
 	body := c.Body()
 	req, err := parseFederationRequest(c)

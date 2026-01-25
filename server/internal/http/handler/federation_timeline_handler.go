@@ -25,6 +25,16 @@ func NewFederationTimelineHandler(contentRepo content.Repository, userRepo ident
 }
 
 // ListTimelinePosts returns published articles for federation timeline.
+// @Summary 联合时间线
+// @Tags Federation
+// @Accept json
+// @Produce json
+// @Param page query int false "页码"
+// @Param per_page query int false "每页数量"
+// @Param since query string false "起始时间 RFC3339"
+// @Param until query string false "结束时间 RFC3339"
+// @Success 200 {object} contract.FederationTimelineResp
+// @Router /api/federation/timeline/posts [get]
 func (h *FederationTimelineHandler) ListTimelinePosts(c *fiber.Ctx) error {
 	if h.cfgSvc != nil {
 		if settings, err := h.cfgSvc.Settings(c.Context()); err == nil {

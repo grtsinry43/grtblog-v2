@@ -2,9 +2,6 @@ package federation
 
 import (
 	"crypto"
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -48,9 +45,6 @@ func (s *Signer) SignRequest(req *http.Request, body []byte, keyID string, priva
 	if req.Header.Get("Date") == "" {
 		req.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
 	}
-	if len(body) > 0 && req.Header.Get("Digest") == "" {
-		req.Header.Set("Digest", buildDigest(body))
-	}
 	if len(body) > 0 && req.Header.Get("Content-Type") == "" {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -60,11 +54,6 @@ func (s *Signer) SignRequest(req *http.Request, body []byte, keyID string, priva
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.signer.SignRequest(privateKey, keyID, req, body)
-}
-
-func buildDigest(body []byte) string {
-	sum := sha256.Sum256(body)
-	return fmt.Sprintf("SHA-256=%s", base64.StdEncoding.EncodeToString(sum[:]))
 }
 
 func resolveAlgorithm(algorithm string) (httpsig.Algorithm, error) {

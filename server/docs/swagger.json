@@ -230,6 +230,245 @@
                 }
             }
         },
+        "/admin/federation/citations/request": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "后台发起引用请求",
+                "parameters": [
+                    {
+                        "description": "引用请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminCitationReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/federation/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "联合配置列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "指定配置 key（逗号分隔）",
+                        "name": "keys",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "更新联合配置",
+                "parameters": [
+                    {
+                        "description": "配置更新参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigBatchUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/federation/friendlinks/request": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "后台发起友链申请",
+                "parameters": [
+                    {
+                        "description": "友链申请参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminFriendLinkRequestReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/federation/mentions/notify": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "后台发起提及通知",
+                "parameters": [
+                    {
+                        "description": "提及通知参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminMentionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/federation/remote/check": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FederationAdmin"
+                ],
+                "summary": "远端联通性检查",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "远端实例地址",
+                        "name": "target_url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationAdminRemoteCheckResp"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/logs": {
             "get": {
                 "security": [
@@ -887,6 +1126,184 @@
                     "200": {
                         "description": "OK",
                         "schema": {}
+                    }
+                }
+            }
+        },
+        "/api/federation/citations/request": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Federation"
+                ],
+                "summary": "联合引用申请（入站）",
+                "parameters": [
+                    {
+                        "description": "引用申请参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationCitationRequestReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationCitationResponseResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/federation/friendlinks/request": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Federation"
+                ],
+                "summary": "联合友链申请（入站）",
+                "parameters": [
+                    {
+                        "description": "友链申请参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationFriendLinkRequestReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationFriendLinkResponseResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/federation/mentions/notify": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Federation"
+                ],
+                "summary": "联合提及通知（入站）",
+                "parameters": [
+                    {
+                        "description": "提及通知参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationMentionNotifyReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationMentionNotifyResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/federation/posts/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Federation"
+                ],
+                "summary": "联合文章详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文章 ID 或短链接",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationPostDetailResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/federation/timeline/posts": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Federation"
+                ],
+                "summary": "联合时间线",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "起始时间 RFC3339",
+                        "name": "since",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间 RFC3339",
+                        "name": "until",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.FederationTimelineResp"
+                        }
                     }
                 }
             }
@@ -2918,6 +3335,295 @@
                 },
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "contract.FederationAdminCitationReq": {
+            "type": "object",
+            "properties": {
+                "citation_context": {
+                    "type": "string"
+                },
+                "citation_type": {
+                    "type": "string"
+                },
+                "source_article_id": {
+                    "type": "integer"
+                },
+                "source_short_url": {
+                    "type": "string"
+                },
+                "target_instance_url": {
+                    "type": "string"
+                },
+                "target_post_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationAdminFriendLinkRequestReq": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "rss_url": {
+                    "type": "string"
+                },
+                "target_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationAdminMentionReq": {
+            "type": "object",
+            "properties": {
+                "mention_context": {
+                    "type": "string"
+                },
+                "mention_type": {
+                    "type": "string"
+                },
+                "mentioned_user": {
+                    "type": "string"
+                },
+                "source_article_id": {
+                    "type": "integer"
+                },
+                "source_short_url": {
+                    "type": "string"
+                },
+                "target_instance_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationAdminProxyResp": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contract.FederationAdminRemoteCheckResp": {
+            "type": "object",
+            "properties": {
+                "endpoints": {
+                    "type": "object"
+                },
+                "manifest": {
+                    "type": "object"
+                },
+                "public_key": {
+                    "type": "object"
+                }
+            }
+        },
+        "contract.FederationCitationRequestReq": {
+            "type": "object",
+            "properties": {
+                "citation_context": {
+                    "type": "string"
+                },
+                "citation_type": {
+                    "type": "string"
+                },
+                "source_instance_url": {
+                    "type": "string"
+                },
+                "source_post": {
+                    "$ref": "#/definitions/contract.FederationCitationSourcePost"
+                },
+                "target_post_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationCitationResponseResp": {
+            "type": "object",
+            "properties": {
+                "citation_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationCitationSourcePost": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationFriendLinkRequestReq": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "requester_url": {
+                    "type": "string"
+                },
+                "rss_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationFriendLinkResponseResp": {
+            "type": "object",
+            "properties": {
+                "applicationId": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationMentionNotifyReq": {
+            "type": "object",
+            "properties": {
+                "mention_context": {
+                    "type": "string"
+                },
+                "mention_type": {
+                    "type": "string"
+                },
+                "mentioned_user": {
+                    "type": "string"
+                },
+                "source_instance_url": {
+                    "type": "string"
+                },
+                "source_post": {
+                    "$ref": "#/definitions/contract.FederationMentionSourcePost"
+                }
+            }
+        },
+        "contract.FederationMentionNotifyResp": {
+            "type": "object",
+            "properties": {
+                "delivered": {
+                    "type": "boolean"
+                },
+                "mention_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contract.FederationMentionSourcePost": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationPostAuthorResp": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationPostDetailResp": {
+            "type": "object",
+            "properties": {
+                "post": {
+                    "$ref": "#/definitions/contract.FederationPostResp"
+                },
+                "related_posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.FederationPostResp"
+                    }
+                }
+            }
+        },
+        "contract.FederationPostResp": {
+            "type": "object",
+            "properties": {
+                "allow_citation": {
+                    "type": "boolean"
+                },
+                "allow_comment": {
+                    "type": "boolean"
+                },
+                "author": {
+                    "$ref": "#/definitions/contract.FederationPostAuthorResp"
+                },
+                "content_preview": {
+                    "type": "string"
+                },
+                "cover_image": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.FederationTimelineResp": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.FederationPostResp"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

@@ -44,6 +44,13 @@ func NewFederationMentionHandler(
 }
 
 // NotifyMention handles cross-site mention notifications.
+// @Summary 联合提及通知（入站）
+// @Tags Federation
+// @Accept json
+// @Produce json
+// @Param request body contract.FederationMentionNotifyReq true "提及通知参数"
+// @Success 200 {object} contract.FederationMentionNotifyResp
+// @Router /api/federation/mentions/notify [post]
 func (h *FederationMentionHandler) NotifyMention(c *fiber.Ctx) error {
 	body := c.Body()
 	req, err := parseFederationRequest(c)

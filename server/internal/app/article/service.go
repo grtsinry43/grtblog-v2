@@ -102,6 +102,7 @@ func (s *Service) CreateArticle(ctx context.Context, authorID int64, cmd CreateA
 			ShortURL: article.ShortURL,
 			At:       now,
 		})
+		publishFederationSignals(ctx, s.events, article, cmd.Content)
 	}
 
 	return article, nil
@@ -115,6 +116,7 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 		return nil, err
 	}
 	prevPublished := existing.IsPublished
+	prevContentHash := existing.ContentHash
 
 	if cmd.CategoryID != nil {
 		if _, err := s.repo.GetCategoryByID(ctx, *cmd.CategoryID); err != nil {
@@ -192,6 +194,9 @@ func (s *Service) UpdateArticle(ctx context.Context, cmd UpdateArticleCmd) (*con
 			ShortURL: existing.ShortURL,
 			At:       now,
 		})
+	}
+	if existing.IsPublished && (!prevPublished || prevContentHash != existing.ContentHash) {
+		publishFederationSignals(ctx, s.events, existing, existing.Content)
 	}
 
 	return existing, nil

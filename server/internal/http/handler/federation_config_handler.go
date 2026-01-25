@@ -22,6 +22,15 @@ func NewFederationConfigHandler(svc *federationconfig.Service) *FederationConfig
 }
 
 // ListFederationConfig lists federation config items.
+// @Summary 联合配置列表
+// @Tags FederationAdmin
+// @Accept json
+// @Produce json
+// @Param keys query string false "指定配置 key（逗号分隔）"
+// @Success 200 {object} contract.SysConfigTreeResp
+// @Security BearerAuth
+// @Router /admin/federation/config [get]
+// @Security JWTAuth
 func (h *FederationConfigHandler) ListFederationConfig(c *fiber.Ctx) error {
 	var keys []string
 	if raw := c.Query("keys"); raw != "" {
@@ -53,6 +62,15 @@ func (h *FederationConfigHandler) ListFederationConfig(c *fiber.Ctx) error {
 }
 
 // UpdateFederationConfig updates federation config items.
+// @Summary 更新联合配置
+// @Tags FederationAdmin
+// @Accept json
+// @Produce json
+// @Param request body contract.SysConfigBatchUpdateReq true "配置更新参数"
+// @Success 200 {object} contract.SysConfigTreeResp
+// @Security BearerAuth
+// @Router /admin/federation/config [put]
+// @Security JWTAuth
 func (h *FederationConfigHandler) UpdateFederationConfig(c *fiber.Ctx) error {
 	var req contract.SysConfigBatchUpdateReq
 	if err := c.BodyParser(&req); err != nil {

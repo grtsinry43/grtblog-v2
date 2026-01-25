@@ -34,6 +34,13 @@ func NewFederationPostHandler(contentRepo content.Repository, userRepo identity.
 }
 
 // GetPostDetail returns a single post with optional related posts.
+// @Summary 联合文章详情
+// @Tags Federation
+// @Accept json
+// @Produce json
+// @Param id path string true "文章 ID 或短链接"
+// @Success 200 {object} contract.FederationPostDetailResp
+// @Router /api/federation/posts/{id} [get]
 func (h *FederationPostHandler) GetPostDetail(c *fiber.Ctx) error {
 	if h.cfgSvc != nil {
 		if settings, err := h.cfgSvc.Settings(c.Context()); err == nil {
