@@ -390,6 +390,80 @@
                 }
             }
         },
+        "/admin/sysconfig": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SysConfig"
+                ],
+                "summary": "获取系统配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "配置 key 列表，逗号分隔",
+                        "name": "keys",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SysConfig"
+                ],
+                "summary": "批量更新系统配置",
+                "parameters": [
+                    {
+                        "description": "批量更新参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigBatchUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/tags": {
             "post": {
                 "security": [
@@ -2862,6 +2936,9 @@
                 "name": {
                     "type": "string"
                 },
+                "rssUrl": {
+                    "type": "string"
+                },
                 "url": {
                     "type": "string"
                 }
@@ -2870,6 +2947,9 @@
         "contract.FriendLinkApplicationResp": {
             "type": "object",
             "properties": {
+                "applyChannel": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2879,6 +2959,9 @@
                 "id": {
                     "type": "integer"
                 },
+                "instanceUrl": {
+                    "type": "string"
+                },
                 "logo": {
                     "type": "string"
                 },
@@ -2887,6 +2970,15 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "requestedSyncMode": {
+                    "type": "string"
+                },
+                "rssUrl": {
+                    "type": "string"
+                },
+                "signatureVerified": {
+                    "type": "boolean"
                 },
                 "status": {
                     "type": "string"
@@ -3352,6 +3444,105 @@
                 },
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "contract.SysConfigBatchUpdateReq": {
+            "type": "object"
+        },
+        "contract.SysConfigGroupResp": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.SysConfigGroupResp"
+                    }
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.SysConfigItemResp"
+                    }
+                },
+                "key": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.SysConfigItemResp": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "defaultValue": {
+                    "type": "object"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enumOptions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "groupPath": {
+                    "type": "string"
+                },
+                "isSensitive": {
+                    "type": "boolean"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "meta": {
+                    "type": "object"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "object"
+                },
+                "valueType": {
+                    "type": "string"
+                },
+                "visibleWhen": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "contract.SysConfigTreeResp": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.SysConfigGroupResp"
+                    }
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.SysConfigItemResp"
+                    }
                 }
             }
         },

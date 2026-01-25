@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/federationconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/handler"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/middleware"
@@ -31,6 +32,12 @@ func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler 
 		admin.Get("/sysconfig", sysConfigHandler.ListSysConfig)
 		admin.Put("/sysconfig", sysConfigHandler.UpdateSysConfig)
 	}
+
+	fedCfgRepo := persistence.NewFederationConfigRepository(deps.DB)
+	fedCfgSvc := federationconfig.NewService(fedCfgRepo)
+	fedCfgHandler := handler.NewFederationConfigHandler(fedCfgSvc)
+	admin.Get("/federation/config", fedCfgHandler.ListFederationConfig)
+	admin.Put("/federation/config", fedCfgHandler.UpdateFederationConfig)
 
 	logHandler := handler.NewAdminLogHandler("storage/logs/app.log", 200)
 	adminLogs := adminGroup.Group("/admin")

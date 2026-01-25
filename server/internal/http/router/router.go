@@ -102,4 +102,6 @@ func Register(app *fiber.App, deps Dependencies) {
 	docsHandler := handler.NewDocsHandler("docs/swagger.json")
 	app.Get("/docs/openapi.json", docsHandler.OpenAPI)
 	app.Get("/docs", docsHandler.Scalar)
+
+	registerFederationRoutes(app, deps)
 }

@@ -22,6 +22,7 @@ type SubmitCmd struct {
 	Logo        string
 	Description string
 	Message     string
+	RSSURL      string
 	UserID      *int64
 }
 
@@ -39,13 +40,16 @@ func (s *Service) Submit(ctx context.Context, cmd SubmitCmd) (*SubmitResult, err
 
 	if existing == nil {
 		app := &social.FriendLinkApplication{
-			Name:        toOptionalString(cmd.Name),
-			URL:         url,
-			Logo:        toOptionalString(cmd.Logo),
-			Description: toOptionalString(cmd.Description),
-			UserID:      cmd.UserID,
-			Message:     toOptionalString(cmd.Message),
-			Status:      "pending",
+			Name:              toOptionalString(cmd.Name),
+			URL:               url,
+			Logo:              toOptionalString(cmd.Logo),
+			Description:       toOptionalString(cmd.Description),
+			ApplyChannel:      "user",
+			RequestedSyncMode: requestedSyncMode(cmd.RSSURL),
+			RSSURL:            toOptionalString(cmd.RSSURL),
+			UserID:            cmd.UserID,
+			Message:           toOptionalString(cmd.Message),
+			Status:            "pending",
 		}
 		if err := s.repo.Create(ctx, app); err != nil {
 			return nil, err
@@ -56,6 +60,9 @@ func (s *Service) Submit(ctx context.Context, cmd SubmitCmd) (*SubmitResult, err
 	existing.Name = toOptionalString(cmd.Name)
 	existing.Logo = toOptionalString(cmd.Logo)
 	existing.Description = toOptionalString(cmd.Description)
+	existing.ApplyChannel = "user"
+	existing.RequestedSyncMode = requestedSyncMode(cmd.RSSURL)
+	existing.RSSURL = toOptionalString(cmd.RSSURL)
 	existing.Message = toOptionalString(cmd.Message)
 	existing.UserID = cmd.UserID
 	existing.Status = "pending"
@@ -72,4 +79,11 @@ func toOptionalString(val string) *string {
 		return nil
 	}
 	return &trimmed
+}
+
+func requestedSyncMode(rssURL string) string {
+	if strings.TrimSpace(rssURL) == "" {
+		return "none"
+	}
+	return "rss"
 }

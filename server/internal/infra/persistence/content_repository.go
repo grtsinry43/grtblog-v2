@@ -686,6 +686,46 @@ func (r *ContentRepository) ListPublicArticles(ctx context.Context, options cont
 	return articles, total, nil
 }
 
+// ListPublicArticlesForFederation 获取用于联合时间线的公开文章列表。
+func (r *ContentRepository) ListPublicArticlesForFederation(ctx context.Context, since *time.Time, until *time.Time, page int, pageSize int) ([]*content.Article, int64, error) {
+	query := r.db.WithContext(ctx).Model(&model.Article{}).Where("is_published = ?", true)
+
+	if since != nil {
+		query = query.Where("created_at >= ?", *since)
+	}
+	if until != nil {
+		query = query.Where("created_at <= ?", *until)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var articleModels []*model.Article
+	if err := query.Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&articleModels).Error; err != nil {
+		return nil, 0, err
+	}
+
+	articles := make([]*content.Article, len(articleModels))
+	for i, am := range articleModels {
+		articles[i] = r.modelToArticle(am)
+	}
+
+	return articles, total, nil
+}
+
 // CreateMoment 创建手记
 func (r *ContentRepository) CreateMoment(ctx context.Context, moment *content.Moment) error {
 	tocBytes, err := tocToBytes(moment.TOC)

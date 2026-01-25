@@ -7,4 +7,5 @@ type FriendLinkApplicationReq struct {
 	Logo        string `json:"logo"`
 	Description string `json:"description"`
 	Message     string `json:"message"`
+	RSSURL      string `json:"rssUrl"`
 }
