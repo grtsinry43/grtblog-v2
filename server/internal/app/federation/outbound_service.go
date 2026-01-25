@@ -149,6 +149,14 @@ func (s *OutboundService) resolveEndpoint(ctx context.Context, target string, ke
 	base := endpoints.BaseURL
 	if base == "" {
 		base = strings.TrimRight(baseURL, "/") + "/api/federation"
+	} else if strings.HasPrefix(base, "/") {
+		base = strings.TrimRight(baseURL, "/") + base
+	} else if !strings.HasPrefix(base, "http://") && !strings.HasPrefix(base, "https://") {
+		if strings.HasPrefix(base, "localhost") || strings.Contains(base, ".") || strings.Contains(base, ":") {
+			base = "https://" + strings.TrimRight(base, "/")
+		} else {
+			base = strings.TrimRight(baseURL, "/") + "/" + strings.TrimLeft(base, "/")
+		}
 	}
 	return strings.TrimRight(base, "/") + path, nil
 }
