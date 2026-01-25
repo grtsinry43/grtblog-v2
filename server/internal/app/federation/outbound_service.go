@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -237,6 +238,17 @@ func normalizeBaseURL(raw string) string {
 	}
 	if strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://") {
 		return strings.TrimRight(trimmed, "/")
+	}
+	hostPart := trimmed
+	if idx := strings.Index(hostPart, "/"); idx >= 0 {
+		hostPart = hostPart[:idx]
+	}
+	host := hostPart
+	if h, _, err := net.SplitHostPort(hostPart); err == nil {
+		host = h
+	}
+	if host == "localhost" || net.ParseIP(host) != nil || strings.Contains(hostPart, ":") {
+		return "http://" + strings.TrimRight(trimmed, "/")
 	}
 	return "https://" + strings.TrimRight(trimmed, "/")
 }
