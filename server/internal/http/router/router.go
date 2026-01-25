@@ -85,12 +85,13 @@ func Register(app *fiber.App, deps Dependencies) {
 
 	fedCfgRepo := persistence.NewFederationConfigRepository(deps.DB)
 	fedCfgSvc := federationconfig.NewService(fedCfgRepo)
+	fedInstanceRepo := persistence.NewFederationInstanceRepository(deps.DB)
 	var fedCache fedinfra.Cache
 	if deps.Redis != nil {
 		fedCache = fedinfra.NewRedisCache(deps.Redis, deps.Config.Redis.Prefix)
 	}
 	fedResolver := fedinfra.NewResolver(&http.Client{Timeout: 10 * time.Second}, fedCache)
-	fedOutbound := appfed.NewOutboundService(fedCfgSvc, fedResolver)
+	fedOutbound := appfed.NewOutboundService(fedCfgSvc, fedResolver, fedInstanceRepo)
 	appfed.RegisterSubscribers(eventBus, fedOutbound)
 
 	websiteInfoRepo := persistence.NewWebsiteInfoRepository(deps.DB)

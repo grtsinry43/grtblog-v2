@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -85,6 +86,16 @@ func (h *FederationConfigHandler) UpdateFederationConfig(c *fiber.Ctx) error {
 		key := strings.TrimSpace(item.Key)
 		if key == "" {
 			return response.NewBizErrorWithMsg(response.ParamsError, "key 不能为空")
+		}
+		if key == "federation.instanceURL" && item.Value != nil {
+			var instanceURL string
+			if err := json.Unmarshal(*item.Value, &instanceURL); err != nil {
+				return response.NewBizErrorWithMsg(response.ParamsError, "instanceURL 必须为字符串")
+			}
+			trimmed := strings.TrimSpace(instanceURL)
+			if trimmed != "" && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") {
+				return response.NewBizErrorWithMsg(response.ParamsError, "instanceURL 必须以 http:// 或 https:// 开头")
+			}
 		}
 		updates = append(updates, sysconfig.UpdateItem{
 			Key:          key,

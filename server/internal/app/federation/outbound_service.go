@@ -18,21 +18,24 @@ import (
 	"time"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/federationconfig"
+	domainfed "github.com/grtsinry43/grtblog-v2/server/internal/domain/federation"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 	fedinfra "github.com/grtsinry43/grtblog-v2/server/internal/infra/federation"
 )
 
 type OutboundService struct {
-	cfgSvc   *federationconfig.Service
-	resolver *fedinfra.Resolver
-	client   *http.Client
+	cfgSvc       *federationconfig.Service
+	resolver     *fedinfra.Resolver
+	instanceRepo domainfed.FederationInstanceRepository
+	client       *http.Client
 }
 
-func NewOutboundService(cfgSvc *federationconfig.Service, resolver *fedinfra.Resolver) *OutboundService {
+func NewOutboundService(cfgSvc *federationconfig.Service, resolver *fedinfra.Resolver, instanceRepo domainfed.FederationInstanceRepository) *OutboundService {
 	return &OutboundService{
-		cfgSvc:   cfgSvc,
-		resolver: resolver,
-		client:   &http.Client{Timeout: 10 * time.Second},
+		cfgSvc:       cfgSvc,
+		resolver:     resolver,
+		instanceRepo: instanceRepo,
+		client:       &http.Client{Timeout: 10 * time.Second},
 	}
 }
 
@@ -140,13 +143,19 @@ func (s *OutboundService) SendMention(ctx context.Context, ev MentionDetected) (
 }
 
 func (s *OutboundService) resolveEndpoint(ctx context.Context, target string, key string, fallbackPath string) (string, error) {
-	baseURL := normalizeBaseURL(target)
+	baseURL := s.resolveTargetBaseURL(ctx, target)
+	if baseURL == "" {
+		return "", errors.New("target instance is empty")
+	}
 	if s.resolver == nil {
 		return "", errors.New("resolver not configured")
 	}
 	endpoints, err := s.resolver.FetchEndpoints(ctx, baseURL)
-	if err != nil || endpoints == nil {
-		return strings.TrimRight(baseURL, "/") + fallbackPath, nil
+	if err != nil {
+		return "", err
+	}
+	if endpoints == nil {
+		return "", errors.New("endpoints not found")
 	}
 	path := endpoints.Endpoints[key]
 	if path == "" {
@@ -155,9 +164,15 @@ func (s *OutboundService) resolveEndpoint(ctx context.Context, target string, ke
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		return path, nil
 	}
-	base := normalizeEndpointBase(baseURL, endpoints.BaseURL)
+	base := strings.TrimSpace(endpoints.BaseURL)
 	if base == "" {
-		base = strings.TrimRight(baseURL, "/") + "/api/federation"
+		return "", errors.New("endpoints.base_url is empty")
+	}
+	if !strings.HasPrefix(base, "http://") && !strings.HasPrefix(base, "https://") {
+		return "", fmt.Errorf("endpoints.base_url must include scheme: %s", base)
+	}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
 	}
 	return strings.TrimRight(base, "/") + path, nil
 }
@@ -231,7 +246,7 @@ func parsePrivateKey(pemData string) (crypto.PrivateKey, error) {
 	return nil, errors.New("unsupported private key format")
 }
 
-func normalizeBaseURL(raw string) string {
+func (s *OutboundService) resolveTargetBaseURL(ctx context.Context, raw string) string {
 	trimmed := strings.TrimSpace(raw)
 	if trimmed == "" {
 		return ""
@@ -239,49 +254,52 @@ func normalizeBaseURL(raw string) string {
 	if strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://") {
 		return strings.TrimRight(trimmed, "/")
 	}
-	hostPart := trimmed
-	if idx := strings.Index(hostPart, "/"); idx >= 0 {
-		hostPart = hostPart[:idx]
-	}
-	host := hostPart
-	if h, _, err := net.SplitHostPort(hostPart); err == nil {
-		host = h
-	}
-	if host == "localhost" || net.ParseIP(host) != nil || strings.Contains(hostPart, ":") {
-		return "http://" + strings.TrimRight(trimmed, "/")
+	host, port := parseHostPort(trimmed)
+	if host != "" && s.instanceRepo != nil {
+		if instances, err := s.instanceRepo.ListActive(ctx); err == nil {
+			for _, instance := range instances {
+				base := strings.TrimRight(instance.BaseURL, "/")
+				parsed, err := url.Parse(base)
+				if err != nil {
+					continue
+				}
+				if !strings.EqualFold(parsed.Hostname(), host) {
+					continue
+				}
+				if port != "" && parsed.Port() != port {
+					continue
+				}
+				return base
+			}
+		}
 	}
 	return "https://" + strings.TrimRight(trimmed, "/")
 }
 
-func normalizeEndpointBase(instanceBase string, endpointBase string) string {
-	raw := strings.TrimSpace(endpointBase)
-	if raw == "" {
-		return ""
+func parseHostPort(raw string) (string, string) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return "", ""
 	}
-	if strings.HasPrefix(raw, "http://") || strings.HasPrefix(raw, "https://") {
-		return strings.TrimRight(raw, "/")
+	if strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://") {
+		parsed, err := url.Parse(trimmed)
+		if err != nil {
+			return "", ""
+		}
+		return parsed.Hostname(), parsed.Port()
 	}
-	if strings.HasPrefix(raw, "/") {
-		return strings.TrimRight(instanceBase, "/") + raw
+	parsed, err := url.Parse("http://" + trimmed)
+	if err == nil {
+		return parsed.Hostname(), parsed.Port()
 	}
-
-	parsed, err := url.Parse(instanceBase)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return strings.TrimRight(instanceBase, "/") + "/" + strings.TrimLeft(raw, "/")
+	hostPart := trimmed
+	if idx := strings.Index(hostPart, "/"); idx >= 0 {
+		hostPart = hostPart[:idx]
 	}
-
-	host := parsed.Host
-	hostNoPort := strings.Split(host, ":")[0]
-	if raw == hostNoPort {
-		return parsed.Scheme + "://" + host
+	if host, port, err := net.SplitHostPort(hostPart); err == nil {
+		return host, port
 	}
-	if strings.HasPrefix(raw, hostNoPort+"/") {
-		return parsed.Scheme + "://" + host + strings.TrimPrefix(raw, hostNoPort)
-	}
-	if strings.HasPrefix(raw, "localhost") || strings.Contains(raw, ".") || strings.Contains(raw, ":") {
-		return parsed.Scheme + "://" + strings.TrimRight(raw, "/")
-	}
-	return strings.TrimRight(instanceBase, "/") + "/" + strings.TrimLeft(raw, "/")
+	return hostPart, ""
 }
 
 func firstNonEmpty(values ...string) string {

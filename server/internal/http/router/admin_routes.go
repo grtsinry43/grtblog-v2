@@ -45,12 +45,13 @@ func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler 
 	admin.Put("/federation/config", fedCfgHandler.UpdateFederationConfig)
 
 	contentRepo := persistence.NewContentRepository(deps.DB)
+	instanceRepo := persistence.NewFederationInstanceRepository(deps.DB)
 	var cache fedinfra.Cache
 	if deps.Redis != nil {
 		cache = fedinfra.NewRedisCache(deps.Redis, deps.Config.Redis.Prefix)
 	}
 	resolver := fedinfra.NewResolver(&http.Client{Timeout: 10 * time.Second}, cache)
-	outbound := appfed.NewOutboundService(fedCfgSvc, resolver)
+	outbound := appfed.NewOutboundService(fedCfgSvc, resolver, instanceRepo)
 	federationAdminHandler := handler.NewFederationAdminHandler(fedCfgSvc, contentRepo, outbound, resolver)
 	admin.Post("/federation/friendlinks/request", federationAdminHandler.RequestFriendLink)
 	admin.Post("/federation/citations/request", federationAdminHandler.SendCitation)
