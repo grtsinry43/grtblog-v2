@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -66,6 +67,7 @@ func (h *FederationCitationHandler) RequestCitation(c *fiber.Ctx) error {
 
 	signature, err := h.verifier.VerifyRequest(c.Context(), req, body)
 	if err != nil {
+		log.Printf("[federation] 入站 引用申请 校验失败 ip=%s err=%v", c.IP(), err)
 		return response.NewBizErrorWithMsg(response.Unauthorized, "签名校验失败")
 	}
 
@@ -144,6 +146,7 @@ func (h *FederationCitationHandler) RequestCitation(c *fiber.Ctx) error {
 		CitationID: citation.ID,
 		Status:     status,
 	}
+	log.Printf("[federation] 入站 引用申请 source=%s target_post=%s citation_id=%d status=%s key_id=%s", payload.SourceInstanceURL, payload.TargetPostID, citation.ID, status, signature.KeyID)
 	return response.Success(c, resp)
 }
 

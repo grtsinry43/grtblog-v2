@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -60,6 +61,7 @@ func (h *FederationFriendLinkHandler) RequestFriendLink(c *fiber.Ctx) error {
 
 	signature, err := h.verifier.VerifyRequest(c.Context(), req, body)
 	if err != nil {
+		log.Printf("[federation] 入站 友链申请 校验失败 ip=%s err=%v", c.IP(), err)
 		return response.NewBizErrorWithMsg(response.Unauthorized, "签名校验失败")
 	}
 
@@ -117,6 +119,7 @@ func (h *FederationFriendLinkHandler) RequestFriendLink(c *fiber.Ctx) error {
 		Status:        app.Status,
 		Message:       message,
 	}
+	log.Printf("[federation] 入站 友链申请 base=%s app_id=%d status=%s key_id=%s", requesterURL, app.ID, app.Status, signature.KeyID)
 	return response.Success(c, resp)
 }
 

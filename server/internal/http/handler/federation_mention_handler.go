@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"strings"
 	"time"
 
@@ -60,6 +61,7 @@ func (h *FederationMentionHandler) NotifyMention(c *fiber.Ctx) error {
 
 	signature, err := h.verifier.VerifyRequest(c.Context(), req, body)
 	if err != nil {
+		log.Printf("[federation] 入站 提及通知 校验失败 ip=%s err=%v", c.IP(), err)
 		return response.NewBizErrorWithMsg(response.Unauthorized, "签名校验失败")
 	}
 
@@ -133,5 +135,6 @@ func (h *FederationMentionHandler) NotifyMention(c *fiber.Ctx) error {
 		MentionID: mention.ID,
 		Delivered: true,
 	}
+	log.Printf("[federation] 入站 提及通知 source=%s mentioned=%s mention_id=%d key_id=%s", payload.SourceInstanceURL, payload.MentionedUser, mention.ID, signature.KeyID)
 	return response.Success(c, resp)
 }

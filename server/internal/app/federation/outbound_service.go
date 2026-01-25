@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -54,10 +55,12 @@ func (s *OutboundService) SendFriendLinkRequest(ctx context.Context, target stri
 	}
 	resp, err := client.DoSigned(ctx, http.MethodPost, endpoint, body, keyID, privKey)
 	if err != nil {
+		log.Printf("[federation] 出站 友链申请 target=%s endpoint=%s err=%v", target, endpoint, err)
 		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	raw, _ := io.ReadAll(resp.Body)
+	log.Printf("[federation] 出站 友链申请 target=%s endpoint=%s status=%d", target, endpoint, resp.StatusCode)
 	return resp, raw, nil
 }
 
@@ -89,10 +92,12 @@ func (s *OutboundService) SendCitation(ctx context.Context, ev CitationDetected)
 	}
 	resp, err := client.DoSigned(ctx, http.MethodPost, endpoint, body, keyID, privKey)
 	if err != nil {
+		log.Printf("[federation] 出站 引用申请 target=%s endpoint=%s err=%v", ev.TargetInstance, endpoint, err)
 		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	raw, _ := io.ReadAll(resp.Body)
+	log.Printf("[federation] 出站 引用申请 target=%s endpoint=%s status=%d", ev.TargetInstance, endpoint, resp.StatusCode)
 	return resp, raw, nil
 }
 
@@ -123,10 +128,12 @@ func (s *OutboundService) SendMention(ctx context.Context, ev MentionDetected) (
 	}
 	resp, err := client.DoSigned(ctx, http.MethodPost, endpoint, body, keyID, privKey)
 	if err != nil {
+		log.Printf("[federation] 出站 提及通知 target=%s endpoint=%s err=%v", ev.TargetInstance, endpoint, err)
 		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	raw, _ := io.ReadAll(resp.Body)
+	log.Printf("[federation] 出站 提及通知 target=%s endpoint=%s status=%d", ev.TargetInstance, endpoint, resp.StatusCode)
 	return resp, raw, nil
 }
 
