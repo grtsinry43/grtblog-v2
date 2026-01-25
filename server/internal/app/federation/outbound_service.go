@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -153,17 +154,9 @@ func (s *OutboundService) resolveEndpoint(ctx context.Context, target string, ke
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		return path, nil
 	}
-	base := endpoints.BaseURL
+	base := normalizeEndpointBase(baseURL, endpoints.BaseURL)
 	if base == "" {
 		base = strings.TrimRight(baseURL, "/") + "/api/federation"
-	} else if strings.HasPrefix(base, "/") {
-		base = strings.TrimRight(baseURL, "/") + base
-	} else if !strings.HasPrefix(base, "http://") && !strings.HasPrefix(base, "https://") {
-		if strings.HasPrefix(base, "localhost") || strings.Contains(base, ".") || strings.Contains(base, ":") {
-			base = "https://" + strings.TrimRight(base, "/")
-		} else {
-			base = strings.TrimRight(baseURL, "/") + "/" + strings.TrimLeft(base, "/")
-		}
 	}
 	return strings.TrimRight(base, "/") + path, nil
 }
@@ -246,6 +239,37 @@ func normalizeBaseURL(raw string) string {
 		return strings.TrimRight(trimmed, "/")
 	}
 	return "https://" + strings.TrimRight(trimmed, "/")
+}
+
+func normalizeEndpointBase(instanceBase string, endpointBase string) string {
+	raw := strings.TrimSpace(endpointBase)
+	if raw == "" {
+		return ""
+	}
+	if strings.HasPrefix(raw, "http://") || strings.HasPrefix(raw, "https://") {
+		return strings.TrimRight(raw, "/")
+	}
+	if strings.HasPrefix(raw, "/") {
+		return strings.TrimRight(instanceBase, "/") + raw
+	}
+
+	parsed, err := url.Parse(instanceBase)
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return strings.TrimRight(instanceBase, "/") + "/" + strings.TrimLeft(raw, "/")
+	}
+
+	host := parsed.Host
+	hostNoPort := strings.Split(host, ":")[0]
+	if raw == hostNoPort {
+		return parsed.Scheme + "://" + host
+	}
+	if strings.HasPrefix(raw, hostNoPort+"/") {
+		return parsed.Scheme + "://" + host + strings.TrimPrefix(raw, hostNoPort)
+	}
+	if strings.HasPrefix(raw, "localhost") || strings.Contains(raw, ".") || strings.Contains(raw, ":") {
+		return parsed.Scheme + "://" + strings.TrimRight(raw, "/")
+	}
+	return strings.TrimRight(instanceBase, "/") + "/" + strings.TrimLeft(raw, "/")
 }
 
 func firstNonEmpty(values ...string) string {
