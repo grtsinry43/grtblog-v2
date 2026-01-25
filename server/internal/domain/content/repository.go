@@ -1,6 +1,9 @@
 package content
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Repository 定义文章相关的持久化操作
 type Repository interface {
@@ -12,6 +15,8 @@ type Repository interface {
 	DeleteArticle(ctx context.Context, id int64) error
 	ListArticles(ctx context.Context, options ArticleListOptionsInternal) ([]*Article, int64, error)
 	ListPublicArticles(ctx context.Context, options ArticleListOptions) ([]*Article, int64, error)
+	// ListPublicArticlesForFederation 提供联合时间线的公开文章列表。
+	ListPublicArticlesForFederation(ctx context.Context, since *time.Time, until *time.Time, page int, pageSize int) ([]*Article, int64, error)
 
 	// ArticleCategory 相关操作
 	CreateCategory(ctx context.Context, category *ArticleCategory) error

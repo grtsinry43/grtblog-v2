@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"log"
+	"net/http"
 	"path/filepath"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"gorm.io/gorm"
 
 	appEvent "github.com/grtsinry43/grtblog-v2/server/internal/app/event"
+	appfed "github.com/grtsinry43/grtblog-v2/server/internal/app/federation"
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/federationconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/htmlsnapshot"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/webhook"
@@ -17,6 +20,7 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/config"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/handler"
 	infraevent "github.com/grtsinry43/grtblog-v2/server/internal/infra/event"
+	fedinfra "github.com/grtsinry43/grtblog-v2/server/internal/infra/federation"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/jwt"
 	"github.com/grtsinry43/grtblog-v2/server/internal/security/turnstile"
@@ -79,6 +83,17 @@ func Register(app *fiber.App, deps Dependencies) {
 	htmlSnapshotSvc := htmlsnapshot.NewService(contentRepo, "")
 	htmlsnapshot.RegisterArticleUpdateSubscriber(eventBus, htmlSnapshotSvc)
 
+	fedCfgRepo := persistence.NewFederationConfigRepository(deps.DB)
+	fedCfgSvc := federationconfig.NewService(fedCfgRepo)
+	fedInstanceRepo := persistence.NewFederationInstanceRepository(deps.DB)
+	var fedCache fedinfra.Cache
+	if deps.Redis != nil {
+		fedCache = fedinfra.NewRedisCache(deps.Redis, deps.Config.Redis.Prefix)
+	}
+	fedResolver := fedinfra.NewResolver(&http.Client{Timeout: 10 * time.Second}, fedCache)
+	fedOutbound := appfed.NewOutboundService(fedCfgSvc, fedResolver, fedInstanceRepo)
+	appfed.RegisterSubscribers(eventBus, fedOutbound)
+
 	websiteInfoRepo := persistence.NewWebsiteInfoRepository(deps.DB)
 	websiteInfoSvc := websiteinfo.NewService(websiteInfoRepo)
 	websiteInfoHandler := handler.NewWebsiteInfoHandler(websiteInfoSvc)
@@ -102,4 +117,6 @@ func Register(app *fiber.App, deps Dependencies) {
 	docsHandler := handler.NewDocsHandler("docs/swagger.json")
 	app.Get("/docs/openapi.json", docsHandler.OpenAPI)
 	app.Get("/docs", docsHandler.Scalar)
+
+	registerFederationRoutes(app, deps)
 }

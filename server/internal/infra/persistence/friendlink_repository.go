@@ -2,8 +2,10 @@ package persistence
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/social"
@@ -50,39 +52,60 @@ func (r *FriendLinkApplicationRepository) Update(ctx context.Context, app *socia
 	return r.db.WithContext(ctx).Model(&model.FriendLinkApplication{}).
 		Where("url = ?", app.URL).
 		Updates(map[string]any{
-			"name":        rec.Name,
-			"logo":        rec.Logo,
-			"description": rec.Description,
-			"user_id":     rec.UserID,
-			"message":     rec.Message,
-			"status":      rec.Status,
+			"name":                rec.Name,
+			"logo":                rec.Logo,
+			"description":         rec.Description,
+			"apply_channel":       rec.ApplyChannel,
+			"requested_sync_mode": rec.RequestedSyncMode,
+			"rss_url":             rec.RSSURL,
+			"instance_url":        rec.InstanceURL,
+			"manifest":            rec.Manifest,
+			"signature_key_id":    rec.SignatureKeyID,
+			"signature_verified":  rec.SignatureVerified,
+			"user_id":             rec.UserID,
+			"message":             rec.Message,
+			"status":              rec.Status,
 		}).Error
 }
 
 func mapFriendLinkApplicationToDomain(rec model.FriendLinkApplication) social.FriendLinkApplication {
 	return social.FriendLinkApplication{
-		ID:          rec.ID,
-		Name:        rec.Name,
-		URL:         rec.URL,
-		Logo:        rec.Logo,
-		Description: rec.Description,
-		UserID:      rec.UserID,
-		Message:     rec.Message,
-		Status:      rec.Status,
-		CreatedAt:   rec.CreatedAt,
-		UpdatedAt:   rec.UpdatedAt,
+		ID:                rec.ID,
+		Name:              rec.Name,
+		URL:               rec.URL,
+		Logo:              rec.Logo,
+		Description:       rec.Description,
+		ApplyChannel:      rec.ApplyChannel,
+		RequestedSyncMode: rec.RequestedSyncMode,
+		RSSURL:            rec.RSSURL,
+		InstanceURL:       rec.InstanceURL,
+		Manifest:          json.RawMessage(rec.Manifest),
+		SignatureKeyID:    rec.SignatureKeyID,
+		SignatureVerified: rec.SignatureVerified,
+		UserID:            rec.UserID,
+		Message:           rec.Message,
+		Status:            rec.Status,
+		CreatedAt:         rec.CreatedAt,
+		UpdatedAt:         rec.UpdatedAt,
 	}
 }
 
 func mapFriendLinkApplicationToModel(app *social.FriendLinkApplication) model.FriendLinkApplication {
 	return model.FriendLinkApplication{
-		ID:          app.ID,
-		Name:        app.Name,
-		URL:         app.URL,
-		Logo:        app.Logo,
-		Description: app.Description,
-		UserID:      app.UserID,
-		Message:     app.Message,
-		Status:      app.Status,
+		ID:                app.ID,
+		Name:              app.Name,
+		URL:               app.URL,
+		Logo:              app.Logo,
+		Description:       app.Description,
+		ApplyChannel:      app.ApplyChannel,
+		RequestedSyncMode: app.RequestedSyncMode,
+		RSSURL:            app.RSSURL,
+		InstanceURL:       app.InstanceURL,
+		Manifest:          datatypes.JSON(app.Manifest),
+		SignatureKeyID:    app.SignatureKeyID,
+		SignatureVerified: app.SignatureVerified,
+		UserID:            app.UserID,
+		Message:           app.Message,
+		Status:            app.Status,
 	}
 }

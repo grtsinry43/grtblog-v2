@@ -1,32 +1,49 @@
 package social
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type FriendLink struct {
-	ID          int64
-	Name        string
-	URL         string
-	Logo        *string
-	Description *string
-	RSSURL      *string
-	UserID      *int64
-	IsActive    bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID               int64
+	Name             string
+	URL              string
+	Logo             *string
+	Description      *string
+	RSSURL           *string
+	Kind             string
+	SyncMode         string
+	InstanceID       *int64
+	LastSyncAt       *time.Time
+	LastSyncStatus   *string
+	SyncInterval     *int
+	TotalPostsCached int
+	UserID           *int64
+	IsActive         bool
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	DeletedAt        *time.Time
 }
 
 type FriendLinkApplication struct {
-	ID          int64
-	Name        *string
-	URL         string
-	Logo        *string
-	Description *string
-	UserID      *int64
-	Message     *string
-	Status      string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                int64
+	Name              *string
+	URL               string
+	Logo              *string
+	Description       *string
+	ApplyChannel      string
+	RequestedSyncMode string
+	RSSURL            *string
+	InstanceURL       *string
+	Manifest          json.RawMessage
+	SignatureKeyID    *string
+	SignatureVerified bool
+	UserID            *int64
+	Message           *string
+	Status            string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 type GlobalNotification struct {
