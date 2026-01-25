@@ -26,6 +26,20 @@ var markdownParser = goldmark.New()
 var tocAnchorSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 var shortURLSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 
+const (
+	CommentAreaTypeArticle = "article"
+	CommentAreaTypeMoment  = "moment"
+	CommentAreaTypePage    = "page"
+)
+
+func BuildCommentAreaName(areaType, title string) string {
+	trimmed := strings.TrimSpace(title)
+	if trimmed == "" {
+		return truncateRunes("评论区："+areaType, 255)
+	}
+	return truncateRunes("评论区："+areaType+"："+trimmed, 255)
+}
+
 func GenerateTOC(markdown string) []content.TOCNode {
 	headings := extractHeadings(markdown)
 	if len(headings) == 0 {

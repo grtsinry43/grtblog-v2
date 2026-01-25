@@ -413,6 +413,7 @@ func (h *ArticleHandler) toArticleListItemResp(ctx context.Context, article *con
 		UpdatedAt:  article.UpdatedAt,
 		Tags:       []string{},
 	}
+	resp.CommentID = article.CommentID
 
 	if article.Cover != nil {
 		resp.Cover = *article.Cover

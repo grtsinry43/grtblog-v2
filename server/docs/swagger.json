@@ -1806,6 +1806,120 @@
                 }
             }
         },
+        "/comments/areas/{areaId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "获取评论树",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论区ID",
+                        "name": "areaId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/contract.CommentNodeResp"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "创建评论（登录用户）",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论区ID",
+                        "name": "areaId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "创建评论参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CreateCommentLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.CreateCommentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/areas/{areaId}/visitor": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "创建评论（访客）",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论区ID",
+                        "name": "areaId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "创建评论参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CreateCommentVisitorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.CreateCommentResp"
+                        }
+                    }
+                }
+            }
+        },
         "/friend-links/applications": {
             "post": {
                 "security": [
@@ -2787,6 +2901,9 @@
                 "categoryShortUrl": {
                     "type": "string"
                 },
+                "commentAreaId": {
+                    "type": "integer"
+                },
                 "comments": {
                     "type": "integer"
                 },
@@ -2864,6 +2981,9 @@
                     "type": "integer"
                 },
                 "categoryId": {
+                    "type": "integer"
+                },
+                "commentAreaId": {
                     "type": "integer"
                 },
                 "content": {
@@ -3145,6 +3265,68 @@
                 }
             }
         },
+        "contract.CommentNodeResp": {
+            "type": "object",
+            "properties": {
+                "areaId": {
+                    "type": "integer"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.CommentNodeResp"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isAuthor": {
+                    "type": "boolean"
+                },
+                "isFriend": {
+                    "type": "boolean"
+                },
+                "isOwner": {
+                    "type": "boolean"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "isViewed": {
+                    "type": "boolean"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "nickName": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "website": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.CreateArticleReq": {
             "type": "object",
             "required": [
@@ -3194,6 +3376,104 @@
                     }
                 },
                 "title": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "contract.CreateCommentLoginReq": {
+            "type": "object",
+            "required": [
+                "content"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contract.CreateCommentResp": {
+            "type": "object",
+            "properties": {
+                "areaId": {
+                    "type": "integer"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isAuthor": {
+                    "type": "boolean"
+                },
+                "isFriend": {
+                    "type": "boolean"
+                },
+                "isOwner": {
+                    "type": "boolean"
+                },
+                "isTop": {
+                    "type": "boolean"
+                },
+                "isViewed": {
+                    "type": "boolean"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "nickName": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "website": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.CreateCommentVisitorReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "email",
+                "nickName"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "nickName": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "website": {
                     "type": "string",
                     "maxLength": 255
                 }
@@ -3813,6 +4093,9 @@
                 "columnShortUrl": {
                     "type": "string"
                 },
+                "commentAreaId": {
+                    "type": "integer"
+                },
                 "comments": {
                     "type": "integer"
                 },
@@ -3893,6 +4176,9 @@
                     "type": "integer"
                 },
                 "columnId": {
+                    "type": "integer"
+                },
+                "commentAreaId": {
                     "type": "integer"
                 },
                 "content": {
@@ -3988,6 +4274,9 @@
         "contract.PageListItemResp": {
             "type": "object",
             "properties": {
+                "commentAreaId": {
+                    "type": "integer"
+                },
                 "comments": {
                     "type": "integer"
                 },
@@ -4048,6 +4337,9 @@
             "properties": {
                 "aiSummary": {
                     "type": "string"
+                },
+                "commentAreaId": {
+                    "type": "integer"
                 },
                 "content": {
                     "type": "string"

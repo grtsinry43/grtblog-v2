@@ -5,6 +5,9 @@ import "time"
 type CommentArea struct {
 	ID        int64
 	Name      string
+	Type      string
+	ContentID *int64
+	IsClosed  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

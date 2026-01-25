@@ -390,6 +390,7 @@ func (h *MomentHandler) toMomentResp(ctx context.Context, momentItem *content.Mo
 		AuthorID:    momentItem.AuthorID,
 		Image:       splitImages(momentItem.Image),
 		ColumnID:    momentItem.ColumnID,
+		CommentID:   momentItem.CommentID,
 		ShortURL:    momentItem.ShortURL,
 		IsPublished: momentItem.IsPublished,
 		IsTop:       momentItem.IsTop,
@@ -443,6 +444,7 @@ func (h *MomentHandler) toMomentListItemResp(ctx context.Context, momentItem *co
 		Topics:     []string{},
 		Image:      splitImages(momentItem.Image),
 	}
+	resp.CommentID = momentItem.CommentID
 
 	if metrics != nil {
 		resp.Views = metrics.Views

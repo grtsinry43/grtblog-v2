@@ -14,6 +14,7 @@ type MomentResp struct {
 	AuthorID    int64        `json:"authorId"`
 	Image       []string     `json:"image,omitempty"`
 	ColumnID    *int64       `json:"columnId,omitempty"`
+	CommentID   *int64       `json:"commentAreaId,omitempty"`
 	ShortURL    string       `json:"shortUrl"`
 	IsPublished bool         `json:"isPublished"`
 	IsTop       bool         `json:"isTop"`
@@ -37,6 +38,7 @@ type MomentListItemResp struct {
 	Views          int64     `json:"views"`
 	ColumnName     string    `json:"columnName,omitempty"`
 	ColumnShortURL string    `json:"columnShortUrl,omitempty"`
+	CommentID      *int64    `json:"commentAreaId,omitempty"`
 	Topics         []string  `json:"topics"`
 	Likes          int       `json:"likes"`
 	Comments       int       `json:"comments"`

@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
+	"github.com/grtsinry43/grtblog-v2/server/internal/app/contentutil"
 	"github.com/grtsinry43/grtblog-v2/server/internal/domain/content"
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence/model"
 )
@@ -474,6 +475,26 @@ func NewContentRepository(db *gorm.DB) *ContentRepository {
 	return &ContentRepository{db: db}
 }
 
+func createCommentArea(tx *gorm.DB, areaType, displayType, title string, contentID int64) (int64, error) {
+	area := model.CommentArea{
+		AreaName:  contentutil.BuildCommentAreaName(displayType, title),
+		AreaType:  areaType,
+		ContentID: &contentID,
+		IsClosed:  false,
+	}
+	if err := tx.Create(&area).Error; err != nil {
+		return 0, err
+	}
+	return area.ID, nil
+}
+
+func deleteCommentArea(tx *gorm.DB, areaID int64) error {
+	if err := tx.Where("area_id = ?", areaID).Delete(&model.Comment{}).Error; err != nil {
+		return err
+	}
+	return tx.Delete(&model.CommentArea{}, areaID).Error
+}
+
 // CreateArticle 创建文章
 func (r *ContentRepository) CreateArticle(ctx context.Context, article *content.Article) error {
 	tocBytes, err := tocToBytes(article.TOC)
@@ -508,6 +529,17 @@ func (r *ContentRepository) CreateArticle(ctx context.Context, article *content.
 			return err
 		}
 
+		areaID, err := createCommentArea(tx, contentutil.CommentAreaTypeArticle, "文章", articleModel.Title, articleModel.ID)
+		if err != nil {
+			return err
+		}
+		if err := tx.Model(&model.Article{}).
+			Where("id = ?", articleModel.ID).
+			Update("comment_id", areaID).Error; err != nil {
+			return err
+		}
+		articleModel.CommentID = &areaID
+
 		metrics := model.ArticleMetrics{
 			ArticleID: articleModel.ID,
 			Views:     0,
@@ -519,6 +551,7 @@ func (r *ContentRepository) CreateArticle(ctx context.Context, article *content.
 		}
 
 		article.ID = articleModel.ID
+		article.CommentID = articleModel.CommentID
 		article.UpdatedAt = articleModel.UpdatedAt
 		return nil
 	})
@@ -586,6 +619,12 @@ func (r *ContentRepository) UpdateArticle(ctx context.Context, article *content.
 		}
 		return err
 	}
+	if article.CommentID != nil {
+		_ = r.db.WithContext(ctx).
+			Model(&model.CommentArea{}).
+			Where("id = ?", *article.CommentID).
+			Update("area_name", contentutil.BuildCommentAreaName("文章", article.Title)).Error
+	}
 
 	article.UpdatedAt = now
 	return nil
@@ -594,6 +633,15 @@ func (r *ContentRepository) UpdateArticle(ctx context.Context, article *content.
 // DeleteArticle 删除文章（软删除）
 func (r *ContentRepository) DeleteArticle(ctx context.Context, id int64) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var rec model.Article
+		if err := tx.Select("id", "comment_id").Where("id = ?", id).First(&rec).Error; err != nil {
+			return err
+		}
+		if rec.CommentID != nil {
+			if err := deleteCommentArea(tx, *rec.CommentID); err != nil {
+				return err
+			}
+		}
 		if err := tx.Where("id = ?", id).Delete(&model.Article{}).Error; err != nil {
 			return err
 		}
@@ -759,6 +807,17 @@ func (r *ContentRepository) CreateMoment(ctx context.Context, moment *content.Mo
 			return err
 		}
 
+		areaID, err := createCommentArea(tx, contentutil.CommentAreaTypeMoment, "手记", momentModel.Title, momentModel.ID)
+		if err != nil {
+			return err
+		}
+		if err := tx.Model(&model.Moment{}).
+			Where("id = ?", momentModel.ID).
+			Update("comment_id", areaID).Error; err != nil {
+			return err
+		}
+		momentModel.CommentID = &areaID
+
 		metrics := model.MomentMetrics{
 			MomentID: momentModel.ID,
 			Views:    0,
@@ -770,6 +829,7 @@ func (r *ContentRepository) CreateMoment(ctx context.Context, moment *content.Mo
 		}
 
 		moment.ID = momentModel.ID
+		moment.CommentID = momentModel.CommentID
 		moment.UpdatedAt = momentModel.UpdatedAt
 		return nil
 	})
@@ -836,6 +896,12 @@ func (r *ContentRepository) UpdateMoment(ctx context.Context, moment *content.Mo
 		}
 		return err
 	}
+	if moment.CommentID != nil {
+		_ = r.db.WithContext(ctx).
+			Model(&model.CommentArea{}).
+			Where("id = ?", *moment.CommentID).
+			Update("area_name", contentutil.BuildCommentAreaName("手记", moment.Title)).Error
+	}
 
 	moment.UpdatedAt = now
 	return nil
@@ -844,6 +910,15 @@ func (r *ContentRepository) UpdateMoment(ctx context.Context, moment *content.Mo
 // DeleteMoment 删除手记（软删除）
 func (r *ContentRepository) DeleteMoment(ctx context.Context, id int64) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var rec model.Moment
+		if err := tx.Select("id", "comment_id").Where("id = ?", id).First(&rec).Error; err != nil {
+			return err
+		}
+		if rec.CommentID != nil {
+			if err := deleteCommentArea(tx, *rec.CommentID); err != nil {
+				return err
+			}
+		}
 		if err := tx.Where("id = ?", id).Delete(&model.Moment{}).Error; err != nil {
 			return err
 		}
@@ -970,6 +1045,17 @@ func (r *ContentRepository) CreatePage(ctx context.Context, page *content.Page) 
 			return err
 		}
 
+		areaID, err := createCommentArea(tx, contentutil.CommentAreaTypePage, "页面", pageModel.Title, pageModel.ID)
+		if err != nil {
+			return err
+		}
+		if err := tx.Model(&model.Page{}).
+			Where("id = ?", pageModel.ID).
+			Update("comment_id", areaID).Error; err != nil {
+			return err
+		}
+		pageModel.CommentID = &areaID
+
 		metrics := model.PageMetrics{
 			PageID:   pageModel.ID,
 			Views:    0,
@@ -981,6 +1067,7 @@ func (r *ContentRepository) CreatePage(ctx context.Context, page *content.Page) 
 		}
 
 		page.ID = pageModel.ID
+		page.CommentID = pageModel.CommentID
 		page.UpdatedAt = pageModel.UpdatedAt
 		return nil
 	})
@@ -1043,6 +1130,12 @@ func (r *ContentRepository) UpdatePage(ctx context.Context, page *content.Page) 
 		}
 		return err
 	}
+	if page.CommentID != nil {
+		_ = r.db.WithContext(ctx).
+			Model(&model.CommentArea{}).
+			Where("id = ?", *page.CommentID).
+			Update("area_name", contentutil.BuildCommentAreaName("页面", page.Title)).Error
+	}
 
 	page.UpdatedAt = now
 	return nil
@@ -1051,6 +1144,15 @@ func (r *ContentRepository) UpdatePage(ctx context.Context, page *content.Page) 
 // DeletePage 删除页面（软删除）
 func (r *ContentRepository) DeletePage(ctx context.Context, id int64) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var rec model.Page
+		if err := tx.Select("id", "comment_id").Where("id = ?", id).First(&rec).Error; err != nil {
+			return err
+		}
+		if rec.CommentID != nil {
+			if err := deleteCommentArea(tx, *rec.CommentID); err != nil {
+				return err
+			}
+		}
 		if err := tx.Where("id = ?", id).Delete(&model.Page{}).Error; err != nil {
 			return err
 		}

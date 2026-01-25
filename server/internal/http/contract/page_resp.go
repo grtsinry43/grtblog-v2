@@ -11,6 +11,7 @@ type PageResp struct {
 	TOC         []TOCNode    `json:"toc,omitempty"`
 	Content     string       `json:"content"`
 	ContentHash string       `json:"contentHash"`
+	CommentID   *int64       `json:"commentAreaId,omitempty"`
 	ShortURL    string       `json:"shortUrl"`
 	IsEnabled   bool         `json:"isEnabled"`
 	IsBuiltin   bool         `json:"isBuiltin"`
@@ -28,6 +29,7 @@ type PageListItemResp struct {
 	Views       int64     `json:"views"`
 	Likes       int       `json:"likes"`
 	Comments    int       `json:"comments"`
+	CommentID   *int64    `json:"commentAreaId,omitempty"`
 	IsEnabled   bool      `json:"isEnabled"`
 	IsBuiltin   bool      `json:"isBuiltin"`
 	CreatedAt   time.Time `json:"createdAt"`

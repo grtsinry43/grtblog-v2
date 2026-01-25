@@ -15,6 +15,7 @@ type ArticleResp struct {
 	AuthorID    int64        `json:"authorId"`
 	Cover       *string      `json:"cover,omitempty"`
 	CategoryID  *int64       `json:"categoryId,omitempty"`
+	CommentID   *int64       `json:"commentAreaId,omitempty"`
 	ShortURL    string       `json:"shortUrl"`
 	IsPublished bool         `json:"isPublished"`
 	IsTop       bool         `json:"isTop"`
@@ -58,6 +59,7 @@ type ArticleListItemResp struct {
 	Views            int64     `json:"views"`
 	CategoryName     string    `json:"categoryName,omitempty"`
 	CategoryShortURL string    `json:"categoryShortUrl,omitempty"`
+	CommentID        *int64    `json:"commentAreaId,omitempty"`
 	Tags             []string  `json:"tags"`
 	Likes            int       `json:"likes"`
 	Comments         int       `json:"comments"`

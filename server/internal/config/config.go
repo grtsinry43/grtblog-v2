@@ -14,6 +14,7 @@ type Config struct {
 	Auth      AuthConfig
 	Turnstile TurnstileConfig
 	Redis     RedisConfig
+	GeoIP     GeoIPConfig
 }
 
 // AppConfig contains Fiber specific settings.
@@ -54,6 +55,14 @@ type RedisConfig struct {
 	Prefix   string
 }
 
+// GeoIPConfig 描述 IP 归属地数据库配置。
+type GeoIPConfig struct {
+	DBPath      string
+	DownloadURL string
+	ASNPath     string
+	ASNURL      string
+}
+
 // Load builds a Config struct with sane defaults overridden by environment variables.
 func Load() Config {
 	return Config{
@@ -84,6 +93,12 @@ func Load() Config {
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       getEnvAsInt("REDIS_DB", 0),
 			Prefix:   getEnv("REDIS_PREFIX", "grtblog:"),
+		},
+		GeoIP: GeoIPConfig{
+			DBPath:      getEnv("GEOIP_DB_PATH", "storage/geoip/GeoLite2-City.mmdb"),
+			DownloadURL: getEnv("GEOIP_DB_URL", "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb"),
+			ASNPath:     getEnv("GEOIP_ASN_DB_PATH", "storage/geoip/GeoLite2-ASN.mmdb"),
+			ASNURL:      getEnv("GEOIP_ASN_DB_URL", "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb"),
 		},
 	}
 }

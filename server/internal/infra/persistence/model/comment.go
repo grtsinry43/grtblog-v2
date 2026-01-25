@@ -8,7 +8,10 @@ import (
 
 type CommentArea struct {
 	ID        int64     `gorm:"column:id;primaryKey"`
-	AreaName  string    `gorm:"column:area_name;size:45;not null"`
+	AreaName  string    `gorm:"column:area_name;size:255;not null"`
+	AreaType  string    `gorm:"column:area_type;size:20;not null"`
+	ContentID *int64    `gorm:"column:content_id"`
+	IsClosed  bool      `gorm:"column:is_closed"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }
@@ -22,7 +25,7 @@ type Comment struct {
 	AuthorID  *int64         `gorm:"column:author_id"`
 	NickName  string         `gorm:"column:nick_name;size:45"`
 	IP        string         `gorm:"column:ip;size:45"`
-	Location  string         `gorm:"column:location;size:45"`
+	Location  string         `gorm:"column:location;size:255"`
 	Platform  string         `gorm:"column:platform;size:45"`
 	Browser   string         `gorm:"column:browser;size:45"`
 	Email     string         `gorm:"column:email;size:255"`

@@ -347,6 +347,7 @@ func (h *PageHandler) toPageResp(ctx context.Context, pageItem *content.Page) (*
 		TOC:         mapPageTOCNodes(pageItem.TOC),
 		Content:     pageItem.Content,
 		ContentHash: pageItem.ContentHash,
+		CommentID:   pageItem.CommentID,
 		ShortURL:    pageItem.ShortURL,
 		IsEnabled:   pageItem.IsEnabled,
 		IsBuiltin:   pageItem.IsBuiltin,
@@ -381,6 +382,7 @@ func (h *PageHandler) toPageListItemResp(ctx context.Context, pageItem *content.
 		CreatedAt:   pageItem.CreatedAt,
 		UpdatedAt:   pageItem.UpdatedAt,
 	}
+	resp.CommentID = pageItem.CommentID
 
 	if metrics != nil {
 		resp.Views = metrics.Views
