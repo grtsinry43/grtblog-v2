@@ -116,7 +116,7 @@ func (h *FederationWellKnownHandler) resolveInstanceURL(c *fiber.Ctx, settings f
 	if c.Protocol() != "" {
 		scheme = c.Protocol()
 	}
-	host := c.Hostname()
+	host := string(c.Context().Host())
 	return fmt.Sprintf("%s://%s", scheme, host)
 }
 
