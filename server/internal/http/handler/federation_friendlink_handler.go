@@ -81,6 +81,9 @@ func (h *FederationFriendLinkHandler) RequestFriendLink(c *fiber.Ctx) error {
 	if err != nil || !settings.Enabled {
 		return response.NewBizErrorWithMsg(response.Unauthorized, "联合未启用")
 	}
+	if !settings.AllowInbound {
+		return response.NewBizErrorWithMsg(response.Unauthorized, "已关闭入站请求")
+	}
 
 	manifest, endpoints, publicKey, err := fetchFederationDocs(c.Context(), h.resolver, requesterURL)
 	if err != nil {
