@@ -248,6 +248,17 @@ export const routeRecordRaw: MenuMixedOptions[] = [
     component: 'webhooks/index',
   },
   {
+    path: 'navigation',
+    name: 'navMenuManagement',
+    icon: 'iconify ph--list',
+    label: '导航菜单',
+    meta: {
+      componentName: 'NavMenuManagement',
+      showTab: true,
+    },
+    component: 'navigation/index',
+  },
+  {
     path: 'settings',
     name: 'systemSettings',
     icon: 'iconify ph--gear-six',

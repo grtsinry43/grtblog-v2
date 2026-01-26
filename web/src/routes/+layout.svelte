@@ -2,10 +2,9 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Sidebar from '$lib/ui/sidebar/Sidebar.svelte';
-	import { SectionId } from '$lib/ui/sidebar/types';
 	import { themeManager } from '$lib/shared/theme.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	// Initialize theme on mount
 	const theme = themeManager;
@@ -27,7 +26,7 @@
 	</script>
 </svelte:head>
 
-<Sidebar activeSection={SectionId.Home} onNavigate={() => {}} />
+<Sidebar menuTree={data.navMenus ?? []} />
 
 <main class="page-wrapper">
 	<div class="content-container">

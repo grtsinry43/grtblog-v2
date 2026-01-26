@@ -1,50 +1,25 @@
 <script lang="ts">
-	import {
-		Home,
-		BookOpen,
-		PenTool,
-		Archive,
-		Image,
-		User,
-		Menu,
-		X,
-		ChevronDown,
-		Terminal,
-		Coffee,
-		Sparkles,
-		Code,
-		List,
-		Sun,
-		Moon,
-		Monitor
-	} from 'lucide-svelte';
-	import { slide, fade, fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { SectionId } from './types';
-	import TableOfContents from './TableOfContents.svelte';
+	import { ChevronDown, Menu, Monitor, Moon, Sun, X } from 'lucide-svelte';
+	import { fade, fly, slide } from 'svelte/transition';
+
+	import type { NavMenuItem } from '$lib/features/navigation/types';
 	import { themeManager } from '$lib/shared/theme.svelte';
+	import DynamicLucideIcon from '$lib/ui/icons/DynamicLucideIcon.svelte';
 
-	type NavItem = {
-		id: SectionId;
-		label: string;
-		icon: any;
-		desc: string;
-		children?: { id: SectionId; label: string; icon?: any }[];
-	};
+	import TableOfContents from './TableOfContents.svelte';
 
-	let { activeSection, onNavigate } = $props<{
-		activeSection: SectionId;
-		onNavigate: (id: SectionId) => void;
-	}>();
+	let { menuTree } = $props<{ menuTree: NavMenuItem[] }>();
 
 	let isMobileMenuOpen = $state(false);
-	let hoveredItemId = $state<SectionId | null>(null);
-	let expandedMobileItems = $state<Set<SectionId>>(new Set());
+	let hoveredItemId = $state<number | null>(null);
+	let expandedMobileItems = $state<Set<number>>(new Set());
 	let scrollY = $state(0);
 	let navProgress = $derived(Math.max(0, Math.min(scrollY / 60, 1)));
 	let isTocOpen = $state(false);
+
+	const navItems = $derived(menuTree ?? []);
 
 	let isMenuAnimating = $state(false);
 	$effect(() => {
@@ -54,39 +29,50 @@
 		return () => clearTimeout(timer);
 	});
 
-	const navItems: NavItem[] = [
-		{ id: SectionId.Home, label: '首页', icon: Home, desc: '回到开始的地方' },
-		{
-			id: SectionId.Articles,
-			label: '文章',
-			icon: BookOpen,
-			desc: '深度思考与技术沉淀',
-			children: [
-				{ id: SectionId.ArtTech, label: '技术', icon: Terminal },
-				{ id: SectionId.ArtLife, label: '生活', icon: Coffee }
-			]
-		},
-		{
-			id: SectionId.Notes,
-			label: '手记',
-			icon: PenTool,
-			desc: '碎片化的灵感记录',
-			children: [
-				{ id: SectionId.NoteCode, label: '代码片段', icon: Code },
-				{ id: SectionId.NoteThought, label: '随想', icon: Sparkles }
-			]
-		},
-		{ id: SectionId.Archives, label: '归档', icon: Archive, desc: '时间的足迹' },
-		{ id: SectionId.Gallery, label: '相册', icon: Image, desc: '光影的瞬间' },
-		{ id: SectionId.About, label: '关于', icon: User, desc: '我是谁' }
-	];
+	const normalizePath = (value: string) => {
+		if (!value) return '/';
+		if (!value.startsWith('/')) return value;
+		const normalized = value.replace(/\/+$/, '');
+		return normalized === '' ? '/' : normalized;
+	};
 
-	function handleNavigate(id: SectionId) {
-		onNavigate(id);
+	const isExternalUrl = (value: string) => /^https?:\/\//i.test(value);
+
+	const isActivePath = (url: string, path: string) => {
+		if (!url.startsWith('/')) return false;
+		const target = normalizePath(url);
+		const current = normalizePath(path);
+		if (target === '/') return current === '/';
+		return current === target || current.startsWith(`${target}/`);
+	};
+
+	const findActiveLabel = (items: NavMenuItem[], path: string): string | null => {
+		for (const item of items) {
+			if (isActivePath(item.url, path)) return item.name;
+			if (item.children?.length) {
+				const child = findActiveLabel(item.children, path);
+				if (child) return child;
+			}
+		}
+		return null;
+	};
+
+	const homeUrl = $derived.by(() => {
+		const match = navItems.find((item) => item.url === '/');
+		return match?.url || '/';
+	});
+
+	function handleNavigate(url: string) {
+		if (!url) return;
+		if (isExternalUrl(url)) {
+			window.open(url, '_blank', 'noopener');
+		} else {
+			goto(url);
+		}
 		isMobileMenuOpen = false;
 	}
 
-	function toggleMobileSubmenu(e: Event, id: SectionId) {
+	function toggleMobileSubmenu(e: Event, id: number) {
 		e.stopPropagation();
 		const newSet = new Set(expandedMobileItems);
 		if (newSet.has(id)) newSet.delete(id);
@@ -94,10 +80,7 @@
 		expandedMobileItems = newSet;
 	}
 
-	let activeLabel = $derived(
-		navItems.find((n) => n.id === activeSection || n.children?.some((c) => c.id === activeSection))
-			?.label || '博客'
-	);
+	let activeLabel = $derived(findActiveLabel(navItems, $page.url.pathname) || '博客');
 
 	let displayTitle = $derived.by(() => {
 		const post = $page.data?.post;
@@ -126,7 +109,7 @@
 <nav class="desktop-dock-container hidden lg:block">
 	<div class="glass-dock" onmouseleave={() => (hoveredItemId = null)} role="presentation">
 		<!-- Avatar -->
-		<button class="avatar-btn" onclick={() => handleNavigate(SectionId.Home)}>
+		<button class="avatar-btn" onclick={() => handleNavigate(homeUrl)}>
 			<img src="https://dogeoss.grtsinry43.com/img/author.jpeg" alt="头像" class="avatar-img" />
 		</button>
 
@@ -134,37 +117,43 @@
 
 		{#each navItems as item (item.id)}
 			{@const isActive =
-				activeSection === item.id || item.children?.some((c) => c.id === activeSection)}
+				isActivePath(item.url, $page.url.pathname) ||
+				item.children?.some((c) => isActivePath(c.url, $page.url.pathname))}
 
 			<div
 				class="nav-item-wrapper"
 				onmouseenter={() => (hoveredItemId = item.id)}
 				role="presentation"
 			>
-				<button onclick={() => handleNavigate(item.id)} class="nav-btn {isActive ? 'active' : ''}">
-					<item.icon size={16} strokeWidth={isActive ? 2.5 : 2} class="icon-transition" />
+				<button onclick={() => handleNavigate(item.url)} class="nav-btn {isActive ? 'active' : ''}">
+					<DynamicLucideIcon
+						name={item.icon ?? undefined}
+						size={16}
+						strokeWidth={isActive ? 2.5 : 2}
+						className="icon-transition"
+					/>
 				</button>
 
 				{#if item.children && hoveredItemId === item.id}
 					<div transition:fly={{ x: -4, duration: 200, opacity: 0 }} class="popover-wrapper">
 						<div class="glass-popover">
 							{#each item.children as subItem}
-								{@const isSubActive = activeSection === subItem.id}
+								{@const isSubActive = isActivePath(subItem.url, $page.url.pathname)}
 								<button
 									onclick={(e) => {
 										e.stopPropagation();
-										handleNavigate(subItem.id);
+										handleNavigate(subItem.url);
 									}}
 									class="popover-item {isSubActive ? 'active' : ''}"
 								>
-									{subItem.label}
+									{subItem.name}
 								</button>
 							{/each}
 						</div>
 					</div>
 				{:else if !item.children && hoveredItemId === item.id}
 					<span transition:fade={{ duration: 150 }} class="dock-tooltip">
-						{item.label}
+						{item.name}
 					</span>
 				{/if}
 			</div>
@@ -273,17 +262,18 @@
 				<div class="menu-list">
 					{#each navItems as item}
 						{@const isActive =
-							activeSection === item.id || item.children?.some((c) => c.id === activeSection)}
+							isActivePath(item.url, $page.url.pathname) ||
+							item.children?.some((c) => isActivePath(c.url, $page.url.pathname))}
 						{@const hasChildren = !!item.children}
 						{@const isExpanded = expandedMobileItems.has(item.id)}
 
 						<div class="menu-item-group">
 							<div class="menu-item {isActive ? 'active' : ''}">
-								<button type="button" onclick={() => handleNavigate(item.id)} class="menu-item-btn">
+							<button type="button" onclick={() => handleNavigate(item.url)} class="menu-item-btn">
 									<div class="menu-icon-box {isActive ? 'active' : ''}">
-										<item.icon size={13} />
+										<DynamicLucideIcon name={item.icon ?? undefined} size={13} />
 									</div>
-									<span class="menu-label {isActive ? 'active' : ''}">{item.label}</span>
+									<span class="menu-label {isActive ? 'active' : ''}">{item.name}</span>
 								</button>
 
 								{#if hasChildren}
@@ -301,13 +291,13 @@
 								<div transition:slide={{ duration: 300 }} class="submenu-list">
 									<div class="tree-line"></div>
 									{#each item.children as subItem}
-										{@const isSubActive = activeSection === subItem.id}
+										{@const isSubActive = isActivePath(subItem.url, $page.url.pathname)}
 										<button
-											onclick={() => handleNavigate(subItem.id)}
+										onclick={() => handleNavigate(subItem.url)}
 											class="submenu-item {isSubActive ? 'active' : ''}"
 										>
 											<div class="branch-line"></div>
-											<span>{subItem.label}</span>
+											<span>{subItem.name}</span>
 										</button>
 									{/each}
 								</div>
@@ -531,7 +521,7 @@
 	}
 
 	.branch-line {
-		@apply absolute top-1/2 left-[24px] h-[1px] w-3 bg-ink-100 dark:bg-ink-800/50;
+		@apply absolute top-1/2 left-6 h-px w-3 bg-ink-100 dark:bg-ink-800/50;
 	}
 
 	.mobile-nav-backdrop {

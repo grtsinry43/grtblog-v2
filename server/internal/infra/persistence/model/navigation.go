@@ -10,6 +10,7 @@ type NavMenu struct {
 	ID        int64          `gorm:"column:id;primaryKey"`
 	Name      string         `gorm:"column:name;size:45;not null"`
 	URL       string         `gorm:"column:url;size:255;not null"`
+	Icon      *string        `gorm:"column:icon;size:64"`
 	Sort      int            `gorm:"column:sort;not null"`
 	ParentID  *int64         `gorm:"column:parent_id"`
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`

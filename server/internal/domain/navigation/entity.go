@@ -6,6 +6,7 @@ type NavMenu struct {
 	ID        int64
 	Name      string
 	URL       string
+	Icon      *string
 	Sort      int
 	ParentID  *int64
 	CreatedAt time.Time

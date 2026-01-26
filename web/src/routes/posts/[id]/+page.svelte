@@ -4,6 +4,7 @@
 	import { checkPostLatest } from '$lib/features/post/api';
 	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/features/post/types';
 	import { browser } from '$app/environment';
+    import {SvelteURL} from "svelte/reactivity";
 
 	let { data } = $props();
 	const postStore = writable<PostDetailModel | null>(data.post ?? null);
@@ -63,7 +64,7 @@
 			return;
 		}
 
-		const wsUrl = new URL('/api/v2/ws', window.location.origin);
+		const wsUrl = new SvelteURL('/api/v2/ws', window.location.origin);
 		wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 		wsUrl.searchParams.set('type', 'article');
 		wsUrl.searchParams.set('id', String(postId));

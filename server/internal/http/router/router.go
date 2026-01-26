@@ -14,6 +14,7 @@ import (
 	appfed "github.com/grtsinry43/grtblog-v2/server/internal/app/federation"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/federationconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/htmlsnapshot"
+	appnav "github.com/grtsinry43/grtblog-v2/server/internal/app/navigation"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/sysconfig"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/webhook"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/websiteinfo"
@@ -98,7 +99,11 @@ func Register(app *fiber.App, deps Dependencies) {
 	websiteInfoSvc := websiteinfo.NewService(websiteInfoRepo)
 	websiteInfoHandler := handler.NewWebsiteInfoHandler(websiteInfoSvc)
 
-	registerPublicRoutes(v2, deps, websiteInfoHandler, htmlSnapshotSvc)
+	navMenuRepo := persistence.NewNavMenuRepository(deps.DB)
+	navMenuSvc := appnav.NewService(navMenuRepo)
+	navMenuHandler := handler.NewNavMenuHandler(navMenuSvc)
+
+	registerPublicRoutes(v2, deps, websiteInfoHandler, htmlSnapshotSvc, navMenuHandler)
 	registerAuthRoutes(v2, deps, sysCfgSvc)
 	deps.EventBus = eventBus
 	registerWSRoutes(v2, wsManager)
@@ -112,7 +117,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerMomentAuthRoutes(v2, deps)
 	registerPageAuthRoutes(v2, deps)
 	registerCommentAuthRoutes(v2, deps)
-	registerAdminRoutes(v2, deps, websiteInfoHandler, sysCfgSvc)
+	registerAdminRoutes(v2, deps, websiteInfoHandler, navMenuHandler, sysCfgSvc)
 	registerTaxonomyAdminRoutes(v2, deps)
 	registerWebhookAdminRoutes(v2, deps, webhookSvc)
 

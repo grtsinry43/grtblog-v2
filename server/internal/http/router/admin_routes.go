@@ -15,7 +15,7 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/infra/persistence"
 )
 
-func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *handler.WebsiteInfoHandler, sysCfgSvc *sysconfig.Service) {
+func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *handler.WebsiteInfoHandler, navMenuHandler *handler.NavMenuHandler, sysCfgSvc *sysconfig.Service) {
 	adminGroup := v2.Group("", middleware.RequireAuth(deps.JWTManager), middleware.RequireAdmin())
 
 	websiteInfo := adminGroup.Group("/website-info")
@@ -23,6 +23,13 @@ func registerAdminRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler 
 	websiteInfo.Post("", websiteInfoHandler.Create)
 	websiteInfo.Put("/:key", websiteInfoHandler.Update)
 	websiteInfo.Delete("/:key", websiteInfoHandler.Delete)
+
+	navMenus := adminGroup.Group("/admin/nav-menus")
+	navMenus.Get("", navMenuHandler.ListAdmin)
+	navMenus.Post("", navMenuHandler.Create)
+	navMenus.Put("/reorder", navMenuHandler.Reorder)
+	navMenus.Put("/:id", navMenuHandler.Update)
+	navMenus.Delete("/:id", navMenuHandler.Delete)
 
 	oauthRepo := persistence.NewOAuthProviderRepository(deps.DB)
 	adminOAuth := handler.NewAdminOAuthHandler(oauthRepo)
