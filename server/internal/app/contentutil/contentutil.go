@@ -27,9 +27,10 @@ var tocAnchorSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 var shortURLSanitizer = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 
 const (
-	CommentAreaTypeArticle = "article"
-	CommentAreaTypeMoment  = "moment"
-	CommentAreaTypePage    = "page"
+	CommentAreaTypeArticle  = "article"
+	CommentAreaTypeMoment   = "moment"
+	CommentAreaTypePage     = "page"
+	CommentAreaTypeThinking = "thinking"
 )
 
 func BuildCommentAreaName(areaType, title string) string {

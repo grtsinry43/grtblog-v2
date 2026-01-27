@@ -151,12 +151,3 @@ type PageMetrics struct {
 }
 
 func (PageMetrics) TableName() string { return "page_metrics" }
-
-type Thinking struct {
-	ID        int64     `gorm:"column:id;primaryKey"`
-	Content   string    `gorm:"column:content;type:text;not null"`
-	Author    string    `gorm:"column:author;size:45;not null"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
-}
-
-func (Thinking) TableName() string { return "thinking" }
