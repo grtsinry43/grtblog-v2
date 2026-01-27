@@ -6,7 +6,6 @@ export const load: LayoutServerLoad = async ({ fetch }) => {
 	let navMenus: NavMenuItem[] = [];
 	try {
 		navMenus = await fetchNavMenuTree(fetch);
-		console.log(navMenus);
 	} catch (error) {
 		console.error('Failed to load nav menus:', error);
 	}

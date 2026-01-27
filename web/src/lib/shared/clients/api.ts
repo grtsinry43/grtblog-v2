@@ -40,7 +40,7 @@ const defaults: FetchOptions = {
 			throw new BusinessError(
 				res.code,
 				res.msg || '未知错误',
-				res.bizError || '' // 业务调试信息
+				res.bizErr || '' // 业务调试信息
 			);
 		}
 	},

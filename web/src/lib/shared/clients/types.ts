@@ -1,7 +1,7 @@
 // 定义 API 响应的通用结构
 export interface ApiResponse<T> {
 	code: number; // 0 成功，非 0 失败
-	bizError: string; // 业务错误信息，code 非 0 时有值
+	bizErr: string; // 业务错误信息，code 非 0 时有值
 	msg: string; // 服务器消息，用户友好信息，可直接展示在前端，code 0 时通常是成功提示，非 0 时可能是错误提示
 	data: T;
 	meta: {
@@ -12,12 +12,12 @@ export interface ApiResponse<T> {
 
 export class BusinessError extends Error {
 	code: number;
-	bizError: string;
+	bizErr: string;
 
-	constructor(code: number, msg: string, bizError: string) {
+	constructor(code: number, msg: string, bizErr: string) {
 		super(msg);
 		this.name = 'BusinessError';
 		this.code = code;
-		this.bizError = bizError;
+		this.bizErr = bizErr;
 	}
 }
