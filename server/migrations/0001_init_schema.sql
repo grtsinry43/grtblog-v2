@@ -229,7 +229,7 @@ CREATE INDEX idx_page_short_url ON page (short_url);
 
 CREATE TABLE IF NOT EXISTS page_metrics
 (
-    page_id   BIGINT PRIMARY KEY
+    page_id  BIGINT PRIMARY KEY
         REFERENCES page (id) ON DELETE CASCADE,
     views      BIGINT  NOT NULL DEFAULT 0,
     likes      INTEGER NOT NULL DEFAULT 0,
