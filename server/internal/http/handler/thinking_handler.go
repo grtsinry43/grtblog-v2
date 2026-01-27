@@ -94,7 +94,7 @@ func (h *ThinkingHandler) UpdateThinking(c *fiber.Ctx) error {
 		return response.NewBizErrorWithCause(response.ParamsError, "无效的请求体", err)
 	}
 
-	_, err := h.svc.Update(c.Context(), thinking.UpdateThinkingCmd{
+	_, err = h.svc.Update(c.Context(), thinking.UpdateThinkingCmd{
 		ID:      id,
 		Content: req.Content,
 	})
