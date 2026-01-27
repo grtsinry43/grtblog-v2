@@ -32,7 +32,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryCreateReq"
+                            "$ref": "#/definitions/contract.CategoryCreateReq"
                         }
                     }
                 ],
@@ -40,7 +40,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryResp"
+                            "$ref": "#/definitions/contract.CategoryResp"
                         }
                     }
                 }
@@ -77,7 +77,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryUpdateReq"
+                            "$ref": "#/definitions/contract.CategoryUpdateReq"
                         }
                     }
                 ],
@@ -85,7 +85,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryResp"
+                            "$ref": "#/definitions/contract.CategoryResp"
                         }
                     }
                 }
@@ -113,7 +113,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.EmptyRespEnvelope"
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
                         }
                     }
                 }
@@ -143,7 +143,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnCreateReq"
+                            "$ref": "#/definitions/contract.ColumnCreateReq"
                         }
                     }
                 ],
@@ -151,7 +151,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnResp"
+                            "$ref": "#/definitions/contract.ColumnResp"
                         }
                     }
                 }
@@ -188,7 +188,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnUpdateReq"
+                            "$ref": "#/definitions/contract.ColumnUpdateReq"
                         }
                     }
                 ],
@@ -196,7 +196,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnResp"
+                            "$ref": "#/definitions/contract.ColumnResp"
                         }
                     }
                 }
@@ -224,7 +224,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.EmptyRespEnvelope"
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
                         }
                     }
                 }
@@ -257,7 +257,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminCitationReq"
+                            "$ref": "#/definitions/contract.FederationAdminCitationReq"
                         }
                     }
                 ],
@@ -265,7 +265,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminProxyResp"
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
                         }
                     }
                 }
@@ -303,7 +303,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigTreeResp"
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
                         }
                     }
                 }
@@ -334,7 +334,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigBatchUpdateReq"
+                            "$ref": "#/definitions/contract.SysConfigBatchUpdateReq"
                         }
                     }
                 ],
@@ -342,7 +342,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigTreeResp"
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
                         }
                     }
                 }
@@ -375,7 +375,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminFriendLinkRequestReq"
+                            "$ref": "#/definitions/contract.FederationAdminFriendLinkRequestReq"
                         }
                     }
                 ],
@@ -383,7 +383,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminProxyResp"
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
                         }
                     }
                 }
@@ -416,7 +416,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminMentionReq"
+                            "$ref": "#/definitions/contract.FederationAdminMentionReq"
                         }
                     }
                 ],
@@ -424,7 +424,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminProxyResp"
+                            "$ref": "#/definitions/contract.FederationAdminProxyResp"
                         }
                     }
                 }
@@ -463,7 +463,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminRemoteCheckResp"
+                            "$ref": "#/definitions/contract.FederationAdminRemoteCheckResp"
                         }
                     }
                 }
@@ -487,7 +487,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.LogLinesEnvelope"
+                            "$ref": "#/definitions/handler.LogLinesEnvelope"
                         }
                     }
                 }
@@ -511,7 +511,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.AdminOAuthProviderListEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderListEnvelope"
                         }
                     }
                 }
@@ -539,7 +539,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.OAuthProviderPayload"
+                            "$ref": "#/definitions/handler.OAuthProviderPayload"
                         }
                     }
                 ],
@@ -547,7 +547,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.AdminOAuthProviderEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderEnvelope"
                         }
                     }
                 }
@@ -584,7 +584,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.OAuthProviderPayload"
+                            "$ref": "#/definitions/handler.OAuthProviderPayload"
                         }
                     }
                 ],
@@ -592,7 +592,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.AdminOAuthProviderEnvelope"
+                            "$ref": "#/definitions/handler.AdminOAuthProviderEnvelope"
                         }
                     }
                 }
@@ -623,7 +623,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_http_handler.AdminGenericMessageEnvelope"
+                            "$ref": "#/definitions/handler.AdminGenericMessageEnvelope"
                         }
                     }
                 }
@@ -658,7 +658,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigTreeResp"
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
                         }
                     }
                 }
@@ -689,7 +689,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigBatchUpdateReq"
+                            "$ref": "#/definitions/contract.SysConfigBatchUpdateReq"
                         }
                     }
                 ],
@@ -697,7 +697,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigTreeResp"
+                            "$ref": "#/definitions/contract.SysConfigTreeResp"
                         }
                     }
                 }
@@ -727,7 +727,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagCreateReq"
+                            "$ref": "#/definitions/contract.TagCreateReq"
                         }
                     }
                 ],
@@ -735,7 +735,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagItemResp"
+                            "$ref": "#/definitions/contract.TagItemResp"
                         }
                     }
                 }
@@ -772,7 +772,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagUpdateReq"
+                            "$ref": "#/definitions/contract.TagUpdateReq"
                         }
                     }
                 ],
@@ -780,7 +780,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagItemResp"
+                            "$ref": "#/definitions/contract.TagItemResp"
                         }
                     }
                 }
@@ -808,7 +808,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.EmptyRespEnvelope"
+                            "$ref": "#/definitions/contract.EmptyRespEnvelope"
                         }
                     }
                 }
@@ -837,7 +837,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookResp"
+                                "$ref": "#/definitions/contract.WebhookResp"
                             }
                         }
                     }
@@ -869,7 +869,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateWebhookReq"
+                            "$ref": "#/definitions/contract.CreateWebhookReq"
                         }
                     }
                 ],
@@ -877,7 +877,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookResp"
+                            "$ref": "#/definitions/contract.WebhookResp"
                         }
                     }
                 }
@@ -938,7 +938,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookHistoryListResp"
+                            "$ref": "#/definitions/contract.WebhookHistoryListResp"
                         }
                     }
                 }
@@ -999,7 +999,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookEventListResp"
+                            "$ref": "#/definitions/contract.WebhookEventListResp"
                         }
                     }
                 }
@@ -1039,7 +1039,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateWebhookReq"
+                            "$ref": "#/definitions/contract.UpdateWebhookReq"
                         }
                     }
                 ],
@@ -1047,7 +1047,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookResp"
+                            "$ref": "#/definitions/contract.WebhookResp"
                         }
                     }
                 }
@@ -1118,7 +1118,7 @@
                         "name": "request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookTestReq"
+                            "$ref": "#/definitions/contract.WebhookTestReq"
                         }
                     }
                 ],
@@ -1149,7 +1149,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationRequestReq"
+                            "$ref": "#/definitions/contract.FederationCitationRequestReq"
                         }
                     }
                 ],
@@ -1157,7 +1157,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationResponseResp"
+                            "$ref": "#/definitions/contract.FederationCitationResponseResp"
                         }
                     }
                 }
@@ -1182,7 +1182,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationFriendLinkRequestReq"
+                            "$ref": "#/definitions/contract.FederationFriendLinkRequestReq"
                         }
                     }
                 ],
@@ -1190,7 +1190,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationFriendLinkResponseResp"
+                            "$ref": "#/definitions/contract.FederationFriendLinkResponseResp"
                         }
                     }
                 }
@@ -1215,7 +1215,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionNotifyReq"
+                            "$ref": "#/definitions/contract.FederationMentionNotifyReq"
                         }
                     }
                 ],
@@ -1223,7 +1223,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionNotifyResp"
+                            "$ref": "#/definitions/contract.FederationMentionNotifyResp"
                         }
                     }
                 }
@@ -1254,7 +1254,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostDetailResp"
+                            "$ref": "#/definitions/contract.FederationPostDetailResp"
                         }
                     }
                 }
@@ -1302,7 +1302,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationTimelineResp"
+                            "$ref": "#/definitions/contract.FederationTimelineResp"
                         }
                     }
                 }
@@ -1355,7 +1355,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleListResp"
+                            "$ref": "#/definitions/contract.ArticleListResp"
                         }
                     }
                 }
@@ -1386,7 +1386,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateArticleReq"
+                            "$ref": "#/definitions/contract.CreateArticleReq"
                         }
                     }
                 ],
@@ -1394,7 +1394,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleResp"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -1422,7 +1422,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleResp"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -1455,7 +1455,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleResp"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -1493,7 +1493,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateArticleReq"
+                            "$ref": "#/definitions/contract.UpdateArticleReq"
                         }
                     }
                 ],
@@ -1501,7 +1501,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleResp"
+                            "$ref": "#/definitions/contract.ArticleResp"
                         }
                     }
                 }
@@ -1565,7 +1565,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckArticleLatestReq"
+                            "$ref": "#/definitions/contract.CheckArticleLatestReq"
                         }
                     }
                 ],
@@ -1573,7 +1573,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckArticleLatestResp"
+                            "$ref": "#/definitions/contract.CheckArticleLatestResp"
                         }
                     }
                 }
@@ -1598,7 +1598,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginReq"
+                            "$ref": "#/definitions/contract.LoginReq"
                         }
                     }
                 ],
@@ -1606,7 +1606,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginRespEnvelope"
+                            "$ref": "#/definitions/contract.LoginRespEnvelope"
                         }
                     }
                 }
@@ -1630,7 +1630,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserRespEnvelope"
+                            "$ref": "#/definitions/contract.UserRespEnvelope"
                         }
                     }
                 }
@@ -1649,7 +1649,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ProviderListRespEnvelope"
+                            "$ref": "#/definitions/contract.ProviderListRespEnvelope"
                         }
                     }
                 }
@@ -1683,7 +1683,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.AuthorizeRespEnvelope"
+                            "$ref": "#/definitions/contract.AuthorizeRespEnvelope"
                         }
                     }
                 }
@@ -1715,7 +1715,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.OAuthCallbackReq"
+                            "$ref": "#/definitions/contract.OAuthCallbackReq"
                         }
                     }
                 ],
@@ -1723,7 +1723,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginRespEnvelope"
+                            "$ref": "#/definitions/contract.LoginRespEnvelope"
                         }
                     }
                 }
@@ -1748,7 +1748,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.RegisterReq"
+                            "$ref": "#/definitions/contract.RegisterReq"
                         }
                     }
                 ],
@@ -1756,7 +1756,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.RegisterRespEnvelope"
+                            "$ref": "#/definitions/contract.RegisterRespEnvelope"
                         }
                     }
                 }
@@ -1777,7 +1777,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryResp"
+                                "$ref": "#/definitions/contract.CategoryResp"
                             }
                         }
                     }
@@ -1799,7 +1799,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnResp"
+                                "$ref": "#/definitions/contract.ColumnResp"
                             }
                         }
                     }
@@ -1830,7 +1830,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CommentNodeResp"
+                                "$ref": "#/definitions/contract.CommentNodeResp"
                             }
                         }
                     }
@@ -1866,7 +1866,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentLoginReq"
+                            "$ref": "#/definitions/contract.CreateCommentLoginReq"
                         }
                     }
                 ],
@@ -1874,7 +1874,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentResp"
+                            "$ref": "#/definitions/contract.CreateCommentResp"
                         }
                     }
                 }
@@ -1906,7 +1906,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentVisitorReq"
+                            "$ref": "#/definitions/contract.CreateCommentVisitorReq"
                         }
                     }
                 ],
@@ -1914,7 +1914,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentResp"
+                            "$ref": "#/definitions/contract.CreateCommentResp"
                         }
                     }
                 }
@@ -1944,7 +1944,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationReq"
+                            "$ref": "#/definitions/contract.FriendLinkApplicationReq"
                         }
                     }
                 ],
@@ -1952,7 +1952,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationRespEnvelope"
+                            "$ref": "#/definitions/contract.FriendLinkApplicationRespEnvelope"
                         }
                     }
                 }
@@ -2005,7 +2005,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentListResp"
+                            "$ref": "#/definitions/contract.MomentListResp"
                         }
                     }
                 }
@@ -2036,7 +2036,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateMomentReq"
+                            "$ref": "#/definitions/contract.CreateMomentReq"
                         }
                     }
                 ],
@@ -2044,7 +2044,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentResp"
+                            "$ref": "#/definitions/contract.MomentResp"
                         }
                     }
                 }
@@ -2072,7 +2072,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentResp"
+                            "$ref": "#/definitions/contract.MomentResp"
                         }
                     }
                 }
@@ -2105,7 +2105,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentResp"
+                            "$ref": "#/definitions/contract.MomentResp"
                         }
                     }
                 }
@@ -2143,7 +2143,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateMomentReq"
+                            "$ref": "#/definitions/contract.UpdateMomentReq"
                         }
                     }
                 ],
@@ -2151,7 +2151,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentResp"
+                            "$ref": "#/definitions/contract.MomentResp"
                         }
                     }
                 }
@@ -2215,7 +2215,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckMomentLatestReq"
+                            "$ref": "#/definitions/contract.CheckMomentLatestReq"
                         }
                     }
                 ],
@@ -2223,7 +2223,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckMomentLatestResp"
+                            "$ref": "#/definitions/contract.CheckMomentLatestResp"
                         }
                     }
                 }
@@ -2276,7 +2276,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageListResp"
+                            "$ref": "#/definitions/contract.PageListResp"
                         }
                     }
                 }
@@ -2307,7 +2307,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreatePageReq"
+                            "$ref": "#/definitions/contract.CreatePageReq"
                         }
                     }
                 ],
@@ -2315,7 +2315,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageResp"
+                            "$ref": "#/definitions/contract.PageResp"
                         }
                     }
                 }
@@ -2343,7 +2343,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageResp"
+                            "$ref": "#/definitions/contract.PageResp"
                         }
                     }
                 }
@@ -2376,7 +2376,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageResp"
+                            "$ref": "#/definitions/contract.PageResp"
                         }
                     }
                 }
@@ -2414,7 +2414,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdatePageReq"
+                            "$ref": "#/definitions/contract.UpdatePageReq"
                         }
                     }
                 ],
@@ -2422,7 +2422,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageResp"
+                            "$ref": "#/definitions/contract.PageResp"
                         }
                     }
                 }
@@ -2486,7 +2486,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckPageLatestReq"
+                            "$ref": "#/definitions/contract.CheckPageLatestReq"
                         }
                     }
                 ],
@@ -2494,7 +2494,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckPageLatestResp"
+                            "$ref": "#/definitions/contract.CheckPageLatestResp"
                         }
                     }
                 }
@@ -2530,7 +2530,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoListRespEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoListRespEnvelope"
                         }
                     }
                 }
@@ -2551,7 +2551,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagItemResp"
+                                "$ref": "#/definitions/contract.TagItemResp"
                             }
                         }
                     }
@@ -2582,7 +2582,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ListThinkingResp"
+                            "$ref": "#/definitions/contract.ListThinkingResp"
                         }
                     }
                 }
@@ -2610,7 +2610,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateThinkingReq"
+                            "$ref": "#/definitions/contract.UpdateThinkingReq"
                         }
                     }
                 ],
@@ -2643,7 +2643,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateThinkingReq"
+                            "$ref": "#/definitions/contract.CreateThinkingReq"
                         }
                     }
                 ],
@@ -2651,7 +2651,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ThinkingResp"
+                            "$ref": "#/definitions/contract.ThinkingResp"
                         }
                     }
                 }
@@ -2721,7 +2721,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileRespEnvelope"
+                            "$ref": "#/definitions/contract.UploadFileRespEnvelope"
                         }
                     }
                 }
@@ -2758,7 +2758,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadRenameReq"
+                            "$ref": "#/definitions/contract.UploadRenameReq"
                         }
                     }
                 ],
@@ -2766,7 +2766,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileRespEnvelope"
+                            "$ref": "#/definitions/contract.UploadFileRespEnvelope"
                         }
                     }
                 }
@@ -2868,7 +2868,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileListRespEnvelope"
+                            "$ref": "#/definitions/contract.UploadFileListRespEnvelope"
                         }
                     }
                 }
@@ -2892,7 +2892,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoListRespEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoListRespEnvelope"
                         }
                     }
                 }
@@ -2920,7 +2920,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoReq"
+                            "$ref": "#/definitions/contract.WebsiteInfoReq"
                         }
                     }
                 ],
@@ -2928,7 +2928,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoDetailRespEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoDetailRespEnvelope"
                         }
                     }
                 }
@@ -2965,7 +2965,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoReq"
+                            "$ref": "#/definitions/contract.WebsiteInfoReq"
                         }
                     }
                 ],
@@ -2973,7 +2973,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoDetailRespEnvelope"
+                            "$ref": "#/definitions/contract.WebsiteInfoDetailRespEnvelope"
                         }
                     }
                 }
@@ -3004,7 +3004,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.GenericMessageEnvelope"
+                            "$ref": "#/definitions/contract.GenericMessageEnvelope"
                         }
                     }
                 }
@@ -3012,7 +3012,7 @@
         }
     },
     "definitions": {
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleListItemResp": {
+        "contract.ArticleListItemResp": {
             "type": "object",
             "properties": {
                 "authorName": {
@@ -3077,13 +3077,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleListResp": {
+        "contract.ArticleListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleListItemResp"
+                        "$ref": "#/definitions/contract.ArticleListItemResp"
                     }
                 },
                 "page": {
@@ -3097,7 +3097,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ArticleResp": {
+        "contract.ArticleResp": {
             "type": "object",
             "properties": {
                 "aiSummary": {
@@ -3143,7 +3143,7 @@
                     "type": "string"
                 },
                 "metrics": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MetricsResp"
+                    "$ref": "#/definitions/contract.MetricsResp"
                 },
                 "shortUrl": {
                     "type": "string"
@@ -3154,7 +3154,7 @@
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagResp"
+                        "$ref": "#/definitions/contract.TagResp"
                     }
                 },
                 "title": {
@@ -3163,7 +3163,7 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 },
                 "updatedAt": {
@@ -3171,7 +3171,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.AuthorizeResp": {
+        "contract.AuthorizeResp": {
             "type": "object",
             "properties": {
                 "authUrl": {
@@ -3185,7 +3185,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.AuthorizeRespEnvelope": {
+        "contract.AuthorizeRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -3195,17 +3195,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.AuthorizeResp"
+                    "$ref": "#/definitions/contract.AuthorizeResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryCreateReq": {
+        "contract.CategoryCreateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3216,7 +3216,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryResp": {
+        "contract.CategoryResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3236,7 +3236,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CategoryUpdateReq": {
+        "contract.CategoryUpdateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3247,7 +3247,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckArticleLatestReq": {
+        "contract.CheckArticleLatestReq": {
             "type": "object",
             "properties": {
                 "hash": {
@@ -3255,7 +3255,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckArticleLatestResp": {
+        "contract.CheckArticleLatestResp": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3276,12 +3276,12 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckMomentLatestReq": {
+        "contract.CheckMomentLatestReq": {
             "type": "object",
             "properties": {
                 "hash": {
@@ -3289,7 +3289,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckMomentLatestResp": {
+        "contract.CheckMomentLatestResp": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3310,12 +3310,12 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckPageLatestReq": {
+        "contract.CheckPageLatestReq": {
             "type": "object",
             "properties": {
                 "hash": {
@@ -3323,7 +3323,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CheckPageLatestResp": {
+        "contract.CheckPageLatestResp": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3344,12 +3344,12 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnCreateReq": {
+        "contract.ColumnCreateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3360,7 +3360,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnResp": {
+        "contract.ColumnResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3380,7 +3380,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ColumnUpdateReq": {
+        "contract.ColumnUpdateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3391,7 +3391,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CommentNodeResp": {
+        "contract.CommentNodeResp": {
             "type": "object",
             "properties": {
                 "areaId": {
@@ -3403,7 +3403,7 @@
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CommentNodeResp"
+                        "$ref": "#/definitions/contract.CommentNodeResp"
                     }
                 },
                 "content": {
@@ -3453,7 +3453,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateArticleReq": {
+        "contract.CreateArticleReq": {
             "type": "object",
             "required": [
                 "content",
@@ -3507,7 +3507,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentLoginReq": {
+        "contract.CreateCommentLoginReq": {
             "type": "object",
             "required": [
                 "content"
@@ -3521,7 +3521,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentResp": {
+        "contract.CreateCommentResp": {
             "type": "object",
             "properties": {
                 "areaId": {
@@ -3577,7 +3577,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateCommentVisitorReq": {
+        "contract.CreateCommentVisitorReq": {
             "type": "object",
             "required": [
                 "content",
@@ -3605,7 +3605,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateMomentReq": {
+        "contract.CreateMomentReq": {
             "type": "object",
             "required": [
                 "content",
@@ -3659,7 +3659,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreatePageReq": {
+        "contract.CreatePageReq": {
             "type": "object",
             "required": [
                 "content",
@@ -3690,7 +3690,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateThinkingReq": {
+        "contract.CreateThinkingReq": {
             "type": "object",
             "required": [
                 "content"
@@ -3704,7 +3704,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.CreateWebhookReq": {
+        "contract.CreateWebhookReq": {
             "type": "object",
             "required": [
                 "events",
@@ -3740,7 +3740,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.EmptyRespEnvelope": {
+        "contract.EmptyRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -3751,14 +3751,14 @@
                 },
                 "data": {},
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminCitationReq": {
+        "contract.FederationAdminCitationReq": {
             "type": "object",
             "properties": {
                 "citation_context": {
@@ -3781,7 +3781,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminFriendLinkRequestReq": {
+        "contract.FederationAdminFriendLinkRequestReq": {
             "type": "object",
             "properties": {
                 "message": {
@@ -3795,7 +3795,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminMentionReq": {
+        "contract.FederationAdminMentionReq": {
             "type": "object",
             "properties": {
                 "mention_context": {
@@ -3818,7 +3818,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminProxyResp": {
+        "contract.FederationAdminProxyResp": {
             "type": "object",
             "properties": {
                 "body": {
@@ -3829,7 +3829,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationAdminRemoteCheckResp": {
+        "contract.FederationAdminRemoteCheckResp": {
             "type": "object",
             "properties": {
                 "endpoints": {
@@ -3843,7 +3843,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationRequestReq": {
+        "contract.FederationCitationRequestReq": {
             "type": "object",
             "properties": {
                 "citation_context": {
@@ -3856,14 +3856,14 @@
                     "type": "string"
                 },
                 "source_post": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationSourcePost"
+                    "$ref": "#/definitions/contract.FederationCitationSourcePost"
                 },
                 "target_post_id": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationResponseResp": {
+        "contract.FederationCitationResponseResp": {
             "type": "object",
             "properties": {
                 "citation_id": {
@@ -3874,7 +3874,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationCitationSourcePost": {
+        "contract.FederationCitationSourcePost": {
             "type": "object",
             "properties": {
                 "id": {
@@ -3888,7 +3888,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationFriendLinkRequestReq": {
+        "contract.FederationFriendLinkRequestReq": {
             "type": "object",
             "properties": {
                 "message": {
@@ -3902,7 +3902,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationFriendLinkResponseResp": {
+        "contract.FederationFriendLinkResponseResp": {
             "type": "object",
             "properties": {
                 "applicationId": {
@@ -3916,7 +3916,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionNotifyReq": {
+        "contract.FederationMentionNotifyReq": {
             "type": "object",
             "properties": {
                 "mention_context": {
@@ -3932,11 +3932,11 @@
                     "type": "string"
                 },
                 "source_post": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionSourcePost"
+                    "$ref": "#/definitions/contract.FederationMentionSourcePost"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionNotifyResp": {
+        "contract.FederationMentionNotifyResp": {
             "type": "object",
             "properties": {
                 "delivered": {
@@ -3947,7 +3947,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationMentionSourcePost": {
+        "contract.FederationMentionSourcePost": {
             "type": "object",
             "properties": {
                 "title": {
@@ -3958,7 +3958,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostAuthorResp": {
+        "contract.FederationPostAuthorResp": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3972,21 +3972,21 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostDetailResp": {
+        "contract.FederationPostDetailResp": {
             "type": "object",
             "properties": {
                 "post": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostResp"
+                    "$ref": "#/definitions/contract.FederationPostResp"
                 },
                 "related_posts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostResp"
+                        "$ref": "#/definitions/contract.FederationPostResp"
                     }
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostResp": {
+        "contract.FederationPostResp": {
             "type": "object",
             "properties": {
                 "allow_citation": {
@@ -3996,7 +3996,7 @@
                     "type": "boolean"
                 },
                 "author": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostAuthorResp"
+                    "$ref": "#/definitions/contract.FederationPostAuthorResp"
                 },
                 "content_preview": {
                     "type": "string"
@@ -4027,13 +4027,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationTimelineResp": {
+        "contract.FederationTimelineResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FederationPostResp"
+                        "$ref": "#/definitions/contract.FederationPostResp"
                     }
                 },
                 "page": {
@@ -4047,7 +4047,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationReq": {
+        "contract.FriendLinkApplicationReq": {
             "type": "object",
             "properties": {
                 "description": {
@@ -4070,7 +4070,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationResp": {
+        "contract.FriendLinkApplicationResp": {
             "type": "object",
             "properties": {
                 "applyChannel": {
@@ -4120,7 +4120,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationRespEnvelope": {
+        "contract.FriendLinkApplicationRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -4130,17 +4130,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.FriendLinkApplicationResp"
+                    "$ref": "#/definitions/contract.FriendLinkApplicationResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.GenericMessageEnvelope": {
+        "contract.GenericMessageEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -4151,20 +4151,20 @@
                 },
                 "data": {},
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ListThinkingResp": {
+        "contract.ListThinkingResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ThinkingResp"
+                        "$ref": "#/definitions/contract.ThinkingResp"
                     }
                 },
                 "total": {
@@ -4172,7 +4172,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginReq": {
+        "contract.LoginReq": {
             "type": "object",
             "properties": {
                 "credential": {
@@ -4187,18 +4187,18 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginResp": {
+        "contract.LoginResp": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserResp"
+                    "$ref": "#/definitions/contract.UserResp"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginRespEnvelope": {
+        "contract.LoginRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -4208,17 +4208,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.LoginResp"
+                    "$ref": "#/definitions/contract.LoginResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MetricsResp": {
+        "contract.MetricsResp": {
             "type": "object",
             "properties": {
                 "comments": {
@@ -4232,7 +4232,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentListItemResp": {
+        "contract.MomentListItemResp": {
             "type": "object",
             "properties": {
                 "authorName": {
@@ -4300,13 +4300,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentListResp": {
+        "contract.MomentListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentListItemResp"
+                        "$ref": "#/definitions/contract.MomentListItemResp"
                     }
                 },
                 "page": {
@@ -4320,7 +4320,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MomentResp": {
+        "contract.MomentResp": {
             "type": "object",
             "properties": {
                 "aiSummary": {
@@ -4366,7 +4366,7 @@
                     "type": "boolean"
                 },
                 "metrics": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MetricsResp"
+                    "$ref": "#/definitions/contract.MetricsResp"
                 },
                 "shortUrl": {
                     "type": "string"
@@ -4380,13 +4380,13 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 },
                 "topics": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagResp"
+                        "$ref": "#/definitions/contract.TagResp"
                     }
                 },
                 "updatedAt": {
@@ -4394,7 +4394,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.OAuthCallbackReq": {
+        "contract.OAuthCallbackReq": {
             "type": "object",
             "properties": {
                 "code": {
@@ -4405,7 +4405,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.OAuthProviderResp": {
+        "contract.OAuthProviderResp": {
             "type": "object",
             "properties": {
                 "displayName": {
@@ -4425,7 +4425,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageListItemResp": {
+        "contract.PageListItemResp": {
             "type": "object",
             "properties": {
                 "commentAreaId": {
@@ -4466,13 +4466,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageListResp": {
+        "contract.PageListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageListItemResp"
+                        "$ref": "#/definitions/contract.PageListItemResp"
                     }
                 },
                 "page": {
@@ -4486,7 +4486,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.PageResp": {
+        "contract.PageResp": {
             "type": "object",
             "properties": {
                 "aiSummary": {
@@ -4517,7 +4517,7 @@
                     "type": "boolean"
                 },
                 "metrics": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.MetricsResp"
+                    "$ref": "#/definitions/contract.MetricsResp"
                 },
                 "shortUrl": {
                     "type": "string"
@@ -4528,7 +4528,7 @@
                 "toc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 },
                 "updatedAt": {
@@ -4536,7 +4536,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ProviderListRespEnvelope": {
+        "contract.ProviderListRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -4548,18 +4548,18 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.OAuthProviderResp"
+                        "$ref": "#/definitions/contract.OAuthProviderResp"
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.RegisterReq": {
+        "contract.RegisterReq": {
             "type": "object",
             "properties": {
                 "email": {
@@ -4579,7 +4579,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.RegisterRespEnvelope": {
+        "contract.RegisterRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -4589,43 +4589,32 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserResp"
+                    "$ref": "#/definitions/contract.UserResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigBatchUpdateReq": {
-            "type": "object",
-            "required": [
-                "items"
-            ],
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigUpdateItem"
-                    }
-                }
-            }
+        "contract.SysConfigBatchUpdateReq": {
+            "type": "object"
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigGroupResp": {
+        "contract.SysConfigGroupResp": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigGroupResp"
+                        "$ref": "#/definitions/contract.SysConfigGroupResp"
                     }
                 },
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigItemResp"
+                        "$ref": "#/definitions/contract.SysConfigItemResp"
                     }
                 },
                 "key": {
@@ -4639,7 +4628,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigItemResp": {
+        "contract.SysConfigItemResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -4692,84 +4681,24 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigTreeResp": {
+        "contract.SysConfigTreeResp": {
             "type": "object",
             "properties": {
                 "groups": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigGroupResp"
+                        "$ref": "#/definitions/contract.SysConfigGroupResp"
                     }
                 },
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigItemResp"
+                        "$ref": "#/definitions/contract.SysConfigItemResp"
                     }
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.SysConfigUpdateItem": {
-            "type": "object",
-            "required": [
-                "key"
-            ],
-            "properties": {
-                "defaultValue": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "description": {
-                    "type": "string"
-                },
-                "enumOptions": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "groupPath": {
-                    "type": "string"
-                },
-                "isSensitive": {
-                    "type": "boolean"
-                },
-                "key": {
-                    "type": "string",
-                    "maxLength": 45
-                },
-                "label": {
-                    "type": "string"
-                },
-                "meta": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "sort": {
-                    "type": "integer"
-                },
-                "value": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "valueType": {
-                    "type": "string"
-                },
-                "visibleWhen": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode": {
+        "contract.TOCNode": {
             "type": "object",
             "properties": {
                 "anchor": {
@@ -4778,7 +4707,7 @@
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TOCNode"
+                        "$ref": "#/definitions/contract.TOCNode"
                     }
                 },
                 "name": {
@@ -4786,7 +4715,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagCreateReq": {
+        "contract.TagCreateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -4794,7 +4723,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagItemResp": {
+        "contract.TagItemResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -4811,7 +4740,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagResp": {
+        "contract.TagResp": {
             "type": "object",
             "properties": {
                 "id": {
@@ -4822,7 +4751,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.TagUpdateReq": {
+        "contract.TagUpdateReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -4830,7 +4759,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ThinkingMetrics": {
+        "contract.ThinkingMetrics": {
             "type": "object",
             "properties": {
                 "comments": {
@@ -4844,7 +4773,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ThinkingResp": {
+        "contract.ThinkingResp": {
             "type": "object",
             "properties": {
                 "author": {
@@ -4863,14 +4792,14 @@
                     "type": "integer"
                 },
                 "metrics": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.ThinkingMetrics"
+                    "$ref": "#/definitions/contract.ThinkingMetrics"
                 },
                 "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateArticleReq": {
+        "contract.UpdateArticleReq": {
             "type": "object",
             "required": [
                 "content",
@@ -4920,7 +4849,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateMomentReq": {
+        "contract.UpdateMomentReq": {
             "type": "object",
             "required": [
                 "content",
@@ -4970,7 +4899,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdatePageReq": {
+        "contract.UpdatePageReq": {
             "type": "object",
             "required": [
                 "content",
@@ -4999,7 +4928,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateThinkingReq": {
+        "contract.UpdateThinkingReq": {
             "type": "object",
             "required": [
                 "content",
@@ -5014,7 +4943,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UpdateWebhookReq": {
+        "contract.UpdateWebhookReq": {
             "type": "object",
             "required": [
                 "events",
@@ -5050,13 +4979,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileListResp": {
+        "contract.UploadFileListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileResp"
+                        "$ref": "#/definitions/contract.UploadFileResp"
                     }
                 },
                 "page": {
@@ -5070,7 +4999,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileListRespEnvelope": {
+        "contract.UploadFileListRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5080,17 +5009,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileListResp"
+                    "$ref": "#/definitions/contract.UploadFileListResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileResp": {
+        "contract.UploadFileResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5119,7 +5048,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileRespEnvelope": {
+        "contract.UploadFileRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5129,17 +5058,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadFileResp"
+                    "$ref": "#/definitions/contract.UploadFileResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UploadRenameReq": {
+        "contract.UploadRenameReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -5147,7 +5076,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserResp": {
+        "contract.UserResp": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -5182,7 +5111,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserRespEnvelope": {
+        "contract.UserRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5192,17 +5121,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.UserResp"
+                    "$ref": "#/definitions/contract.UserResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookEventListResp": {
+        "contract.WebhookEventListResp": {
             "type": "object",
             "properties": {
                 "events": {
@@ -5213,13 +5142,13 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookHistoryListResp": {
+        "contract.WebhookHistoryListResp": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookHistoryResp"
+                        "$ref": "#/definitions/contract.WebhookHistoryResp"
                     }
                 },
                 "page": {
@@ -5233,7 +5162,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookHistoryResp": {
+        "contract.WebhookHistoryResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5280,7 +5209,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookResp": {
+        "contract.WebhookResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5318,7 +5247,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebhookTestReq": {
+        "contract.WebhookTestReq": {
             "type": "object",
             "properties": {
                 "eventName": {
@@ -5326,7 +5255,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoDetailRespEnvelope": {
+        "contract.WebsiteInfoDetailRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5336,17 +5265,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoResp"
+                    "$ref": "#/definitions/contract.WebsiteInfoResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoListRespEnvelope": {
+        "contract.WebsiteInfoListRespEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5358,18 +5287,18 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoResp"
+                        "$ref": "#/definitions/contract.WebsiteInfoResp"
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoReq": {
+        "contract.WebsiteInfoReq": {
             "type": "object",
             "properties": {
                 "key": {
@@ -5380,7 +5309,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_contract.WebsiteInfoResp": {
+        "contract.WebsiteInfoResp": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -5397,18 +5326,7 @@
                 }
             }
         },
-        "github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta": {
-            "type": "object",
-            "properties": {
-                "requestId": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_http_handler.AdminGenericMessageEnvelope": {
+        "handler.AdminGenericMessageEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5419,14 +5337,14 @@
                 },
                 "data": {},
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "internal_http_handler.AdminOAuthProviderEnvelope": {
+        "handler.AdminOAuthProviderEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5436,17 +5354,17 @@
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/internal_http_handler.AdminOAuthProviderResp"
+                    "$ref": "#/definitions/handler.AdminOAuthProviderResp"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "internal_http_handler.AdminOAuthProviderListEnvelope": {
+        "handler.AdminOAuthProviderListEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5458,18 +5376,18 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal_http_handler.AdminOAuthProviderResp"
+                        "$ref": "#/definitions/handler.AdminOAuthProviderResp"
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "internal_http_handler.AdminOAuthProviderResp": {
+        "handler.AdminOAuthProviderResp": {
             "type": "object",
             "properties": {
                 "authorizationEndpoint": {
@@ -5520,7 +5438,7 @@
                 }
             }
         },
-        "internal_http_handler.LogLinesEnvelope": {
+        "handler.LogLinesEnvelope": {
             "type": "object",
             "properties": {
                 "bizErr": {
@@ -5536,14 +5454,14 @@
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_grtsinry43_grtblog-v2_server_internal_http_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "internal_http_handler.OAuthProviderPayload": {
+        "handler.OAuthProviderPayload": {
             "type": "object",
             "properties": {
                 "authorizationEndpoint": {
@@ -5587,6 +5505,17 @@
                     "type": "string"
                 },
                 "userinfoEndpoint": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Meta": {
+            "type": "object",
+            "properties": {
+                "requestId": {
+                    "type": "string"
+                },
+                "timestamp": {
                     "type": "string"
                 }
             }
