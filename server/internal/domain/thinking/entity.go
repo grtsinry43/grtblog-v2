@@ -14,7 +14,7 @@ type Thinking struct {
 	ID        int64
 	CommentID int64
 	Content   string
-	Author    string
+	AuthorID  int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Metrics   ThinkingMetrics

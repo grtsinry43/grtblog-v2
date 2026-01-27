@@ -2563,7 +2563,7 @@
                 "tags": [
                     "Thinking"
                 ],
-                "summary": "获取回响列表",
+                "summary": "获取思考列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2587,39 +2587,6 @@
                     }
                 }
             },
-            "put": {
-                "security": [
-                    {
-                        "JWTAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Thinking"
-                ],
-                "summary": "更新回响",
-                "parameters": [
-                    {
-                        "description": "更新参数",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/contract.UpdateThinkingReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -2635,7 +2602,7 @@
                 "tags": [
                     "Thinking"
                 ],
-                "summary": "发布回响",
+                "summary": "发布思考",
                 "parameters": [
                     {
                         "description": "创建参数",
@@ -2658,6 +2625,46 @@
             }
         },
         "/thinkings/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Thinking"
+                ],
+                "summary": "更新思考",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "思考ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.UpdateThinkingReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -2667,11 +2674,11 @@
                 "tags": [
                     "Thinking"
                 ],
-                "summary": "删除回响",
+                "summary": "删除思考",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "回响ID",
+                        "description": "思考ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -3696,9 +3703,6 @@
                 "content"
             ],
             "properties": {
-                "author": {
-                    "type": "string"
-                },
                 "content": {
                     "type": "string"
                 }
@@ -4776,7 +4780,13 @@
         "contract.ThinkingResp": {
             "type": "object",
             "properties": {
-                "author": {
+                "authorId": {
+                    "type": "integer"
+                },
+                "authorName": {
+                    "type": "string"
+                },
+                "avatar": {
                     "type": "string"
                 },
                 "commentId": {
@@ -4931,15 +4941,11 @@
         "contract.UpdateThinkingReq": {
             "type": "object",
             "required": [
-                "content",
-                "id"
+                "content"
             ],
             "properties": {
                 "content": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 }
             }
         },

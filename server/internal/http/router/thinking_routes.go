@@ -20,7 +20,7 @@ func registerThinkingAuthRoutes(v2 fiber.Router, deps Dependencies) {
 	thinkingHandler := newThinkingHandler(deps)
 	authGroup := v2.Group("/thinkings", middleware.RequireAuth(deps.JWTManager), middleware.RequireAdmin())
 	authGroup.Post("/", thinkingHandler.CreateThinking)
-	authGroup.Put("/", thinkingHandler.UpdateThinking)
+	authGroup.Put("/:id", thinkingHandler.UpdateThinking)
 	authGroup.Delete("/:id", thinkingHandler.DeleteThinking)
 }
 
@@ -28,5 +28,6 @@ func newThinkingHandler(deps Dependencies) *handler.ThinkingHandler {
 	thinkingRepo := persistence.NewThinkingRepository(deps.DB)
 	commentRepo := persistence.NewCommentRepository(deps.DB)
 	thinkingSvc := thinking.NewService(thinkingRepo, commentRepo)
-	return handler.NewThinkingHandler(thinkingSvc)
+	userRepo := persistence.NewIdentityRepository(deps.DB)
+	return handler.NewThinkingHandler(thinkingSvc, userRepo)
 }

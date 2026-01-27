@@ -12,3 +12,8 @@ CREATE TABLE IF NOT EXISTS thinking_metrics
     comments   INTEGER NOT NULL DEFAULT 0,
     updated_at TIMESTAMPTZ      DEFAULT now()
 );
+
+-- +goose Down
+DROP TABLE IF EXISTS thinking_metrics;
+ALTER TABLE thinking DROP COLUMN IF EXISTS comment_id;
+ALTER TABLE thinking DROP COLUMN IF EXISTS updated_at;

@@ -8,7 +8,7 @@ type Thinking struct {
 	ID        int64           `gorm:"column:id;primaryKey;autoIncrement"`
 	CommentID int64           `gorm:"column:comment_id;not null"`
 	Content   string          `gorm:"column:content;type:text;not null"`
-	Author    string          `gorm:"column:author;size:45;not null;default:'原创'"`
+	AuthorID  int64           `gorm:"column:author_id"`
 	CreatedAt time.Time       `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time       `gorm:"column:updated_at;autoUpdateTime"`
 	Metrics   ThinkingMetrics `gorm:"foreignKey:ThinkingID;references:ID"`

@@ -67,7 +67,7 @@ func (r *ThinkingRepository) Create(ctx context.Context, t *thinking.Thinking) e
 			return err
 		}
 
-		areaID, err := createCommentArea(tx, contentutil.CommentAreaTypeThinking, "回响", strconv.FormatInt(m.ID, 10), m.ID)
+		areaID, err := createCommentArea(tx, contentutil.CommentAreaTypeThinking, "思考", strconv.FormatInt(m.ID, 10), m.ID)
 		if err != nil {
 			return err
 		}
@@ -104,12 +104,20 @@ func (r *ThinkingRepository) Update(ctx context.Context, t *thinking.Thinking) e
 		Where("id = ?", t.ID).
 		Updates(map[string]interface{}{
 			"content": t.Content,
-			"author":  t.Author,
 		}).Error
 }
 
 func (r *ThinkingRepository) Delete(ctx context.Context, id int64) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var rec model.Thinking
+		if err := tx.Select("id", "comment_id").Where("id = ?", id).First(&rec).Error; err != nil {
+			return err
+		}
+		if rec.CommentID != 0 {
+			if err := deleteCommentArea(tx, rec.CommentID); err != nil {
+				return err
+			}
+		}
 		if err := tx.Delete(&model.ThinkingMetrics{}, "thinking_id = ?", id).Error; err != nil {
 			return err
 		}
@@ -155,7 +163,7 @@ func mapModelToThinking(m *model.Thinking) *thinking.Thinking {
 		ID:        m.ID,
 		CommentID: m.CommentID,
 		Content:   m.Content,
-		Author:    m.Author,
+		AuthorID:  m.AuthorID,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 		Metrics: thinking.ThinkingMetrics{
@@ -173,6 +181,6 @@ func mapThinkingToModel(t *thinking.Thinking) model.Thinking {
 		ID:        t.ID,
 		CommentID: t.CommentID,
 		Content:   t.Content,
-		Author:    t.Author,
+		AuthorID:  t.AuthorID,
 	}
 }

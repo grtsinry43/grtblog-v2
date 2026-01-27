@@ -1,8 +1,8 @@
 package thinking
 
 type CreateThinkingCmd struct {
-	Content string
-	Author  string
+	Content  string
+	AuthorID int64
 }
 
 type UpdateThinkingCmd struct {

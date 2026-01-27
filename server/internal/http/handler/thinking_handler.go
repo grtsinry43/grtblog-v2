@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
@@ -8,21 +9,26 @@ import (
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/middleware"
 
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/thinking"
+	"github.com/grtsinry43/grtblog-v2/server/internal/domain/identity"
 	domainthinking "github.com/grtsinry43/grtblog-v2/server/internal/domain/thinking"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/contract"
 	"github.com/grtsinry43/grtblog-v2/server/internal/http/response"
 )
 
 type ThinkingHandler struct {
-	svc *thinking.Service
+	svc      *thinking.Service
+	userRepo identity.Repository
 }
 
-func NewThinkingHandler(svc *thinking.Service) *ThinkingHandler {
-	return &ThinkingHandler{svc: svc}
+func NewThinkingHandler(svc *thinking.Service, userRepo identity.Repository) *ThinkingHandler {
+	return &ThinkingHandler{
+		svc:      svc,
+		userRepo: userRepo,
+	}
 }
 
 // CreateThinking godoc
-// @Summary 发布回响
+// @Summary 发布思考
 // @Tags Thinking
 // @Accept json
 // @Produce json
@@ -41,14 +47,9 @@ func (h *ThinkingHandler) CreateThinking(c *fiber.Ctx) error {
 		return response.NewBizErrorWithCause(response.ParamsError, "请求体解析失败", err)
 	}
 
-	author := req.Author
-	if author == "" {
-		author = "Admin"
-	}
-
 	created, err := h.svc.Create(c.Context(), thinking.CreateThinkingCmd{
-		Content: req.Content,
-		Author:  author,
+		Content:  req.Content,
+		AuthorID: claims.UserID,
 	})
 	if err != nil {
 		return h.mapError(c, err)
@@ -56,26 +57,36 @@ func (h *ThinkingHandler) CreateThinking(c *fiber.Ctx) error {
 
 	Audit(c, "thinking.create", map[string]any{
 		"thinkingId":     created.ID,
-		"thinkingAuthor": created.Author,
+		"thinkingAuthor": created.AuthorID,
 		"userId":         claims.UserID,
 	})
 
-	return response.Success(c, toThinkingResp(created))
+	resp, err := h.toThinkingResp(c.Context(), created)
+	if err != nil {
+		return err
+	}
+	return response.Success(c, resp)
 }
 
 // UpdateThinking godoc
-// @Summary 更新回响
+// @Summary 更新思考
 // @Tags Thinking
 // @Accept json
 // @Produce json
+// @Param id path int true "思考ID"
 // @Param request body contract.UpdateThinkingReq true "更新参数"
 // @Success 200
 // @Security JWTAuth
-// @Router /thinkings [put]
+// @Router /thinkings/{id} [put]
 func (h *ThinkingHandler) UpdateThinking(c *fiber.Ctx) error {
 	claims, ok := middleware.GetClaims(c)
 	if !ok {
 		return response.ErrorFromBiz[any](c, response.NotLogin)
+	}
+
+	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	if err != nil {
+		return response.NewBizErrorWithMsg(response.ParamsError, "无效的思考ID")
 	}
 
 	var req contract.UpdateThinkingReq
@@ -84,7 +95,7 @@ func (h *ThinkingHandler) UpdateThinking(c *fiber.Ctx) error {
 	}
 
 	_, err := h.svc.Update(c.Context(), thinking.UpdateThinkingCmd{
-		ID:      req.ID,
+		ID:      id,
 		Content: req.Content,
 	})
 	if err != nil {
@@ -92,15 +103,15 @@ func (h *ThinkingHandler) UpdateThinking(c *fiber.Ctx) error {
 	}
 
 	Audit(c, "thinking.update", map[string]any{
-		"thinkingId": req.ID,
+		"thinkingId": id,
 		"userId":     claims.UserID,
 	})
 
-	return response.SuccessWithMessage[any](c, nil, "更新回响成功")
+	return response.SuccessWithMessage[any](c, nil, "更新思考成功")
 }
 
 // ListThinkings godoc
-// @Summary 获取回响列表
+// @Summary 获取思考列表
 // @Tags Thinking
 // @Param page query int false "页码"
 // @Param pageSize query int false "页大小"
@@ -127,7 +138,11 @@ func (h *ThinkingHandler) ListThinkings(c *fiber.Ctx) error {
 
 	resItems := make([]*contract.ThinkingResp, len(items))
 	for i, item := range items {
-		resItems[i] = toThinkingResp(item)
+		resp, err := h.toThinkingResp(c.Context(), item)
+		if err != nil {
+			return err
+		}
+		resItems[i] = resp
 	}
 
 	return response.Success(c, contract.ListThinkingResp{
@@ -137,9 +152,9 @@ func (h *ThinkingHandler) ListThinkings(c *fiber.Ctx) error {
 }
 
 // DeleteThinking godoc
-// @Summary 删除回响
+// @Summary 删除思考
 // @Tags Thinking
-// @Param id path int true "回响ID"
+// @Param id path int true "思考ID"
 // @Success 200
 // @Security JWTAuth
 // @Router /thinkings/{id} [delete]
@@ -163,13 +178,13 @@ func (h *ThinkingHandler) DeleteThinking(c *fiber.Ctx) error {
 		"userId":     claims.UserID,
 	})
 
-	return response.SuccessWithMessage[any](c, nil, "回响删除成功")
+	return response.SuccessWithMessage[any](c, nil, "思考删除成功")
 }
 
 func (h *ThinkingHandler) mapError(c *fiber.Ctx, err error) error {
 	switch {
 	case errors.Is(err, domainthinking.ErrThinkingNotFound):
-		return response.NewBizErrorWithMsg(response.NotFound, "回响不存在")
+		return response.NewBizErrorWithMsg(response.NotFound, "思考不存在")
 	case errors.Is(err, domainthinking.ErrThinkingContentEmpty):
 		return response.NewBizErrorWithMsg(response.ParamsError, "内容不能为空")
 	default:
@@ -177,12 +192,12 @@ func (h *ThinkingHandler) mapError(c *fiber.Ctx, err error) error {
 	}
 }
 
-func toThinkingResp(t *domainthinking.Thinking) *contract.ThinkingResp {
-	return &contract.ThinkingResp{
+func (h *ThinkingHandler) toThinkingResp(ctx context.Context, t *domainthinking.Thinking) (*contract.ThinkingResp, error) {
+	resp := &contract.ThinkingResp{
 		ID:        t.ID,
 		CommentID: t.CommentID,
 		Content:   t.Content,
-		Author:    t.Author,
+		AuthorID:  t.AuthorID,
 		Metrics: contract.ThinkingMetrics{
 			Views:    t.Metrics.Views,
 			Likes:    t.Metrics.Likes,
@@ -191,4 +206,16 @@ func toThinkingResp(t *domainthinking.Thinking) *contract.ThinkingResp {
 		CreatedAt: t.CreatedAt,
 		UpdatedAt: t.UpdatedAt,
 	}
+	if h.userRepo != nil {
+		user, err := h.userRepo.FindByID(ctx, t.AuthorID)
+		if err != nil {
+			if !errors.Is(err, identity.ErrUserNotFound) {
+				return nil, err
+			}
+		} else if user != nil {
+			resp.AuthorName = user.Nickname
+			resp.Avatar = user.Avatar
+		}
+	}
+	return resp, nil
 }

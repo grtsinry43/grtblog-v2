@@ -23,14 +23,10 @@ func (s *Service) Create(ctx context.Context, cmd CreateThinkingCmd) (*domainthi
 	if cmd.Content == "" {
 		return nil, domainthinking.ErrThinkingContentEmpty
 	}
-	author := cmd.Author
-	if author == "" {
-		author = "Admin"
-	}
 
 	t := &domainthinking.Thinking{
-		Content: cmd.Content,
-		Author:  author,
+		Content:  cmd.Content,
+		AuthorID: cmd.AuthorID,
 	}
 	if err := s.repo.Create(ctx, t); err != nil {
 		return nil, err
@@ -40,6 +36,9 @@ func (s *Service) Create(ctx context.Context, cmd CreateThinkingCmd) (*domainthi
 }
 
 func (s *Service) Update(ctx context.Context, cmd UpdateThinkingCmd) (*domainthinking.Thinking, error) {
+	if cmd.Content == "" {
+		return nil, domainthinking.ErrThinkingContentEmpty
+	}
 	t, err := s.repo.FindByID(ctx, cmd.ID)
 	if err != nil {
 		return nil, err
