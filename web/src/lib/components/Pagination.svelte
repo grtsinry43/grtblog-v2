@@ -14,16 +14,24 @@
 	const pages = $derived(Array.from({ length: total }, (_, i) => i + 1));
 </script>
 
+{#snippet prevContent()}
+	<ArrowLeft size={12} class="mr-1.5" />
+	上一页
+{/snippet}
+
+{#snippet nextContent()}
+	下一页
+	<ArrowRight size={12} class="ml-1.5" />
+{/snippet}
+
 <nav class="pagination {className}">
 	<Button
 		variant="ghost"
 		disabled={current <= 1}
 		onclick={() => onPageChange(current - 1)}
 		class="nav-btn"
-	>
-		<ArrowLeft size={12} class="mr-1.5" />
-		上一页
-	</Button>
+		content={prevContent}
+	/>
 
 	<div class="page-numbers">
 		{#each pages as page}
@@ -32,9 +40,12 @@
 					{page}
 				</span>
 			{:else if page === 1 || page === total || (page >= current - 1 && page <= current + 1)}
-				<Button variant="ghost" onclick={() => onPageChange(page)} class="page-num-btn">
-					{page}
-				</Button>
+				<Button
+					variant="ghost"
+					onclick={() => onPageChange(page)}
+					class="page-num-btn"
+					content={() => page}
+				/>
 			{:else if (page === current - 2 && page > 1) || (page === current + 2 && page < total)}
 				<span class="ellipsis">...</span>
 			{/if}
@@ -46,10 +57,8 @@
 		disabled={current >= total}
 		onclick={() => onPageChange(current + 1)}
 		class="nav-btn"
-	>
-		下一页
-		<ArrowRight size={12} class="ml-1.5" />
-	</Button>
+		content={nextContent}
+	/>
 </nav>
 
 <style>

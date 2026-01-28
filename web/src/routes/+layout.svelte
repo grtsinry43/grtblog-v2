@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import Sidebar from '$lib/ui/sidebar/Sidebar.svelte';
+	import Sidebar from '$lib/components/sidebar/Sidebar.svelte';
 	import { brand } from '$lib/shared/brand';
 	import { themeManager } from '$lib/shared/theme.svelte';
 	import { onMount } from 'svelte';
@@ -65,6 +65,7 @@
 </svelte:head>
 
 <Sidebar menuTree={data.navMenus ?? []} />
+<div class="bg-noise" aria-hidden="true"></div>
 
 <main class="page-wrapper">
 	<div class="content-container">

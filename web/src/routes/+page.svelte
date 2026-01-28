@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Search, Sparkles, ArrowRight } from 'lucide-svelte';
-	import Card from '$lib/ui/Card.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Input from '$lib/ui/Input.svelte';
-	import Badge from '$lib/ui/Badge.svelte';
-	import Tag from '$lib/ui/Tag.svelte';
-	import Divider from '$lib/ui/Divider.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/ui/button/Button.svelte';
+	import Input from '$lib/components/Input.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import Tag from '$lib/components/Tag.svelte';
+	import Divider from '$lib/components/Divider.svelte';
 
 	// Mock Data for Preview
 	const featuredPost = {
@@ -36,6 +36,19 @@
 </script>
 
 <div class="homepage-container">
+	{#snippet heroButtonContent()}
+		34324234
+	{/snippet}
+
+	{#snippet readMoreContent()}
+		阅读全文
+		<ArrowRight size={14} class="ml-1.5 transition-transform group-hover:translate-x-1" />
+	{/snippet}
+
+	{#snippet viewAllContent()}
+		查看全部
+	{/snippet}
+
 	<!-- Hero Section -->
 	<section class="hero-section">
 		<div class="hero-content">
@@ -43,6 +56,8 @@
 				<Sparkles size={10} />
 				匠心营造
 			</Badge>
+
+			<Button content={heroButtonContent} />
 
 			<h1 class="hero-title">
 				秩序与<br />
@@ -86,12 +101,7 @@
 					</p>
 
 					<div class="featured-actions">
-						<Button variant="ghost" class="text-link">
-							阅读全文 <ArrowRight
-								size={14}
-								class="ml-1.5 transition-transform group-hover:translate-x-1"
-							/>
-						</Button>
+						<Button variant="ghost" class="text-link" content={readMoreContent} />
 					</div>
 				</div>
 			</div>
@@ -102,7 +112,7 @@
 	<section class="posts-section">
 		<div class="section-header">
 			<Tag variant="ink">近期文章</Tag>
-			<Button variant="ghost" class="view-all-btn">查看全部</Button>
+			<Button variant="ghost" class="view-all-btn" content={viewAllContent} />
 		</div>
 
 		<div class="posts-list">

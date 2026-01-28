@@ -5,10 +5,10 @@
 	import type { TOCNode } from '$lib/features/post/types';
 	import { mountMarkdownComponents } from '$lib/shared/markdown/components';
 	import { Calendar, Clock, Share2, ArrowLeft } from 'lucide-svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Badge from '$lib/ui/Badge.svelte';
-	import Tag from '$lib/ui/Tag.svelte';
-	import Divider from '$lib/ui/Divider.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Badge from '$lib/components/Badge.svelte';
+	import Tag from '$lib/components/Tag.svelte';
+	import Divider from '$lib/components/Divider.svelte';
 	import '$lib/shared/markdown/components/register';
 
 	let { post, updated = false } = $props<{ post: PostDetail | null; updated?: boolean }>();
@@ -88,14 +88,29 @@
 </script>
 
 {#if post}
+	{#snippet backContent()}
+		<ArrowLeft size={14} class="group-hover:-translate-x-1 transition-transform" />
+		<span>返回</span>
+	{/snippet}
+
+	{#snippet shareContent()}
+		<Share2 size={14} />
+	{/snippet}
+
+	{#snippet topContent()}
+		返回顶部
+	{/snippet}
+
 	<article class="article-container">
 		<!-- Header -->
 		<header class="article-header">
 			<div class="back-nav">
-				<Button variant="ghost" class="back-btn group" onclick={() => history.back()}>
-					<ArrowLeft size={14} class="group-hover:-translate-x-1 transition-transform" />
-					<span>返回</span>
-				</Button>
+				<Button
+					variant="ghost"
+					class="back-btn group"
+					onclick={() => history.back()}
+					content={backContent}
+				/>
 				<div class="nav-divider"></div>
 			</div>
 
@@ -135,17 +150,14 @@
 				<footer class="article-footer">
 					<div class="share-row">
 						<span class="share-label">分享此文</span>
-						<Button variant="ghost" class="share-btn" title="分享">
-							<Share2 size={14} />
-						</Button>
+						<Button variant="ghost" class="share-btn" title="分享" content={shareContent} />
 					</div>
 					<Button
 						variant="ghost"
 						class="top-btn"
 						onclick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-					>
-						返回顶部
-					</Button>
+						content={topContent}
+					/>
 				</footer>
 			</main>
 

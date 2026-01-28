@@ -39,3 +39,6 @@ design-system/
 .cursor/
 .gemini/
 
+
+*storybook.log
+storybook-static

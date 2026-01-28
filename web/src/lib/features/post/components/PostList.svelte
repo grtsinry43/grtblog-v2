@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PostSummary } from '$lib/features/post/types';
-	import Card from '$lib/ui/Card.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
-	import Tag from '$lib/ui/Tag.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
+	import Tag from '$lib/components/Tag.svelte';
 	import { ArrowRight, FileText } from 'lucide-svelte';
 
 	type PaginationData = {
