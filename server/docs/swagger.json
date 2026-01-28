@@ -493,6 +493,182 @@
                 }
             }
         },
+        "/admin/nav-menus": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "获取导航菜单（管理端）",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.NavMenuListRespEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "创建导航菜单",
+                "parameters": [
+                    {
+                        "description": "导航菜单",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.CreateNavMenuReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.NavMenuDetailRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/nav-menus/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "更新导航菜单排序",
+                "parameters": [
+                    {
+                        "description": "排序信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.ReorderNavMenuReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.GenericMessageEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/nav-menus/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "更新导航菜单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "导航菜单",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contract.UpdateNavMenuReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.NavMenuDetailRespEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "删除导航菜单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.GenericMessageEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/oauth-providers": {
             "get": {
                 "security": [
@@ -2517,6 +2693,25 @@
                 }
             }
         },
+        "/public/nav-menus": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NavMenu"
+                ],
+                "summary": "公开获取导航菜单",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/contract.NavMenuListRespEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/public/website-info": {
             "get": {
                 "produces": [
@@ -3666,6 +3861,23 @@
                 }
             }
         },
+        "contract.CreateNavMenuReq": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.CreatePageReq": {
             "type": "object",
             "required": [
@@ -4398,6 +4610,98 @@
                 }
             }
         },
+        "contract.NavMenuDetailRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/contract.NavMenuResp"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.NavMenuListRespEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.NavMenuResp"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "contract.NavMenuOrderItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                }
+            }
+        },
+        "contract.NavMenuResp": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.NavMenuResp"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "contract.OAuthCallbackReq": {
             "type": "object",
             "properties": {
@@ -4600,6 +4904,17 @@
                 },
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "contract.ReorderNavMenuReq": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/contract.NavMenuOrderItem"
+                    }
                 }
             }
         },
@@ -4906,6 +5221,26 @@
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "contract.UpdateNavMenuReq": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

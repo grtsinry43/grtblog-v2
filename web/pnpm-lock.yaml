@@ -23,6 +23,9 @@ importers:
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
+      svatoms:
+        specifier: ^0.1.0
+        version: 0.1.0(svelte@5.45.6)
     devDependencies:
       '@chromatic-com/storybook':
         specifier: ^5.0.0
@@ -2019,6 +2022,11 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  svatoms@0.1.0:
+    resolution: {integrity: sha512-5WnPqXw3JD+ksv4Uc0RB8XPyClETucoGY+VR3jU832NpIeh0HTUm6N+teS7AMM601TC1ULFTTpPETGsRJoY9xQ==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte-ast-print@0.4.2:
     resolution: {integrity: sha512-hRHHufbJoArFmDYQKCpCvc0xUuIEfwYksvyLYEQyH+1xb5LD5sM/IthfooCdXZQtOIqXz6xm7NmaqdfwG4kh6w==}
@@ -4048,6 +4056,10 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  svatoms@0.1.0(svelte@5.45.6):
+    dependencies:
+      svelte: 5.45.6
 
   svelte-ast-print@0.4.2(svelte@5.45.6):
     dependencies:

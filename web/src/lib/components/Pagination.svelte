@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from './Button.svelte';
+	import Button from './ui/button/Button.svelte';
 	import { ArrowLeft, ArrowRight } from 'lucide-svelte';
 
 	interface Props {

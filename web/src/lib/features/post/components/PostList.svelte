@@ -4,6 +4,7 @@
 	import Pagination from '$lib/components/Pagination.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import { ArrowRight, FileText } from 'lucide-svelte';
+	import { postContext } from '$routes/posts/post-context';
 
 	type PaginationData = {
 		total: number;
@@ -11,7 +12,27 @@
 		size: number;
 	};
 
-	let { posts, pagination } = $props<{ posts: PostSummary[]; pagination: PaginationData }>();
+	console.log(postContext.getModelData())
+	// selectModelData returns a store; use $ to log the value
+	const postsStore = postContext.selectModelData((state) => state?.posts ?? [])
+	const totalStore = postContext.selectModelData((state) => state?.pagination?.total ?? 0)
+	const pageStore = postContext.selectModelData((state) => state?.pagination?.page ?? 1)
+	const sizeStore = postContext.selectModelData((state) => state?.pagination?.size ?? 10)
+	$effect(() => {
+		console.log('posts:', $postsStore)
+	})
+
+	// const title = postContext.selectModelData((p) => p?.title ?? '')
+	let posts = postsStore
+	let total = totalStore
+	let page = pageStore
+	let size = sizeStore
+
+	const pagination: PaginationData = $derived({
+		total: $total,
+		page: $page,
+		size: $size
+	});
 
 	let totalPages = $derived(
 		pagination.size > 0 ? Math.max(1, Math.ceil(pagination.total / pagination.size)) : 1
@@ -34,9 +55,9 @@
 		<p class="archive-desc">按时间顺序排布的思考、笔记与技术沉淀。</p>
 	</header>
 
-	{#if posts && posts.length > 0}
+	{#if $posts && $posts.length > 0}
 		<div class="archive-list">
-			{#each posts as post}
+			{#each $posts as post}
 				<a href="/posts/{post.shortUrl}" class="archive-link group">
 					<Card variant="seamless" hover={true} class="archive-card">
 						<div class="archive-content">

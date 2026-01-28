@@ -10,7 +10,8 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			$shared: '../shared'
+			$shared: '../shared',
+			$routes: './src/routes',
 		}
 	},
 	extensions: ['.svelte', '.svx']

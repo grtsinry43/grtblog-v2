@@ -5,7 +5,7 @@
 	import type { TOCNode } from '$lib/features/post/types';
 	import { mountMarkdownComponents } from '$lib/shared/markdown/components';
 	import { Calendar, Clock, Share2, ArrowLeft } from 'lucide-svelte';
-	import Button from '$lib/components/Button.svelte';
+	import Button from '$lib/components/ui/button/Button.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import Divider from '$lib/components/Divider.svelte';

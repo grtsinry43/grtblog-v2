@@ -1,35 +1,52 @@
 import { browser } from '$app/environment';
 
 export type Theme = 'light' | 'dark' | 'system';
+export type ResolvedTheme = 'light' | 'dark';
 
 class ThemeManager {
-    current = $state<Theme>('system');
+	current = $state<Theme>('system');
 
-    constructor() {
-        if (browser) {
-            const saved = localStorage.getItem('theme') as Theme;
-            if (saved) {
-                this.current = saved;
-            }
-        }
-
-        $effect.root(() => {
-            $effect(() => {
-                if (!browser) return;
-
-                const isDark =
-                    this.current === 'dark' ||
-                    (this.current === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-                document.documentElement.classList.toggle('dark', isDark);
-                localStorage.setItem('theme', this.current);
-            });
-        });
-    }
-
-    set(theme: Theme) {
-        this.current = theme;
-    }
+	set(theme: Theme) {
+		this.current = theme;
+	}
 }
 
 export const themeManager = new ThemeManager();
+
+export const resolveTheme = (theme: Theme): ResolvedTheme => {
+	if (!browser || theme !== 'system') {
+		return theme === 'dark' ? 'dark' : 'light';
+	}
+
+	return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+export const initTheme = (manager: ThemeManager): void => {
+	if (!browser) return;
+
+	const saved = localStorage.getItem('theme') as Theme | null;
+	if (saved === 'light' || saved === 'dark' || saved === 'system') {
+		manager.set(saved);
+	}
+};
+
+export const startThemeSync = (manager: ThemeManager): void => {
+	$effect(() => {
+		if (!browser) return;
+
+		const media = window.matchMedia('(prefers-color-scheme: dark)');
+		const apply = () => {
+			const resolved = resolveTheme(manager.current);
+			document.documentElement.classList.toggle('dark', resolved === 'dark');
+			localStorage.setItem('theme', manager.current);
+		};
+
+		apply();
+
+		if (manager.current !== 'system') return;
+
+		const onChange = () => apply();
+		media.addEventListener('change', onChange);
+		return () => media.removeEventListener('change', onChange);
+	});
+};

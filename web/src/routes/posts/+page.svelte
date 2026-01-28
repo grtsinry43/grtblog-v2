@@ -1,7 +1,16 @@
 <script lang="ts">
 	import { PostList } from '$lib/features/post';
+    import {postContext} from "$routes/posts/post-context";
 
-	let { data } = $props();
+    let { data } = $props();
+
+    console.log('PostList Page Data:', data);
+
+    const postStore = postContext.mountModelData(data);
+
+    $effect(() => {
+        postContext.syncModelData(postStore, data);
+    });
 </script>
 
-<PostList posts={data.posts ?? []} pagination={data.pagination} />
+<PostList />

@@ -19,6 +19,12 @@ func NewNavMenuHandler(svc *appnav.Service) *NavMenuHandler {
 	return &NavMenuHandler{svc: svc}
 }
 
+// ListPublic godoc
+// @Summary 公开获取导航菜单
+// @Tags NavMenu
+// @Produce json
+// @Success 200 {object} contract.NavMenuListRespEnvelope
+// @Router /public/nav-menus [get]
 func (h *NavMenuHandler) ListPublic(c *fiber.Ctx) error {
 	items, err := h.svc.List(c.Context())
 	if err != nil {
@@ -28,6 +34,13 @@ func (h *NavMenuHandler) ListPublic(c *fiber.Ctx) error {
 	return response.Success(c, buildNavMenuTree(items))
 }
 
+// ListAdmin godoc
+// @Summary 获取导航菜单（管理端）
+// @Tags NavMenu
+// @Produce json
+// @Success 200 {object} contract.NavMenuListRespEnvelope
+// @Security BearerAuth
+// @Router /admin/nav-menus [get]
 func (h *NavMenuHandler) ListAdmin(c *fiber.Ctx) error {
 	items, err := h.svc.List(c.Context())
 	if err != nil {
@@ -37,6 +50,15 @@ func (h *NavMenuHandler) ListAdmin(c *fiber.Ctx) error {
 	return response.Success(c, buildNavMenuTree(items))
 }
 
+// Create godoc
+// @Summary 创建导航菜单
+// @Tags NavMenu
+// @Accept json
+// @Produce json
+// @Param request body contract.CreateNavMenuReq true "导航菜单"
+// @Success 200 {object} contract.NavMenuDetailRespEnvelope
+// @Security BearerAuth
+// @Router /admin/nav-menus [post]
 func (h *NavMenuHandler) Create(c *fiber.Ctx) error {
 	var req contract.CreateNavMenuReq
 	if err := c.BodyParser(&req); err != nil {
@@ -65,6 +87,16 @@ func (h *NavMenuHandler) Create(c *fiber.Ctx) error {
 	return response.SuccessWithMessage[contract.NavMenuResp](c, toNavMenuResp(created), "菜单创建成功")
 }
 
+// Update godoc
+// @Summary 更新导航菜单
+// @Tags NavMenu
+// @Accept json
+// @Produce json
+// @Param id path int64 true "菜单ID"
+// @Param request body contract.UpdateNavMenuReq true "导航菜单"
+// @Success 200 {object} contract.NavMenuDetailRespEnvelope
+// @Security BearerAuth
+// @Router /admin/nav-menus/{id} [put]
 func (h *NavMenuHandler) Update(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
@@ -100,6 +132,14 @@ func (h *NavMenuHandler) Update(c *fiber.Ctx) error {
 	return response.SuccessWithMessage[contract.NavMenuResp](c, toNavMenuResp(updated), "菜单更新成功")
 }
 
+// Delete godoc
+// @Summary 删除导航菜单
+// @Tags NavMenu
+// @Produce json
+// @Param id path int64 true "菜单ID"
+// @Success 200 {object} contract.GenericMessageEnvelope
+// @Security BearerAuth
+// @Router /admin/nav-menus/{id} [delete]
 func (h *NavMenuHandler) Delete(c *fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
@@ -113,6 +153,15 @@ func (h *NavMenuHandler) Delete(c *fiber.Ctx) error {
 	return response.SuccessWithMessage[any](c, nil, "菜单已删除")
 }
 
+// Reorder godoc
+// @Summary 更新导航菜单排序
+// @Tags NavMenu
+// @Accept json
+// @Produce json
+// @Param request body contract.ReorderNavMenuReq true "排序信息"
+// @Success 200 {object} contract.GenericMessageEnvelope
+// @Security BearerAuth
+// @Router /admin/nav-menus/reorder [put]
 func (h *NavMenuHandler) Reorder(c *fiber.Ctx) error {
 	var req contract.ReorderNavMenuReq
 	if err := c.BodyParser(&req); err != nil {
