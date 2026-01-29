@@ -5,30 +5,37 @@
 	import type { PostContentPayload, PostDetail as PostDetailModel } from '$lib/features/post/types';
 	import { browser } from '$app/environment';
     import {SvelteURL} from "svelte/reactivity";
+	import { postDetailCtx } from './post-detail-context.js';
 
 	let { data } = $props();
-	const postStore = writable<PostDetailModel | null>(data.post ?? null);
 	let socket: WebSocket | null = null;
-	let showUpdateHint = $state(false);
 	let updateHintTimer: ReturnType<typeof setTimeout> | null = null;
 
+	const postDetailStore = postDetailCtx.mountModelData(data.post ?? null);
+	const { updateModelData } = postDetailCtx.useModelActions();
+	const postIdStore = postDetailCtx.selectModelData((data) => data?.id ?? null);
+	const contentHashStore = postDetailCtx.selectModelData((data) => data?.contentHash ?? null);
+
+	const showUpdateHint = writable(false);
+
 	$effect(() => {
-		postStore.set(data.post ?? null);
+		postDetailCtx.syncModelData(postDetailStore, data.post ?? null);
 	});
 
 	const refreshPostIfNeeded = async () => {
-		const current = get(postStore);
-		if (!current?.id || !current.contentHash) {
+		const id = get(postIdStore);
+		const contentHash = get(contentHashStore);
+		if (!id || !contentHash) {
 			return;
 		}
 
 		try {
-			const latest = await checkPostLatest(undefined, current.id, current.contentHash);
+			const latest = await checkPostLatest(undefined, id, contentHash);
 			if (!latest || latest.latest) {
 				return;
 			}
 
-			postStore.update((prev) => {
+			updateModelData((prev) => {
 				if (!prev) {
 					return prev;
 				}
@@ -49,18 +56,18 @@
 	};
 
 	const triggerUpdateHint = () => {
-		showUpdateHint = true;
+		showUpdateHint.set(true);
 		if (updateHintTimer) {
 			clearTimeout(updateHintTimer);
 		}
 		updateHintTimer = setTimeout(() => {
-			showUpdateHint = false;
+			showUpdateHint.set(false);
 			updateHintTimer = null;
 		}, 2400);
 	};
 
-	const connectToPostUpdates = (postId: number) => {
-		if (!browser) {
+	const connectToPostUpdates = (postId: number | null) => {
+		if (!browser || postId === null) {
 			return;
 		}
 
@@ -77,7 +84,7 @@
 				if (!payload?.contentHash) {
 					return;
 				}
-				postStore.update((prev) => {
+				updateModelData((prev) => {
 					if (!prev) {
 						return prev;
 					}
@@ -101,11 +108,11 @@
 		if (!browser) {
 			return;
 		}
-		const current = data.post;
-		if (!current?.id) {
+		const postId = get(postIdStore);
+		if (!postId) {
 			return;
 		}
-		connectToPostUpdates(current.id);
+		connectToPostUpdates(postId);
 		return () => {
 			socket?.close();
 			socket = null;
@@ -120,7 +127,7 @@
 		if (!browser) {
 			return;
 		}
-		const postId = data.post?.id;
+		const postId = get(postIdStore);
 		if (!postId) {
 			return;
 		}
@@ -128,4 +135,4 @@
 	});
 </script>
 
-<PostDetail post={$postStore} updated={showUpdateHint} />
+<PostDetail updated={showUpdateHint} />

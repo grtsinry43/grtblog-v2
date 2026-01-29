@@ -4,8 +4,6 @@
 
     let { data } = $props();
 
-    console.log('PostList Page Data:', data);
-
     const postStore = postContext.mountModelData(data);
 
     $effect(() => {

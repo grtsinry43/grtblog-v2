@@ -10,8 +10,12 @@
 	import Tag from '$lib/components/Tag.svelte';
 	import Divider from '$lib/components/Divider.svelte';
 	import '$lib/shared/markdown/components/register';
+	import { postDetailCtx } from '$routes/posts/[id]/post-detail-context';
+	import QueryRoot from '$lib/shared/query/QueryRoot.svelte';
+	import PostMetricsClient from '$lib/features/post/components/PostMetricsClient.svelte';
 
-	let { post, updated = false } = $props<{ post: PostDetail | null; updated?: boolean }>();
+	const postStore = postDetailCtx.selectModelData((data) => data as PostDetail | null);
+	let { updated = false } = $props<{ updated?: boolean }>();
 	let contentRoot: HTMLElement | null = $state(null);
 	let activeAnchor = $state<string | null>(null);
 	let observer: IntersectionObserver | null = null;
@@ -30,7 +34,9 @@
 		return anchors;
 	};
 
-	let contentHtml = $derived(post ? renderMarkdown(post.content ?? '', flattenTOC(post.toc)) : '');
+	let contentHtml = $derived(
+		$postStore ? renderMarkdown($postStore.content ?? '', flattenTOC($postStore.toc)) : ''
+	);
 
 	const setupObserver = () => {
 		if (!contentRoot || typeof IntersectionObserver === 'undefined') return;
@@ -87,7 +93,7 @@
 	};
 </script>
 
-{#if post}
+{#if $postStore}
 	{#snippet backContent()}
 		<ArrowLeft size={14} class="group-hover:-translate-x-1 transition-transform" />
 		<span>返回</span>
@@ -120,19 +126,26 @@
 					<span class="meta-label">技术与设计</span>
 				</div>
 
-				<h1 class="article-title">{post.title}</h1>
+				<h1 class="article-title">{$postStore.title}</h1>
 
 				<div class="meta-info-row">
-					<span class="meta-item"><Calendar size={12} /> {formatDate(post.createdAt)}</span>
+					<span class="meta-item"><Calendar size={12} /> {formatDate($postStore.createdAt)}</span>
 					<span class="meta-item"><Clock size={12} /> 12 分钟阅读</span>
+					<span class="meta-item">
+						浏览 {$postStore.metrics?.views ?? 0} · 喜欢 {$postStore.metrics?.likes ?? 0} · 评论
+						{$postStore.metrics?.comments ?? 0}
+					</span>
 					{#if updated}
 						<Badge variant="soft" class="animate-pulse">内容已更新</Badge>
 					{/if}
+					<QueryRoot>
+						<PostMetricsClient />
+					</QueryRoot>
 				</div>
 			</div>
 
-			{#if post.leadIn}
-				<p class="lead-in">{post.leadIn}</p>
+			{#if $postStore.leadIn}
+				<p class="lead-in">{$postStore.leadIn}</p>
 			{/if}
 		</header>
 
@@ -162,13 +175,13 @@
 			</main>
 
 			<!-- Sidebar / TOC -->
-			{#if post.toc?.length}
+			{#if $postStore.toc?.length}
 				<aside class="desktop-sidebar">
 					<div class="sidebar-sticky">
 						<div class="toc-container">
 							<span class="toc-header">本页目录</span>
 							<ul class="toc-list">
-								{#each post.toc as item}
+								{#each $postStore.toc as item}
 									<li class="toc-item">
 										<a
 											class="toc-link {activeAnchor === item.anchor ? 'active' : ''}"
@@ -214,7 +227,7 @@
 	</div>
 {/if}
 
-<style>
+<style lang="postcss">
 	@reference "../../../../routes/layout.css";
 
 	.article-container {

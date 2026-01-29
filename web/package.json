@@ -57,6 +57,7 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
+		"@tanstack/svelte-query": "^6.0.18",
 		"bits-ui": "^2.15.4",
 		"lucide-svelte": "^0.562.0",
 		"markdown-it": "^14.1.0",

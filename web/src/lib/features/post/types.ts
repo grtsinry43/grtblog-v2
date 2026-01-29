@@ -25,6 +25,11 @@ export type PostDetail = {
 	shortUrl: string;
 	cover?: string | null;
 	isPublished: boolean;
+	metrics: {
+		views: number;
+		likes: number;
+		comments: number;
+	};
 	isTop: boolean;
 	isHot: boolean;
 	isOriginal: boolean;
