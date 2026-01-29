@@ -27,3 +27,11 @@
 		});
 	});
 </script>
+
+<span>
+	{#if metricsQuery.data}
+		<span class="text-sm text-gray-500 dark:text-gray-400">
+			阅读 {metricsQuery.data.views} · 喜欢 {metricsQuery.data.likes} · 评论 {metricsQuery.data.comments}
+		</span>
+	{/if}
+</span>

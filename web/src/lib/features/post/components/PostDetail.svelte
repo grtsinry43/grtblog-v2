@@ -12,7 +12,6 @@
 	import '$lib/shared/markdown/components/register';
 	import { postDetailCtx } from '$routes/posts/[id]/post-detail-context';
 	import QueryRoot from '$lib/shared/query/QueryRoot.svelte';
-	import PostMetricsClient from '$lib/features/post/components/PostMetricsClient.svelte';
 
 	const postStore = postDetailCtx.selectModelData((data) => data as PostDetail | null);
 	let { updated = false } = $props<{ updated?: boolean }>();
@@ -138,9 +137,13 @@
 					{#if updated}
 						<Badge variant="soft" class="animate-pulse">内容已更新</Badge>
 					{/if}
-					<QueryRoot>
-						<PostMetricsClient />
-					</QueryRoot>
+					{#snippet fallback()}
+						<span>加载中...</span>
+					{/snippet}
+					<QueryRoot
+						loader={() => import('$lib/features/post/components/PostMetricsClient.svelte')}
+						{fallback}
+					/>
 				</div>
 			</div>
 
