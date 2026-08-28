@@ -247,6 +247,7 @@ func Register(app *fiber.App, deps Dependencies) {
 	registerCommentAuthRoutes(v2, deps)
 	registerAdminRoutes(v2, deps, websiteInfoHandler, navMenuHandler, sysCfgSvc, wsManager, aiSvc)
 	registerBackupRoutes(v2, deps)
+	registerContentExportRoutes(v2, deps)
 	registerTaxonomyAdminRoutes(v2, deps)
 	registerWebhookAdminRoutes(v2, deps, webhookSvc)
 

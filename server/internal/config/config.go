@@ -16,6 +16,7 @@ type Config struct {
 	Redis     RedisConfig
 	GeoIP     GeoIPConfig
 	Backup    BackupConfig
+	Export    ExportConfig
 }
 
 // AppConfig contains Fiber specific settings.
@@ -86,6 +87,16 @@ type BackupConfig struct {
 	RestoreMaxExtractedBytes int64
 }
 
+// ExportConfig controls the built-in content export (markdown + bundled images archive).
+type ExportConfig struct {
+	RootDir          string
+	TicketTTL        time.Duration
+	JobTimeout       time.Duration
+	ExternalWorkers  int
+	ExternalTimeout  time.Duration
+	MaxExternalBytes int64
+}
+
 // Load builds a Config struct with sane defaults overridden by environment variables.
 func Load() Config {
 	return Config{
@@ -149,6 +160,14 @@ func Load() Config {
 			SchedulerPollInterval:    getEnvAsDuration("BACKUP_SCHEDULER_POLL_INTERVAL", 30*time.Second),
 			RestoreMaxArchiveBytes:   getEnvAsInt64("BACKUP_RESTORE_MAX_ARCHIVE_BYTES", 10<<30),
 			RestoreMaxExtractedBytes: getEnvAsInt64("BACKUP_RESTORE_MAX_EXTRACTED_BYTES", 50<<30),
+		},
+		Export: ExportConfig{
+			RootDir:          getEnv("EXPORT_ROOT_DIR", "storage/exports"),
+			TicketTTL:        getEnvAsDuration("EXPORT_DOWNLOAD_TICKET_TTL", 10*time.Minute),
+			JobTimeout:       getEnvAsDuration("EXPORT_JOB_TIMEOUT", 30*time.Minute),
+			ExternalWorkers:  int(getEnvAsInt64("EXPORT_EXTERNAL_WORKERS", 4)),
+			ExternalTimeout:  getEnvAsDuration("EXPORT_EXTERNAL_TIMEOUT", 15*time.Second),
+			MaxExternalBytes: getEnvAsInt64("EXPORT_MAX_EXTERNAL_BYTES", 25<<20),
 		},
 	}
 }
