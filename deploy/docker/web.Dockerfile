@@ -5,7 +5,7 @@ WORKDIR /app
 RUN corepack enable
 
 COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --frozen-lockfile
 
 COPY web/. .
 COPY shared /shared

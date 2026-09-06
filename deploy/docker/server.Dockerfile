@@ -5,7 +5,7 @@ WORKDIR /app
 RUN corepack enable
 
 COPY admin/package.json admin/pnpm-lock.yaml admin/pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --frozen-lockfile
 
 COPY admin/. ./
 COPY shared /shared
