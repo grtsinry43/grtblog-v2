@@ -53,6 +53,8 @@ const resolveBackfillPath = (pathname: string): string | null => {
 		candidate = candidate.replace(/\/+$/, '') || '/';
 	}
 	if (candidate.startsWith('/_app/') || candidate.startsWith('/api/')) return null;
+	// Discovery stays dynamic until its publication/withdrawal lifecycle joins ISR.
+	if (candidate === '/sitemap') return null;
 	// Paths with a file extension are assets (og-image.png, favicon, ...), not pages.
 	if (/\.[a-zA-Z0-9]+$/.test(candidate)) return null;
 	return candidate;

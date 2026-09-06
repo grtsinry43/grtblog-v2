@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 
+	appdiscovery "github.com/grtsinry43/grtblog-v2/server/internal/app/discovery"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/friendlink"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/friendtimeline"
 	"github.com/grtsinry43/grtblog-v2/server/internal/app/globalnotification"
@@ -21,6 +22,9 @@ import (
 
 func registerPublicRoutes(v2 fiber.Router, deps Dependencies, websiteInfoHandler *handler.WebsiteInfoHandler, htmlSnapshotSvc *htmlsnapshot.Service, navMenuHandler *handler.NavMenuHandler) {
 	public := v2.Group("/public")
+	discoveryHandler := handler.NewDiscoveryHandler(appdiscovery.NewService(persistence.NewDiscoveryRepository(deps.DB), deps.SysConfig))
+	public.Get("/discovery/catalog", discoveryHandler.Catalog)
+	public.Get("/discovery/resource/*", discoveryHandler.Resource)
 	ownerStatusHandler := handler.NewOwnerStatusHandler(deps.OwnerStatus)
 	public.Get("/owner-status", ownerStatusHandler.GetStatus)
 	v2.Get("/onlineStatus", ownerStatusHandler.GetStatus)

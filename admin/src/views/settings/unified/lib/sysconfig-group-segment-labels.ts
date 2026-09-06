@@ -7,6 +7,7 @@ const SEGMENT_LABELS: Readonly<Record<string, string>> = {
   ai: 'AI',
   base: '基础',
   comment: '评论',
+  discovery: '搜索与 AI 阅读',
   email: '邮件',
   federation: '联合',
   friendlink: '友链',

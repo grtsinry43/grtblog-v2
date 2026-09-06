@@ -7,6 +7,8 @@ export type ResolvedSeoMeta = {
 	description: string;
 	keywords: string;
 	canonicalUrl: string;
+	llmsUrl: string;
+	markdownUrl: string | null;
 	ogSiteName: string;
 	ogTitle: string;
 	ogDescription: string;
@@ -174,6 +176,8 @@ export const resolveOgTag = (pathname: string, ogType: string): string => {
 };
 
 const resolvePageMeta = (pathname: string, search: string, routeData: UnknownRecord): PageMeta => {
+	if (pathname === '/sitemap')
+		return { pageTitle: '站点地图', description: '浏览博客的文章、手记、独立页面与分类目录。' };
 	const post = getPageValue(routeData, 'post');
 	if (post) {
 		return {
@@ -314,6 +318,19 @@ export const resolveSeoMeta = (input: ResolveSeoMetaInput): ResolvedSeoMeta => {
 	const baseUrl = resolveBaseUrl(websiteInfo, input.origin);
 	const canonicalPath = pathname === '/' ? '/' : `${pathname}/`;
 	const canonicalUrl = buildCanonicalUrl(canonicalPath, search, baseUrl);
+	const llmsScope = pathname.startsWith('/posts/')
+		? '/posts'
+		: pathname.startsWith('/moments/')
+			? '/moments'
+			: '';
+	const llmsUrl = toAbsoluteUrl(`${llmsScope}/llms.txt`, baseUrl);
+	const hasMarkdown =
+		Boolean(
+			getPageValue(routeData, 'post') ||
+			getPageValue(routeData, 'moment') ||
+			getPageValue(routeData, 'page')
+		) && !pathname.startsWith('/internal/');
+	const markdownUrl = hasMarkdown ? toAbsoluteUrl(`${canonicalPath}index.md`, baseUrl) : null;
 	const ogUrl = canonicalUrl;
 
 	const contentImage = toAbsoluteUrl(readString(pageMeta.image), baseUrl);
@@ -342,6 +359,8 @@ export const resolveSeoMeta = (input: ResolveSeoMetaInput): ResolvedSeoMeta => {
 		description,
 		keywords,
 		canonicalUrl,
+		llmsUrl,
+		markdownUrl,
 		ogSiteName,
 		ogTitle,
 		ogDescription,

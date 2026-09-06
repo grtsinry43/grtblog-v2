@@ -365,6 +365,10 @@
 	<link rel="apple-touch-icon" href={resolvedFavicon} />
 	<title>{seoMeta.title}</title>
 	<link rel="canonical" href={seoMeta.canonicalUrl} />
+	<link rel="describedby" href={seoMeta.llmsUrl} type="text/markdown" />
+	{#if seoMeta.markdownUrl}
+		<link rel="alternate" href={seoMeta.markdownUrl} type="text/markdown" />
+	{/if}
 	<meta
 		name="viewport"
 		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"

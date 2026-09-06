@@ -6953,6 +6953,71 @@
                 }
             }
         },
+        "/public/discovery/catalog": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Discovery"
+                ],
+                "summary": "公开站点导航目录",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DiscoveryCatalogEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/public/discovery/resource/{path}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Discovery"
+                ],
+                "summary": "站点地图、robots、LLM 目录和公开 Markdown 正文",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "公开资源路径，如 sitemap.xml 或 posts/example/index.md",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "LLM 目录页码",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/public/email/events": {
             "get": {
                 "produces": [
@@ -13856,6 +13921,49 @@
                 }
             }
         },
+        "discovery.Catalog": {
+            "type": "object",
+            "properties": {
+                "baseUrl": {
+                    "type": "string"
+                },
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/discovery.Entry"
+                    }
+                },
+                "siteName": {
+                    "type": "string"
+                }
+            }
+        },
+        "discovery.Entry": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "type": "string"
+                },
+                "markdownUrl": {
+                    "type": "string"
+                },
+                "modified": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.AdminDashboardStatsEnvelope": {
             "type": "object",
             "properties": {
@@ -14196,6 +14304,26 @@
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.DiscoveryCatalogEnvelope": {
+            "type": "object",
+            "properties": {
+                "bizErr": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/discovery.Catalog"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "msg": {
                     "type": "string"
                 }
             }
