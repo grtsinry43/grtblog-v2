@@ -14,6 +14,12 @@
 
 	const currentYear = new Date().getFullYear();
 	const footerThemeStore = websiteInfoCtx.selectModelData((data) => resolveFooterThemeConfig(data));
+	const desktopColumnCount = $derived(Math.min($footerThemeStore.sections.length, 6));
+	const desktopGridStyle = $derived.by(() => {
+		const sectionCols = Math.max(desktopColumnCount, 1);
+		return `repeat(${sectionCols}, minmax(0, 1fr)) minmax(220px, 1.2fr)`;
+	});
+	const brandFullRow = $derived($footerThemeStore.sections.length + 1 > 6);
 	let nowMs = $state(0);
 
 	const formatPresenceText = (template: string, count: number): string =>
@@ -131,7 +137,10 @@
 		</div>
 
 		<!-- Desktop Multi-column Layout (Hidden on Mobile) -->
-		<div class="hidden md:grid grid-cols-4 gap-12 mb-16">
+		<div
+			class="hidden md:grid gap-8 lg:gap-12 mb-16"
+			style:grid-template-columns={desktopGridStyle}
+		>
 			{#each $footerThemeStore.sections as section (section.title)}
 				<div class="flex flex-col gap-6">
 					<h3
@@ -157,7 +166,10 @@
 			{/each}
 
 			<!-- Brand Info inside Desktop Grid -->
-			<div class="flex flex-col gap-6 items-end text-right">
+			<div
+				class="flex flex-col gap-6 items-end text-right"
+				style:grid-column={brandFullRow ? '1 / -1' : undefined}
+			>
 				<div class="flex flex-col items-end">
 					<div class="text-xl font-mono font-bold text-ink-900 dark:text-ink-100">
 						{$footerThemeStore.brandName}

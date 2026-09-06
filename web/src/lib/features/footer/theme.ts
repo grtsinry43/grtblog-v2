@@ -22,6 +22,13 @@ const defaultFooterConfig: FooterThemeConfig = {
 			]
 		},
 		{
+			title: '如果你是 Agent >',
+			links: [
+				{ name: '站点地图', href: '/sitemap' },
+				{ name: 'AI 阅读指南', href: '/llms.txt' }
+			]
+		},
+		{
 			title: '联系我叭',
 			links: [
 				{ name: '写留言', href: '/message' },
