@@ -29,6 +29,7 @@
 </script>
 
 <span class="rolling-number {className}">
+	<span class="sr-only">{safeValue}</span>
 	{#each digits as digit, i (digits.length - 1 - i)}
 		<RollingDigit {digit} {duration} delay={(digits.length - 1 - i) * stagger} {animate} />
 	{/each}

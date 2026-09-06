@@ -63,12 +63,13 @@
 </span>
 
 <style>
-	.rd-col {
-		display: inline-block;
-		height: 1em;
-		line-height: 1;
-		overflow: hidden;
-	}
+.rd-col {
+	display: inline-block;
+	height: 1em;
+	line-height: 1;
+	overflow: hidden;
+	user-select: none;
+}
 
 	.rd-strip {
 		display: flex;
